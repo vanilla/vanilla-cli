@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.swp
+~*
+composer-local.json
+.project
+.settings
+.buildpath
+.idea/*
+/nbproject/
+/vendor/
