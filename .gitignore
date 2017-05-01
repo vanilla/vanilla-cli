@@ -3,6 +3,7 @@ Thumbs.db
 *.swp
 ~*
 composer-local.json
+composer.lock
 .project
 .settings
 .buildpath
