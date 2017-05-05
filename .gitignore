@@ -10,3 +10,4 @@ composer.lock
 .idea/*
 /nbproject/
 /vendor/
+/vanillaSrc

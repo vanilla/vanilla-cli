@@ -14,12 +14,13 @@ abstract class Cmd {
      * @return string
      */
     public function getName() {
-        // Convert "\Namespace\SomeCommandName" to "some-command-name"
+        // Convert "\Namespace\SomeCommandNameCmd" to "some-command-name"
         $className = str_replace(__NAMESPACE__.'\\', '', static::class);
-        $className = preg_replace('/([A-Z])/', '-$1', $className);
-        $className = strtolower(ltrim($className, '-'));
+        $cmdName = preg_replace('/cmd$/i', '', $className);
+        $cmdName = preg_replace('/([A-Z])/', '-$1', $cmdName);
+        $cmdName = strtolower(ltrim($cmdName, '-'));
 
-        return $className;
+        return $cmdName;
     }
 
     abstract function run(\Garden\Cli\Args $args);

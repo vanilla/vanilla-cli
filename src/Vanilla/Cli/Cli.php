@@ -13,10 +13,11 @@ class Cli {
 
     private function scanCommands() {
         $dirIterator = new \DirectoryIterator(__DIR__.'/Cmd');
-        $commandsIt = new \RegexIterator(new \IteratorIterator($dirIterator), '/^.+\.php$/', \RegexIterator::GET_MATCH);
+        $commandsIt = new \RegexIterator(new \IteratorIterator($dirIterator), '/^.+\Cmd.php$/', \RegexIterator::GET_MATCH);
+        $cmdNameSpace =  __NAMESPACE__.'\\Cmd\\';
         foreach ($commandsIt as $info) {
-            $cmdName = __NAMESPACE__.'\\Cmd\\'.pathinfo($info[0], PATHINFO_FILENAME);
-            if (is_subclass_of($cmdName, 'Vanilla\\Cli\\Cmd\\Cmd')) {
+            $cmdName = $cmdNameSpace.pathinfo($info[0], PATHINFO_FILENAME);
+            if (is_subclass_of($cmdName, $cmdNameSpace.'Cmd')) {
                 $cmd = new $cmdName($this->cli);
                 $this->commands[$cmd->getName()] = $cmd;
             }

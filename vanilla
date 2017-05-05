@@ -2,4 +2,8 @@
 <?php
 require(__DIR__.'/vendor/autoload.php');
 $cli = new \Vanilla\Cli\Cli();
-$cli->run();
+try {
+    $cli->run();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
