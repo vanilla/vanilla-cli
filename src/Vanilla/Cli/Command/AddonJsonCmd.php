@@ -1,6 +1,10 @@
 <?php
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
+ */
 
-namespace Vanilla\Cli\Cmd;
+namespace Vanilla\Cli\Command;
 
 use \Garden\Cli\Args;
 use \Garden\Cli\Cli;
@@ -8,18 +12,34 @@ use \Vanilla\Addon;
 use \Vanilla\AddonManager;
 use \Vanilla\Cli\CliUtil;
 
-class AddonJsonCmd extends AddonCmdBase {
+/**
+ * Class AddonJsonCmd
+ *
+ * @package Vanilla\Cli\Command
+ */
+class AddonJsonCmd extends AddonCommandBase {
 
+    /**
+     * AddonJsonCmd constructor.
+     *
+     * @param Cli $cli
+     */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
         $cli->description('Convert addons\' info array to json.');
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function preAddonManagerInit(Args $args, array &$scanDirs, &$addonManagerCachePath) {
         // Set cache path to null so make sure that we do not mess with the cache.
         $addonManagerCachePath = null;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function doRun(Args $args, AddonManager $addonManager) {
         $addonsOutput = '';
         $warningsOutput = '';
@@ -44,7 +64,7 @@ class AddonJsonCmd extends AddonCmdBase {
                     }
 
                     CliUtil::write($addonDefinitionPath.' generated.');
-                    file_put_contents($addonDefinitionPath, json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                    file_put_contents($addonDefinitionPath, json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)."\n");
                 } else {
                     CliUtil::write("$addonKey  in '$addonPath' has some issues that must be fixed.\n".print_r($info['Issues'], true));
                 }
