@@ -21,11 +21,17 @@ class Cli {
     private $cli;
     private $commands = [];
 
+    /**
+     * Cli constructor.
+     */
     public function __construct() {
         $this->cli = new \Garden\Cli\Cli();
         $this->scanCommands();
     }
 
+    /**
+     * Scan for available commands.
+     */
     private function scanCommands() {
         $dirIterator = new DirectoryIterator(__DIR__.'/Command');
         $commandsIt = new RegexIterator(new IteratorIterator($dirIterator), '/^.+\Cmd.php$/', RegexIterator::GET_MATCH);
