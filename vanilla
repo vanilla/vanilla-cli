@@ -1,0 +1,14 @@
+#!/usr/bin/php
+<?php
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
+ */
+
+require(__DIR__.'/vendor/autoload.php');
+$cli = new \Vanilla\Cli\Cli();
+try {
+    $cli->run();
+} catch (Exception $e) {
+    die($e->getMessage());
+}
