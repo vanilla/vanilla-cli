@@ -20,6 +20,7 @@
     "gulp-cssnano": "^2.1.2",
     "gulp-eslint": "^4.0.0",
     "gulp-imagemin": "^3.3.0",
+    "gulp-livereload": "^3.8.1",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
     "gulp-size": "^2.1.0",
@@ -33,5 +34,10 @@
     "webpack": "^2.6.1",
     "webpack-merge": "^4.1.0",
     "webpack-stream": "^3.2.0"
-  }
+  },
+    "browserslist": [
+        "ie > 9",
+        "last 6 iOS versions",
+        "last 4 versions"
+    ]
 }

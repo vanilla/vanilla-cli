@@ -35,16 +35,9 @@ class VanillaBuildTool {
     spawnChildBuildProcess() {
         this.childProcess = spawn("gulp", [
             `--addonpath`,
-            `${this.addonDirectory}`
-        ]);
-
-        this.childProcess.stdout.on("data", function(data) {
-            if (data) console.log(data.toString());
-        });
-
-        this.childProcess.stderr.on("data", function(data) {
-            if (data) console.log(data.toString());
-        });
+            `${this.addonDirectory}`,
+            '--color'
+        ], { stdio: 'inherit' });
     }
 
     async parseAddonJson() {
