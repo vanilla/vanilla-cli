@@ -10,6 +10,30 @@ An addon may specify which version of the build process it would like to use wit
 
 This build process is primary `gulp` based. It builds stylesheets using `node-sass`, bundles javascript with `webpack` and `babel`, generates icon-fonts from svg's and compresses image assets.
 
+This build process relies on the addon having the following structure for its source files:
+
+```
+addonfoldername
+|--src
+   |--js
+      |--some-file.js
+      |--another-file.js
+   |--sass
+      |--some-entry-file.scss
+      |--_not-an-entry-file.scss
+   |--images
+      |--some-image.jpg
+      |--another-image.png
+      |--vector-format.svg
+      |--folder
+         |--some-file.gif
+   |--icons
+      |--an-icon.svg
+      |--another-icon.svg
+```
+
+Javscript entry points are defined in the `entries` field of the addon's `package.json`. It accepts an array or an object.
+
 #### Legacy
 
 > __Notice__: This build process is deprecated and only exists to support legacy addons. New addons should use the latest build process.
