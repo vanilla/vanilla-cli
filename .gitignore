@@ -11,3 +11,4 @@ composer.lock
 /nbproject/
 /vendor/
 /vanillaSrc
+node_modules
