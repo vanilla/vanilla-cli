@@ -44,6 +44,6 @@ abstract class NodeCommandBase extends Command {
      * @param string $nodeFilePath The absolute file path of the
      */
     final protected function spawnNodeProcess($nodeFilePath) {
-        system('node ' . $nodeFilePath . ' --color', $out);
+        system('node ' . $nodeFilePath . ' --color');
     }
 }
