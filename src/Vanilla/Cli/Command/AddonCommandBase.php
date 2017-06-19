@@ -39,6 +39,7 @@ abstract class AddonCommandBase extends Command {
             CliUtil::error('Vanilla source directory is missing.');
         }
 
+        define('PATH_ROOT', realpath($vanillaSrcDir));
         if (!require_once("$vanillaSrcDir/environment.php")) {
             CliUtil::error('Vanilla version must be >= 2.4.201');
         }
