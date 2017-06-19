@@ -30,11 +30,20 @@ abstract class NodeCommandBase extends Command {
      * @inheritdoc
      */
     final public function run(Args $args) {
-        $this->spawnNodeProcess($this->getScriptFilePath());
+        $this->spawnNodeProcess($this->getScriptFilePath(), $args);
     }
 
     /**
+     * Get the options to pass to the node process
+     *
+     * @return array
+     */
+    abstract protected function getOptions();
+
+    /**
      * Get the path of the node file to execute in the child process
+     *
+     * @return string The file path of the node script to execute
      */
     abstract protected function getScriptFilePath();
 
@@ -43,7 +52,8 @@ abstract class NodeCommandBase extends Command {
      *
      * @param string $nodeFilePath The absolute file path of the
      */
-    final protected function spawnNodeProcess($nodeFilePath) {
-        system('node ' . $nodeFilePath . ' --color');
+    final protected function spawnNodeProcess($nodeFilePath, Args $args) {
+        $serializedArgs = json_encode($args->getOpts());
+        system("node '$nodeFilePath' --color --options '$serializedArgs'");
     }
 }

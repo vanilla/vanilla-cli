@@ -29,7 +29,7 @@ gulp.task("build", ["build:js", "build:assets", "build:styles"]);
 
 gulp.task("default", ["build"], () => {});
 
-gulp.task("watch", ["default"], function() {
+gulp.task("watch", ["build"], () => {
     livereload.listen();
 
     gulp.watch(
