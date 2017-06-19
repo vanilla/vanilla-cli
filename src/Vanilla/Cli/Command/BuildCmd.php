@@ -28,7 +28,8 @@ class BuildCmd extends NodeCommandBase {
         $cli->description('Run the javascirpt build process.')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browsre extension.')
             ->opt('clean:c', 'Deletes all previous build artifacts before building.')
-            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json', false, 'string');
+            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json', false, 'string')
+            ->opt('verbose:v', 'Show detailed build process output');
         ;
     }
 

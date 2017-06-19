@@ -3,31 +3,30 @@ const gulp = require("gulp");
 const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 
-const VanillUtility = require("../../VanillaUtility");
+const VanillaUtility = require("../../VanillaUtility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
 
 const addonpath = argv.addonpath;
+const options = JSON.parse(argv.options);
 
 gulp.task("build:js", () => {
-    return VanillUtility.getJsEntries(addonpath).then(jsfiles => {
-        return buildJs(addonpath, jsfiles);
+    return VanillaUtility.getJsEntries(addonpath).then(jsfiles => {
+        return buildJs(addonpath, options, jsfiles);
     });
 });
 
 gulp.task("build:styles", () => {
-    return buildStyles(addonpath);
+    return buildStyles(addonpath, options);
 });
 
 gulp.task("build:assets", () => {
-    return buildAssets(addonpath);
+    return buildAssets(addonpath, options);
 });
 
 gulp.task("build", ["build:js", "build:assets", "build:styles"]);
-
-gulp.task("default", ["build"], () => {});
 
 gulp.task("watch", ["build"], () => {
     livereload.listen();
@@ -47,6 +46,14 @@ gulp.task("watch", ["build"], () => {
     gulp.watch(path.resolve(addonpath, "src/scss/**/*.scss"), ["build:styles"]);
     gulp.watch(path.resolve(addonpath, "src/js/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
+});
+
+
+const tasksToExecute = [
+    options.isWatchMode ? "watch" : "build"
+]
+
+gulp.task("default", tasksToExecute, () => {
 });
 
 module.exports = gulp;
