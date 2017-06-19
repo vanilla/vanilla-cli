@@ -64,12 +64,15 @@ class AddonDoctorCmd extends AddonCommandBase {
                             $addonIssues = array_merge($addonIssues, $issues);
                         }
 
+                        // Check for key vs addon's directory match.
                         $addonKey = $addon->getKey();
                         $addonSubdir = basename($addon->getSubdir());
                         if ($addonKey !== $addonSubdir) {
+                            // Themes and plugins already kind of check for this issue but this check is stricter so no problem overriding here.
                             $addonIssues['key-subdir-mismatch'] = "The addon's key must match its subdirectory name ($addonKey vs. $addonSubdir).";
                         }
 
+                        // Check for icons.
                         if (!$addon->getInfoValue('icon')) {
                             $addonIssues['required-icon'] = 'The icon info field is required.';
                         } else if (!file_exists($addon->getIcon(Addon::PATH_FULL))) {
