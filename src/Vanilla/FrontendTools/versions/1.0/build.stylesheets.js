@@ -20,10 +20,10 @@ module.exports = buildStylesheets;
  *
  * @returns {Gulp.Src} A gulp src funtion
  */
-function buildStylesheets(addonDirectory) {
+function buildStylesheets(addonDirectory, options) {
     const destination = path.resolve(addonDirectory, 'design');
 
-    return gulp
+    const process = gulp
         .src(path.resolve(addonDirectory, 'src/scss/*.scss'))
         .pipe(plumber())
         .pipe(sourcemaps.init())
@@ -32,10 +32,15 @@ function buildStylesheets(addonDirectory) {
         //         reporters: [{ formatter: 'string', console: true }]
         //     })
         // )
-        .pipe(cssnano())
         .pipe(sass())
         .pipe(autoprefixer())
+        .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(destination))
-        .pipe(size({ showFiles: true }));
+        .pipe(gulp.dest(destination));
+
+    if (options.isVerboseMode) {
+        process.pipe(size({ showFiles: true }));
+    }
+
+    return process;
 }

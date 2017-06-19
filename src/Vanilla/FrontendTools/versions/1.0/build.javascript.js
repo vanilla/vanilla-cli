@@ -9,7 +9,7 @@ const merge = require("webpack-merge");
 // Gulp specific imports
 const gulp = require("gulp");
 
-module.exports = (addonDirectory, entries) => {
+module.exports = (addonDirectory, options, entries) => {
     if (typeof entries === "string") {
         entries = {
             custom: entries
@@ -69,7 +69,21 @@ module.exports = (addonDirectory, entries) => {
     });
 
     return gulp
-        .src('')
-        .pipe(webpackStream(webpackProdConfig, webpack))
+        .src("")
+        .pipe(
+            webpackStream(
+                options.isWatchMode ? webpackDevConfig : webpackProdConfig,
+                webpack,
+                (err, stats) => {
+                    if (options.isVerboseMode) {
+                        console.log(
+                            stats.toString({
+                                colors: true
+                            })
+                        );
+                    }
+                }
+            )
+        )
         .pipe(gulp.dest(path.resolve(addonDirectory, "./js")));
 };

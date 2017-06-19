@@ -6,6 +6,9 @@
   "repository": "https://github.com/vanilla/vanilla-cli",
   "author": "Adam Charron <adam@charrondev.com>",
   "license": "GNU GPL v2",
+  "scripts": {
+    "build": "gulp"
+  },
   "dependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.0.0",
@@ -31,13 +34,13 @@
     "stylelint": "^7.11.1",
     "stylelint-config-vanillaforums": "^1.0.5",
     "uglify": "^0.1.5",
-    "webpack": "^2.6.1",
+    "webpack": "^3.0.0",
     "webpack-merge": "^4.1.0",
     "webpack-stream": "^3.2.0"
   },
-    "browserslist": [
-        "ie > 9",
-        "last 6 iOS versions",
-        "last 4 versions"
-    ]
+  "browserslist": [
+    "ie > 9",
+    "last 6 iOS versions",
+    "last 4 versions"
+  ]
 }

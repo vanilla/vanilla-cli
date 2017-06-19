@@ -5,8 +5,8 @@ const size = require('gulp-size');
 const cache = require('gulp-cache');
 const imagemin = require("gulp-imagemin");
 
-module.exports = (addonDirectory) => {
-    return gulp
+module.exports = (addonDirectory, options) => {
+    const process =  gulp
         .src(path.resolve(addonDirectory, 'src/images/**/*'))
         .pipe(
             cache(
@@ -17,6 +17,11 @@ module.exports = (addonDirectory) => {
                 })
             )
         )
-        .pipe(gulp.dest(path.resolve(addonDirectory, 'design/images')))
-        .pipe(size({ showFiles: true }));
+        .pipe(gulp.dest(path.resolve(addonDirectory, 'design/images')));
+
+    if (options.isVerboseMode) {
+        process.pipe(size({ showFiles: true }));
+    }
+
+    return process;
 }
