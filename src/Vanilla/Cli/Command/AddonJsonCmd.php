@@ -58,7 +58,10 @@ class AddonJsonCmd extends AddonCommandBase {
                 }
                 $info = $addon->getInfo();
                 if (!$addon->getInfoValue('Issues')) {
-                    unset($info['Issues'], $info['keyRaw'], $info['oldType']);
+                    unset($info['Issues'], $info['oldType']);
+                    if ($info['oldType'] === 'plugin') {
+                        unset($info['keyRaw']);
+                    }
                     if ($info['priority'] === Addon::PRIORITY_NORMAL) {
                         unset($info['priority']);
                     }
