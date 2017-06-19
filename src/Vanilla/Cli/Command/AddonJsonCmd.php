@@ -59,7 +59,9 @@ class AddonJsonCmd extends AddonCommandBase {
                 $info = $addon->getInfo();
                 if (!$addon->getInfoValue('Issues')) {
                     unset($info['Issues'], $info['oldType']);
-                    if ($info['oldType'] === 'plugin') {
+
+                    // This kludge is only needed if the application manager exist.
+                    if ($info['oldType'] === 'plugin' || !class_exists('Gdn_ApplicationManager')) {
                         unset($info['keyRaw']);
                     }
                     if ($info['priority'] === Addon::PRIORITY_NORMAL) {
