@@ -9,7 +9,18 @@ const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const size = require('gulp-size');
 
-module.exports = (addonDirectory) => {
+
+module.exports = buildStylesheets;
+
+/**
+ * Create the stylesheet gulp task function;
+ * @export
+ *
+ * @param {string} addonDirectory The directory where things will be built.
+ *
+ * @returns {Gulp.Src} A gulp src funtion
+ */
+function buildStylesheets(addonDirectory) {
     const destination = path.resolve(addonDirectory, 'design');
 
     return gulp
