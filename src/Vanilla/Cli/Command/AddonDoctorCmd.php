@@ -41,6 +41,19 @@ class AddonDoctorCmd extends AddonCommandBase {
      * @inheritdoc
      */
     public function doRun(Args $args, AddonManager $addonManager) {
+        $getRelativePath = function($from, $path) {
+            $path = explode(DIRECTORY_SEPARATOR, $path);
+            $from = explode(DIRECTORY_SEPARATOR, $from);
+            $common = array_intersect_assoc($path, $from);
+
+            $base = [];
+            if ($preFill = count(array_diff_assoc($from, $common))) {
+                $base = array_fill(0, $preFill, '..');
+            }
+            $path = array_merge($base, array_diff_assoc($path, $common));
+            return implode(DIRECTORY_SEPARATOR, $path);
+        };
+
         $sickAddonsCount = 0;
         $issuesCount = 0;
         foreach ($addonManager->getScanDirs() as $addonType => $scanDirectories) {
@@ -48,11 +61,12 @@ class AddonDoctorCmd extends AddonCommandBase {
                 $addonDirs = glob(PATH_ROOT."$scanDirectory/*", GLOB_ONLYDIR);
                 foreach ($addonDirs as $subdir) {
                     $addon = null;
-                    $addonPath = str_replace(PATH_ROOT, '', $subdir);
+                    $addonRealPathFromVanilla = $getRelativePath(PATH_ROOT, realpath($subdir));
+                    $addonRelativePath = str_replace(PATH_ROOT, '', $subdir);
                     $addonIssues = [];
                     try {
                         ob_start();
-                        $addon = new Addon($addonPath);
+                        $addon = new Addon($addonRelativePath);
                         ob_end_clean();
                     } catch (\Exception $ex) {
                         $addonIssues[] = $ex->getMessage();
@@ -85,7 +99,7 @@ class AddonDoctorCmd extends AddonCommandBase {
                         $issuesCount += count($addonIssues);
                         ksort($addonIssues);
 
-                        CliUtil::write("$addonPath has somme issues:");
+                        CliUtil::write("[$addonRealPathFromVanilla] has somme issues:");
                         $outputArray = explode(PHP_EOL, print_r($addonIssues, true));
                         unset($outputArray[count($outputArray) - 2], $outputArray[0], $outputArray[1]);
                         CliUtil::write(implode("\n", $outputArray));
