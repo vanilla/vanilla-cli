@@ -80,7 +80,7 @@ class AddonDoctorCmd extends AddonCommandBase {
 
                         // Check for key vs addon's directory match.
                         $addonKey = $addon->getKey();
-                        $addonSubdir = basename($addon->getSubdir());
+                        $addonSubdir = basename($addon->path('/', Addon::PATH_REAL));
                         if ($addonKey !== $addonSubdir) {
                             // Themes and plugins already kind of check for this issue but this check is stricter so no problem overriding here.
                             $addonIssues['key-subdir-mismatch'] = "The addon's key must match its subdirectory name ($addonKey vs. $addonSubdir).";
