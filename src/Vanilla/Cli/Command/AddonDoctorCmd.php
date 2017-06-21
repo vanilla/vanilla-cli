@@ -87,10 +87,12 @@ class AddonDoctorCmd extends AddonCommandBase {
                         }
 
                         // Check for icons.
-                        if (!$addon->getInfoValue('icon')) {
-                            $addonIssues['required-icon'] = 'The icon info field is required.';
-                        } else if (!file_exists($addon->getIcon(Addon::PATH_FULL))) {
-                            $addonIssues['required-iconfile'] = 'The icon file specified by the icon info field does not exist.';
+                        if (!$addon->getInfoValue('hidden', false)) {
+                            if (!$addon->getInfoValue('icon')) {
+                                $addonIssues['required-icon'] = 'The icon info field is required.';
+                            } else if (!file_exists($addon->getIcon(Addon::PATH_FULL))) {
+                                $addonIssues['required-iconfile'] = 'The icon file specified by the icon info field does not exist.';
+                            }
                         }
                     }
 
