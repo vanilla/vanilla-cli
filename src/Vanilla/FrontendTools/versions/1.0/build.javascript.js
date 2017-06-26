@@ -26,7 +26,13 @@ module.exports = (addonDirectory, options, entries) => {
                     test: /\.jsx?$/,
                     include: [path.resolve(addonDirectory, "./src")],
                     exclude: ["node_modules"],
-                    loaders: ["babel-loader?cacheDirectory=true"]
+                    use: [{
+                        loader: 'babel-loader',
+                        options: {
+                            presets: ['env'],
+                            cacheDirectory: true
+                        }
+                    }]
                 }
             ]
         },
@@ -40,6 +46,7 @@ module.exports = (addonDirectory, options, entries) => {
     };
 
     const webpackDevConfig = merge(webpackBaseConfig, {
+        watch: true,
         cache: true,
         devtool: "eval-source-map",
         plugins: [
