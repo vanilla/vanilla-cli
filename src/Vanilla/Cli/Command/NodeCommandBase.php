@@ -60,7 +60,7 @@ abstract class NodeCommandBase extends Command {
      */
     final protected function spawnNodeProcess(string $nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
-        $debugArg = array_key_exists('debug', $args->getOpts()) ? '--inspect --debug-brk --nolazy' : '';
+        $debugArg = $args->getOpt('debug') ? '--inspect --debug-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
         system($command);
     }
