@@ -8,7 +8,7 @@ An addon may specify which version of the build process it would like to use wit
 
 #### 1.0
 
-This build process is primary `gulp` based. It builds stylesheets using `node-sass`, bundles javascript with `webpack` and `babel`, generates icon-fonts from svg's and compresses image assets.
+This build process is primary `gulp` based. It builds stylesheets using `node-sass`, bundles javascript with `webpack` and `babel`, and compresses image assets.
 
 This build process relies on the addon having the following structure for its source files:
 
@@ -27,9 +27,6 @@ addonfoldername
       |--vector-format.svg
       |--folder
          |--some-file.gif
-   |--icons
-      |--an-icon.svg
-      |--another-icon.svg
 ```
 
 Javscript entry points are defined in the `entries` field of the addon's `package.json`. It accepts an array or an object.
@@ -38,10 +35,11 @@ Javscript entry points are defined in the `entries` field of the addon's `packag
 
 > __Notice__: This build process is deprecated and only exists to support legacy addons. New addons should use the latest build process.
 
-This build process will attempt to find the tasks `build`, `watch`, `test`, and `lint` in the addon itself by checking the following possible build tools:
+This build process will attempt to find the tasks `build` and `watch` tasks in the addon itself by checking the npm scripts for those tasks
 
-1. npm scripts *eg. `npm run build`*
-2. `gulp`
-3. `grunt`
+## Versioning
+The build processes use [semantic versioning](http://semver.org/). To summarize:
 
-## Contributing
+- **MAJOR** version when you make incompatible API changes,
+- **MINOR** version when you add functionality in a backwards-compatible manner, and
+- **PATCH** version when you make backwards-compatible bug fixes.
