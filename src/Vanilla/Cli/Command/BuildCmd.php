@@ -36,13 +36,6 @@ class BuildCmd extends NodeCommandBase {
     /**
      * @inheritDoc
      */
-    protected function getOptions() {
-
-    }
-
-    /**
-     * @inheritDoc
-     */
     protected function getScriptFilePath() {
         return realpath(__DIR__.'/../../FrontendTools/index.js');
     }

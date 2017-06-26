@@ -31,16 +31,13 @@ abstract class NodeCommandBase extends Command {
     /**
      * @inheritdoc
      */
-    final public function run(Args $args) {
+    public function run(Args $args) {
         $validNode = $this->isValidNodeInstall();
 
         if ($validNode) {
             $this->spawnNodeProcess($this->getScriptFilePath(), $args);
         } else {
-            CliUtil::error('Node and yarn are not installed correctly. Try running
-    vanilla build-doctor
-
-for assistance or check http://github.com/vanilla/vanilla-cli.');
+            $this->printInvalidNodeError();
         }
     }
 
@@ -55,6 +52,7 @@ for assistance or check http://github.com/vanilla/vanilla-cli.');
      * AddonCommandBase's execution function.
      *
      * @param string $nodeFilePath The absolute file path of the
+     * @param Args $args The arguments passed from the command line
      *
      * @return void
      */
@@ -70,7 +68,7 @@ for assistance or check http://github.com/vanilla/vanilla-cli.');
      *
      * @return boolean
      */
-    final private function isValidNodeInstall() {
+    final protected function isValidNodeInstall() {
         $nodeExists = shell_exec('which node');
         $yarnExists = shell_exec('which yarn');
 
@@ -91,8 +89,10 @@ for assistance or check http://github.com/vanilla/vanilla-cli.');
         return $comparisonResult;
     }
 
-    final private function printInvalidNodeError() {
+    final protected function printInvalidNodeError() {
+        CliUtil::error('Node and yarn are not installed correctly. Try running
+    vanilla build-doctor
 
+for assistance or check http://github.com/vanilla/vanilla-cli.');
     }
 }
-
