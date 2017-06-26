@@ -32,7 +32,16 @@ abstract class NodeCommandBase extends Command {
      * @inheritdoc
      */
     final public function run(Args $args) {
-        $this->spawnNodeProcess($this->getScriptFilePath(), $args);
+        $validNode = $this->isValidNodeInstall();
+
+        if ($validNode) {
+            $this->spawnNodeProcess($this->getScriptFilePath(), $args);
+        } else {
+            CliUtil::error('Node and yarn are not installed correctly. Try running
+    vanilla build-doctor
+
+for assistance or check http://github.com/vanilla/vanilla-cli.');
+        }
     }
 
     /**
@@ -52,19 +61,26 @@ abstract class NodeCommandBase extends Command {
     final protected function spawnNodeProcess($nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = array_key_exists('debug', $args->getOpts()) ? '--inspect --debug-brk --nolazy' : '';
-        $output = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
-        echo $output;
-        system($output);
+        $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
+        system($command);
     }
 
     /**
      * Verify that the minimum required version of node is installed and on the path
      *
-     * @return void
+     * @return boolean
      */
     final private function isValidNodeInstall() {
+        $nodeExists = shell_exec('which node');
+        $yarnExists = shell_exec('which yarn');
+
+        if (empty($nodeExists) || empty($yarnExists)) {
+            return false;
+        }
+
+        $nodeVersionString = shell_exec('node --version');
+
         // Drop the 'v' of the begining of the version string
-        $nodeVersionString = `node --version`;
         $droppedFirstCharacter = mb_substr(
             $nodeVersionString,
             1,
@@ -72,7 +88,7 @@ abstract class NodeCommandBase extends Command {
         );
 
         $comparisonResult = version_compare($droppedFirstCharacter, self::MINIMUM_NODE_VERSION);
-
+        return $comparisonResult;
     }
 
     final private function printInvalidNodeError() {
