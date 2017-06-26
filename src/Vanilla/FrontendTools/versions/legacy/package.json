@@ -1,0 +1,28 @@
+{
+  "name": "vanilla-build-legacy",
+  "version": "1.0.0",
+  "description": "The legacy build process. Will attempt to use build process provided by the addon",
+  "main": "build.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/vanilla/vanilla-cli.git"
+  },
+  "keywords": [
+    "build",
+    "javascript",
+    "vanilla",
+    "forums"
+  ],
+  "author": "Adam Charron <adam@charrondev.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vanilla/vanilla-cli/issues"
+  },
+  "homepage": "https://github.com/vanilla/vanilla-cli#readme"
+}
