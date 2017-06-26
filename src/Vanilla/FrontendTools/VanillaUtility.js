@@ -20,6 +20,14 @@ module.exports = {
     getSubDirectories
 };
 
+/**
+ * Fetch and parse the package json file in the given directory
+ *
+ * @param {string} addonDirectory The directory to read from
+ *
+ * @async
+ * @returns Object|boolean
+ */
 function getPackageJson(addonDirectory) {
     const packagePath = path.resolve(addonDirectory, "./package.json");
 
@@ -35,11 +43,14 @@ function getPackageJson(addonDirectory) {
     });
 }
 
-async function getPackageJsonEntries(addonDirectory) {
-    const packageJson = await getPackageJson();
-    return processJsFilePaths(packageJson.entries);
-}
-
+/**
+ * Get the index js file path if it exists
+ *
+ * @param {any} addonDirectory
+ *
+ * @async
+ * @returns {string|boolean}
+ */
 function getIndexJs(addonDirectory) {
     const indexPath = path.resolve(addonDirectory, "./src/js/index.js");
 
@@ -54,11 +65,20 @@ function getIndexJs(addonDirectory) {
     });
 }
 
+/**
+ * Get the javascript entry points from the package.json if they exist
+ *
+ * @param {string} addonDirectory
+ *
+ * @async
+ * @returns {string[] | false}
+ */
 async function getJsEntries(addonDirectory) {
-    const packageJsonEntries = await getPackageJsonEntries(addonDirectory);
+    const packageJson =  await getPackageJson(addonDirectory);
+    const {entries} = packageJson;
 
-    if (packageJsonEntries) {
-        return packageJsonEntries;
+    if (entries) {
+        return entries;
     }
 
     const indexJs = await getIndexJs(addonDirectory);
@@ -70,32 +90,15 @@ async function getJsEntries(addonDirectory) {
     return false;
 }
 
-function processJsFilePaths(paths) {
-    let results;
-
-    if (paths instanceof String) {
-        paths = [paths];
-    }
-
-    if (paths instanceof Array) {
-        paths.forEach(item => {
-            const key = item.replace(/\.[^/.]+$/, "");
-            results[key] = item;
-        });
-    } else if (paths instanceof Object) {
-        results = paths;
-    }
-
-    return results;
-}
-
 /**
  *  Parse the options from the CLI into a javscript object.
  *
- * @param {BuildToolOptions} options
+ * @param {string} options A JSON encoded array of options passed from php
+ *
+ * @returns {BuildToolOptions}
  */
-function parseCliOptions(options) {
-    options = JSON.parse(options);
+function parseCliOptions(optionsString) {
+    const options = JSON.parse(optionsString);
     const result = {
         isWatchMode: options.watch || options.watch === "",
         isCleanMode: options.clean || options.clean === "",
@@ -107,10 +110,11 @@ function parseCliOptions(options) {
 }
 
 /**
- *
- *
+ * Fetch all of the direct subdirectories of a given directory
  *
  * @param {string} rootDirectory An absolute path of the parent folder
+ *
+ * @async
  * @returns {string[]} The subdirectories
  */
 function getSubDirectories(rootDirectory) {

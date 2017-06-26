@@ -12,7 +12,7 @@ use \Garden\Cli\Cli;
 use \Vanilla\Cli\CliUtil;
 
 /**
- * Class NodeCommand.
+ * Class NodeCommandBase.
  */
 abstract class NodeCommandBase extends Command {
 
@@ -25,7 +25,7 @@ abstract class NodeCommandBase extends Command {
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
-        $cli->opt('debug:d', 'Break node process on the first line to attatch a debugger');
+        $cli->opt('debug:d', 'Break node process on the first line to attatch a debugger', false, 'bool');
     }
 
     /**
@@ -46,7 +46,9 @@ abstract class NodeCommandBase extends Command {
      *
      * @return string The file path of the node script to execute
      */
-    abstract protected function getScriptFilePath();
+    protected function getScriptFilePath() {
+        return "";
+    }
 
     /**
      * AddonCommandBase's execution function.
@@ -56,7 +58,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    final protected function spawnNodeProcess($nodeFilePath, Args $args) {
+    final protected function spawnNodeProcess(string $nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = array_key_exists('debug', $args->getOpts()) ? '--inspect --debug-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
@@ -79,20 +81,21 @@ abstract class NodeCommandBase extends Command {
         $nodeVersionString = shell_exec('node --version');
 
         // Drop the 'v' of the begining of the version string
-        $droppedFirstCharacter = mb_substr(
+        $droppedFirstCharacter = substr(
             $nodeVersionString,
-            1,
-            mb_strlen($nodeVersionString)
+            1
         );
 
         $comparisonResult = version_compare($droppedFirstCharacter, self::MINIMUM_NODE_VERSION);
         return $comparisonResult;
     }
 
+    /**
+     * Print an error message about node not being installed
+     *
+     * @return void
+     */
     final protected function printInvalidNodeError() {
-        CliUtil::error('Node and yarn are not installed correctly. Try running
-    vanilla build-doctor
-
-for assistance or check http://github.com/vanilla/vanilla-cli.');
+        CliUtil::error('Node and yarn are not installed correctly. Check http://github.com/vanilla/vanilla-cli for installation instructions.');
     }
 }

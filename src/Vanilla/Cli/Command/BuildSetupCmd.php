@@ -2,6 +2,7 @@
 /**
  * @copyright 2009-2017 Vanilla Forums Inc.
  * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
+ * @package Vanilla\Cli\Command
  */
 
 namespace Vanilla\Cli\Command;
@@ -12,9 +13,7 @@ use \Vanilla\Cli\CliUtil;
 use \Vanilla\AddonManager;
 
 /**
- * Class AddonCacheCmd
- *
- * @package Vanilla\Cli\Command
+ * Class BuildSetupCommand.
  */
 class BuildSetupCmd extends NodeCommandBase {
 
@@ -44,6 +43,11 @@ class BuildSetupCmd extends NodeCommandBase {
         }
     }
 
+    /**
+     * Install node dependancies for the top level build process
+     *
+     * @return void
+     */
     final public function installBaseNodeDeps() {
         $basepath = realpath(__DIR__.'/../../FrontendTools');
         chdir($basepath);
@@ -52,6 +56,11 @@ class BuildSetupCmd extends NodeCommandBase {
         system('yarn install --color');
     }
 
+    /**
+     * Install node dependancies in all process version subdirectories
+     *
+     * @return void
+     */
     final public function installProcessNodeDeps() {
         $basepath = realpath(__DIR__.'/../../FrontendTools/versions');
         chdir($basepath);
@@ -62,9 +71,5 @@ class BuildSetupCmd extends NodeCommandBase {
             chdir($basepath."/$processVersion");
             system('yarn install --color');
         }
-    }
-
-    public function getScriptFilePath() {
-        return "";
     }
 }
