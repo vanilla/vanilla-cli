@@ -24,6 +24,7 @@ class VanillaBuildTool {
         this.addonInfo = undefined;
         this.addonDirectory = undefined;
         this.version = undefined;
+        this.options = undefined;
 
         this.spawnChildBuildProcess = this.spawnChildBuildProcess.bind(this);
         this.parseAddonJson = this.parseAddonJson.bind(this);
@@ -51,7 +52,7 @@ class VanillaBuildTool {
         if (instance.options.buildProcessVersion) {
             instance.version = options.buildProcessVersion;
         } else {
-            instance.version = instance.addonInfo.buildProcess || "legacy";
+            instance.version = instance.addonInfo.buildProcessVersion || "legacy";
         }
         await instance.spawnChildBuildProcess();
     }
@@ -91,7 +92,7 @@ class VanillaBuildTool {
             ];
 
             if (this.options.debug) {
-                args.push([`--inspect --inspect-brk="9230"`])
+                args.push(`--inspect --inspect-brk="9230"`)
             }
 
             this.childProcess = spawn(
@@ -103,7 +104,7 @@ class VanillaBuildTool {
     }
 
     /**
-     * Parse the addon's addon.json file.
+     * Parse the addon's addon.json file
      *
      * @returns {Promise<Object, Error>} The object representation of the addon.json file.
      *

@@ -1,9 +1,14 @@
 const { spawn } = require("child_process");
-const chalk = require("chalk");
 
 const VanillaUtility = require("../../VanillaUtility");
 const Messages = require("../../Messages");
 
+/**
+ * Run the `npm run build` command in the addon directory
+ *
+ * @param {string} addonPath The path of the addon
+ * @returns {Promise<void, Error>}
+ */
 async function runBuildProcess(addonPath) {
     const packageJson = await VanillaUtility.getPackageJson(addonPath);
 

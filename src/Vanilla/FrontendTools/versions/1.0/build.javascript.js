@@ -6,9 +6,11 @@ const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
 
-// Gulp specific imports
 const gulp = require("gulp");
 
+/**
+ * create the javascript build process
+ */
 module.exports = (addonDirectory, options, entries) => {
     if (typeof entries === "string") {
         entries = {

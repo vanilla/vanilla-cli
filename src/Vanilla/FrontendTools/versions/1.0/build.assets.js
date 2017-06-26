@@ -5,6 +5,9 @@ const size = require('gulp-size');
 const cache = require('gulp-cache');
 const imagemin = require("gulp-imagemin");
 
+/**
+ * Gulp build process for images.
+ */
 module.exports = (addonDirectory, options) => {
     const process =  gulp
         .src(path.resolve(addonDirectory, 'src/images/**/*'))
