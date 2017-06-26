@@ -1,5 +1,3 @@
-// @ts-check
-
 const path = require("path");
 const fs = require("fs");
 const VanillaUtility = require("./VanillaUtility");
@@ -26,7 +24,6 @@ class VanillaBuildTool {
         this.addonInfo = undefined;
         this.addonDirectory = undefined;
         this.version = undefined;
-        this.options = {};
 
         this.spawnChildBuildProcess = this.spawnChildBuildProcess.bind(this);
         this.parseAddonJson = this.parseAddonJson.bind(this);
@@ -45,13 +42,13 @@ class VanillaBuildTool {
      *
      * @memberof VanillaBuildTool
      */
-    static async create(addonDirectory = "", options) {
+    static async create(addonDirectory = "", options = {}) {
         const instance = new VanillaBuildTool();
 
         instance.addonDirectory = addonDirectory;
         instance.options = options;
         instance.addonInfo = await instance.parseAddonJson();
-        if (options.buildProcessVersion) {
+        if (instance.options.buildProcessVersion) {
             instance.version = options.buildProcessVersion;
         } else {
             instance.version = instance.addonInfo.buildProcess || "legacy";
@@ -68,7 +65,7 @@ class VanillaBuildTool {
      */
     async spawnChildBuildProcess() {
         const directory = path.resolve(__dirname, `./versions/${this.version}`);
-        const isValidDirectory = this.checkPathExists(directory);
+        const isValidDirectory = await this.checkPathExists(directory);
 
         if (!isValidDirectory) {
             const validVersions = await VanillaUtility.getSubDirectories(
@@ -82,18 +79,24 @@ class VanillaBuildTool {
             process.chdir(directory);
             console.log(Messages.STARTING_BUILD_PROCESS(this.version));
 
+            const args = [
+                "run",
+                "build",
+                "--",
+                `--addonpath`,
+                `${this.addonDirectory}`,
+                "--color",
+                `--options`,
+                JSON.stringify(this.options)
+            ];
+
+            if (this.options.debug) {
+                args.push([`--inspect --inspect-brk="9230"`])
+            }
+
             this.childProcess = spawn(
                 "npm",
-                [
-                    "run",
-                    "build",
-                    "--",
-                    `--addonpath`,
-                    `${this.addonDirectory}`,
-                    "--color",
-                    `--options`,
-                    JSON.stringify(this.options)
-                ],
+                ,
                 { stdio: "inherit" }
             );
         }
@@ -113,8 +116,11 @@ class VanillaBuildTool {
             fs.readFile(packagePath, "utf8", (err, data) => {
                 if (err && err.code === "ENOENT") {
                     resolve({});
+                    return;
                 } else if (err) {
+                    console.log(err.code);
                     reject(err);
+                    return;
                 }
 
                 const addonInfo = JSON.parse(data);
