@@ -70,10 +70,10 @@ class VanillaBuildTool {
         if (!isValidDirectory) {
             const validVersions = await VanillaUtility.getSubDirectories(
                 path.resolve(__dirname, `./versions`)
-            ).join(", ");
+            );
 
             console.log(
-                Messages.ERROR_WRONG_VERSION(this.version, validVersions)
+                Messages.ERROR_WRONG_VERSION(this.version, validVersions.join(", "))
             );
         } else {
             process.chdir(directory);
@@ -96,7 +96,7 @@ class VanillaBuildTool {
 
             this.childProcess = spawn(
                 "npm",
-                ,
+                args,
                 { stdio: "inherit" }
             );
         }
