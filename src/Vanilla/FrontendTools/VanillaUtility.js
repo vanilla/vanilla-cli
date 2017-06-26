@@ -16,22 +16,28 @@ const yargs = require("yargs");
 module.exports = {
     getJsEntries,
     parseCliOptions,
+    getPackageJson,
     getSubDirectories
 };
 
-function getPackageJsonEntries(addonDirectory) {
+function getPackageJson(addonDirectory) {
     const packagePath = path.resolve(addonDirectory, "./package.json");
 
     return new Promise(resolve => {
         fs.readFile(packagePath, "utf8", (err, data) => {
             if (err) {
-                resolve(false);
+                return resolve(false);
             }
 
             const packageInfo = JSON.parse(data);
-            resolve(processJsFilePaths(packageInfo.entries));
+            resolve(packageInfo);
         });
     });
+}
+
+async function getPackageJsonEntries(addonDirectory) {
+    const packageJson = await getPackageJson();
+    return processJsFilePaths(packageJson.entries);
 }
 
 function getIndexJs(addonDirectory) {
