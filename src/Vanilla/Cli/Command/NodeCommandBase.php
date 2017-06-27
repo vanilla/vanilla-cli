@@ -33,6 +33,7 @@ abstract class NodeCommandBase extends Command {
      */
     public function run(Args $args) {
         $validNode = $this->isValidNodeInstall();
+        $this->doRun($args);
     }
 
     /**

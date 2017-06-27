@@ -12,3 +12,4 @@ composer.lock
 /vendor/
 /vanillaSrc
 node_modules
+vanillabuild.json
