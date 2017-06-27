@@ -23,11 +23,11 @@ abstract class AddonCommandBase extends Command {
      * @param Cli $cli
      */
     public function __construct(Cli $cli) {
-        parent::__construct($cli);
         $cli->opt(
             'vanillasrc',
             'Vanilla source folder. This parameter can be skipped if you set VANILLACLI_VANILLA_SRC_DIR in your environment variables.'
         );
+        parent::__construct($cli);
     }
 
     /**
