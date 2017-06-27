@@ -33,22 +33,16 @@ abstract class NodeCommandBase extends Command {
      */
     public function run(Args $args) {
         $validNode = $this->isValidNodeInstall();
-
-        if ($validNode) {
-            $this->spawnNodeProcess($this->getScriptFilePath(), $args);
-        } else {
-            $this->printInvalidNodeError();
-        }
     }
 
     /**
-     * Get the path of the node file to execute in the child process
+     * The NodeCommand's execution function
      *
-     * @return string The file path of the node script to execute
+     * @param Args $args The CLI arguments
+     *
+     * @return void
      */
-    protected function getScriptFilePath() {
-        CliUtil::error('No javascript was provided to execute. Either ')
-    }
+    abstract protected function doRun(Args $args);
 
     /**
      * Spawn the child node process.
@@ -62,7 +56,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    final protected function spawnNodeProcess(string $nodeFilePath, Args $args) {
+    final public function spawnNodeProcess(string $nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --debug-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
@@ -74,7 +68,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return boolean
      */
-    final protected function isValidNodeInstall() {
+    private function isValidNodeInstall() {
         $nodeExists = `which node`;
         $yarnExists = `which yarn`;
 
