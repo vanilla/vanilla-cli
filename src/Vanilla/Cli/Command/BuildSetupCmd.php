@@ -24,13 +24,13 @@ class BuildSetupCmd extends NodeCommandBase {
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
-        $cli->description('Install dependancies for the javascript build process. Run this after every update');
+        $cli->description('Install dependencies for the javascript build process. Run this after every update');
     }
 
     /**
      * @inheritdoc
      */
-    final public function run(Args $args) {
+    public function run(Args $args) {
         $validNode = $this->isValidNodeInstall();
 
         if ($validNode) {
@@ -48,7 +48,7 @@ class BuildSetupCmd extends NodeCommandBase {
      *
      * @return void
      */
-    final public function installBaseNodeDeps() {
+    public function installBaseNodeDeps() {
         $basepath = realpath(__DIR__.'/../../FrontendTools');
         chdir($basepath);
 
@@ -61,14 +61,14 @@ class BuildSetupCmd extends NodeCommandBase {
      *
      * @return void
      */
-    final public function installProcessNodeDeps() {
+    public function installProcessNodeDeps() {
         $basepath = realpath(__DIR__.'/../../FrontendTools/versions');
         chdir($basepath);
 
-        foreach (glob('*', GLOB_ONLYDIR) as $processVersion) {
+        foreach (glob("$basepath/*", GLOB_ONLYDIR) as $processVersion) {
             CliUtil::write("\nInstall dependancies for Build Process version $processVersion\n");
 
-            chdir($basepath."/$processVersion");
+            chdir("$basepath/$processVersion");
             system('yarn install --color');
         }
     }

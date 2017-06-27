@@ -15,7 +15,7 @@ use \Garden\Cli\Cli;
 class BuildCmd extends NodeCommandBase {
 
     /**
-     * AddonCacheCmd constructor.
+     * BuildCmd constructor.
      *
      * @param Cli $cli The CLI instance
      */
@@ -23,7 +23,7 @@ class BuildCmd extends NodeCommandBase {
         parent::__construct($cli);
         $cli->description('Run the javascirpt build process.')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browsre extension.')
-            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json', false, 'string')
+            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('verbose:v', 'Show detailed build process output');
         ;
     }

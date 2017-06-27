@@ -19,7 +19,7 @@ abstract class NodeCommandBase extends Command {
     const MINIMUM_NODE_VERSION = '6.0.0';
 
     /**
-     * AddonCmdBase constructor.
+     * NodeCommandBase constructor.
      *
      * @param Cli $cli The CLI instance
      */
@@ -47,11 +47,15 @@ abstract class NodeCommandBase extends Command {
      * @return string The file path of the node script to execute
      */
     protected function getScriptFilePath() {
-        return "";
+        CliUtil::error('No javascript was provided to execute. Either ')
     }
 
     /**
-     * AddonCommandBase's execution function.
+     * Spawn the child node process.
+     *
+     * The node process will handle the rest of the work for this command.
+     * The build tools can output so much to stdio that it is not worth
+     * trying to parse any of it of from this side.
      *
      * @param string $nodeFilePath The absolute file path of the
      * @param Args $args The arguments passed from the command line
@@ -71,20 +75,17 @@ abstract class NodeCommandBase extends Command {
      * @return boolean
      */
     final protected function isValidNodeInstall() {
-        $nodeExists = shell_exec('which node');
-        $yarnExists = shell_exec('which yarn');
+        $nodeExists = `which node`;
+        $yarnExists = `which yarn`;
 
         if (empty($nodeExists) || empty($yarnExists)) {
             return false;
         }
 
-        $nodeVersionString = shell_exec('node --version');
+        $nodeVersionString = `node --version`;
 
         // Drop the 'v' of the begining of the version string
-        $droppedFirstCharacter = substr(
-            $nodeVersionString,
-            1
-        );
+        $droppedFirstCharacter = substr($nodeVersionString, 1);
 
         $comparisonResult = version_compare($droppedFirstCharacter, self::MINIMUM_NODE_VERSION);
         return $comparisonResult;
