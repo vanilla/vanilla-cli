@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
+ */
+
 const argv = require("yargs").argv;
 const chalk = require("chalk");
 const path = require("path");
@@ -11,16 +16,23 @@ const isVerbose = options.verbose || false;
 let command = options.watch ? "watch" : "build";
 const workingDirectory = process.cwd();
 
+// For when want to output to the CLI
 const spawnOptions = {
     stdio: "inherit"
 };
 
-
+// For when you don't only out in verbose mode
 const conditionalSpawnOptions = {};
 if (isVerbose) {
     conditionalSpawnOptions.stdio = "inherit";
 }
 
+/**
+ * Primary execution function
+ *
+ * @returns {Promise}
+ * @throws {Error} Some kind of build error.
+ */
 async function run() {
     const npmTaskExists = await runNpmTaskIfExists();
 
@@ -36,11 +48,22 @@ run()
         console.log(chalk.green("Build process completed successfully."));
     })
     .catch(err => {
-        console.error(`${chalk.red("There was an error in the build process\n")}
-`);
+        console.error(
+            `${chalk.red("There was an error in the build process\n")}`
+        );
         console.error(err);
     });
 
+
+/**
+ * Spawn a child build process. Wraps child_process.spawn
+ *
+ * @param {string} command
+ * @param {string[]} args
+ * @param {Object} options
+ * @returns Promise<boolean> Return if the process exits cleanly.
+ * @throws {Error} If the process throws and error
+ */
 async function spawnChildBuildProcess(command, args, options) {
     return new Promise((resolve, reject) => {
         const task = spawn(command, args, options);
@@ -55,6 +78,13 @@ async function spawnChildBuildProcess(command, args, options) {
     });
 }
 
+/**
+ * Check if a node dependancy has been installed and is on the path. Installs if it can't find it.
+ *
+ * @param {string} packageName The name of the node dependacny
+ * @returns Promise<boolean>
+ * @throws {Error} If the install process fails
+ */
 async function checkGlobalNodeDependancyInstalled(packageName) {
     return new Promise((resolve, reject) => {
         console.log(
@@ -107,6 +137,11 @@ async function checkGlobalNodeDependancyInstalled(packageName) {
     });
 }
 
+/**
+ * Conditionally run an npm task if it exists
+ *
+ * @returns {boolean} Whether or not the task existed
+ */
 async function runNpmTaskIfExists() {
     const packageJson = await VanillaUtility.getPackageJson(workingDirectory);
 
@@ -145,6 +180,11 @@ async function runNpmTaskIfExists() {
     );
 }
 
+/**
+ * Conditionally run a gulp task if it exists.
+ *
+ * @returns {undefined}
+ */
 async function runGulpTaskIfExists() {
     const gulpFilePath = path.join(workingDirectory, "gulpfile.js");
 
@@ -205,6 +245,11 @@ async function runGulpTaskIfExists() {
     );
 }
 
+/**
+ * Fetch all the grunt tasks in working directories grunt file by parsing `gulp --help`
+ *
+ * @returns {Promise<string[]>}
+ */
 async function getGruntTasks() {
     return new Promise(resolve => {
         const gruntHelpProcess = exec(
@@ -226,6 +271,11 @@ async function getGruntTasks() {
     });
 }
 
+/**
+ * Conditionally run a grunt task if it exists
+ *
+ * @returns
+ */
 async function runGruntTaskIfExists() {
     const gruntfilePath = path.join(workingDirectory, "gruntfile.js");
 
@@ -271,6 +321,12 @@ async function runGruntTaskIfExists() {
     await spawnChildBuildProcess("grunt", [command, "--color"], spawnOptions);
 }
 
+/**
+ * Check if a package is installed and on the path
+ *
+ * @param {string} package The name of the package
+ * @returns {Promise}
+ */
 async function checkDependencyOnPath(package) {
     return new Promise((resolve, reject) => {
         exec(`which ${package}`, (err, stdout, stderr) => {
@@ -291,6 +347,11 @@ async function checkDependencyOnPath(package) {
     });
 }
 
+/**
+ * Run the ruby bundler to install all gems from a Gemfile
+ *
+ * @returns {Promise}
+ */
 async function runBundler() {
     await checkDependencyOnPath("bundler");
     console.log("Installing Ruby Gems.\n");
@@ -312,6 +373,11 @@ async function runBundler() {
     });
 }
 
+/**
+ * Conditionally run a ruby task if it exists.
+ *
+ * @returns {Promise}
+ */
 async function runRubyTaskIfExists() {
     const gemfilePath = path.join(workingDirectory, "Gemfile");
 
