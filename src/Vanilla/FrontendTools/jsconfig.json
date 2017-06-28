@@ -4,5 +4,8 @@
     },
     "exclude": [
         "node_modules"
-    ]
+    ],
+    "typeAcquisition": {
+        "node": true
+    }
 }
