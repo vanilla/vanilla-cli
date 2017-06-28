@@ -17,7 +17,7 @@ module.exports = {
     getJsEntries,
     parseCliOptions,
     getPackageJson,
-    getSubDirectories
+    getSubDirectories,
 };
 
 /**

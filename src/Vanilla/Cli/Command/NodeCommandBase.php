@@ -57,11 +57,26 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    final public function spawnNodeProcess(string $nodeFilePath, Args $args) {
+    final public function spawnNodeProcessFromFile(string $nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
-        $debugArg = $args->getOpt('debug') ? '--inspect --debug-brk --nolazy' : '';
+        $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
         system($command);
+    }
+
+    final public function spawnNodeProcessFromPackageMain(string $directory, Args $args) {
+        $serializedArgs = json_encode($args->getOpts());
+        $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
+        $packageJson = json_decode(file_get_contents($directory.'/package.json'), true);
+        $command = $packageJson['main'] ?? false;
+        $scriptPath = realpath("$directory/$command");
+
+        if ($command && $scriptPath) {
+            $runCommand = "node $debugArg $scriptPath --color --options '$serializedArgs'";
+            system($runCommand);
+        } else {
+            CliUtil::error("Command not found");
+        }
     }
 
     /**

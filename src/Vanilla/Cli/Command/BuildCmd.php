@@ -16,6 +16,8 @@ use \Garden\Cli\Args;
  */
 class BuildCmd extends NodeCommandBase {
 
+    public $basePath;
+
     /**
      * BuildCmd constructor.
      *
@@ -27,15 +29,63 @@ class BuildCmd extends NodeCommandBase {
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browsre extension.', false, 'bool')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('setup', 'Install dependencies for the javascript build process. Run this after every update.')
-            ->opt('verbose:v', 'Show detailed build process output', false, 'bool');;
+            ->opt('verbose:v', 'Show detailed build process output', false, 'bool');
+
+        $this->basePath = realpath(__DIR__.'/../../FrontendTools/versions/');
     }
 
     /**
      * @inheritdoc
      */
     protected function doRun(Args $args) {
-        $isVerbose = $args->getOpt('verbose');
+        $isVerbose = $args->getOpt('verbose') ?? false;
         $this->runBuildSetup($isVerbose);
+        $this->spawnNodeProcessFromPackageMain(
+            $this->determineBuildProcessFolder($args),
+            $args
+        );
+    }
+
+    /**
+     * Get the directory of the build process to execute
+     *
+     * @param Args $args
+     * @return string
+     */
+    public function determineBuildProcessFolder(Args $args): string {
+        $processVersion = $args->getOpt('process');
+
+        if (!$processVersion) {
+            $addonJsonPath = getcwd().'/addon.json';
+
+            if (file_exists($addonJsonPath)) {
+                $addonJson = json_decode(file_get_contents($addonJsonPath), true);
+                $processVersion = array_key_exists('buildProcessVersion', $addonJson) ?
+                    $addonJson['buildProcessVersion'] :
+                    'legacy';
+            } else {
+                $processVersion = 'legacy';
+            }
+        }
+
+        $path = $this->basePath.'/'.$processVersion;
+
+        if (!file_exists($path)) {
+            $buildDirectories = glob($this->basePath.'/*');
+            $validBuildDirectories = [];
+
+            foreach ($buildDirectories as $directory) {
+                $validBuildDirectories []= basename($directory);
+            }
+
+            $validString = implode(', ', $validBuildDirectories);
+            CliUtil::error("Could not find build process version $processVersion
+Available build process versions are
+    $validString");
+        }
+
+        CliUtil::write("\nStarting build process version $processVersion");
+        return $path;
     }
 
     /**
@@ -57,7 +107,7 @@ class BuildCmd extends NodeCommandBase {
         $vanillaBuildPath = "$directoryPath/vanillabuild.json";
         $folderName = basename($directoryPath);
 
-        CliUtil::write(PHP_EOL."Checking dependancies for $folderName");
+        $isVerbose && CliUtil::write(PHP_EOL."Checking dependancies for $folderName");
 
         if (!file_exists($packageJsonPath)) {
             CliUtil::write("Skipping install for $folderName - No package.json exists");
@@ -75,18 +125,18 @@ class BuildCmd extends NodeCommandBase {
             $installedVersion = $vanillaBuild['installedVersion'];
             $shouldUpdate = version_compare($packageVersion, $installedVersion, '>');
 
-            $outputMessage = $shouldUpdate ?
-                "Installing dependencies for $folderName
+            if ($shouldUpdate) {
+                CliUtil::write("Installing dependencies for $folderName
     Installed Version - $installedVersion
-    Current Version - $packageVersion"      :
-                "Skipping install for $folderName - Already installed
+    Current Version - $packageVersion");
+            } elseif ($isVerbose) {
+                CliUtil::write("Skipping install for $folderName - Already installed
     Installed Version - $installedVersion
-    Current Version - $packageVersion";
+    Current Version - $packageVersion");
+            }
         } else {
-            $outputMessage = "Installing dependencies for $folderName - No Installed Version Found";
+            CliUtil::write("Installing dependencies for $folderName - No Installed Version Found");
         }
-
-        CliUtil::write($outputMessage);
 
         if ($shouldUpdate) {
             $command = 'yarn install';
@@ -103,7 +153,7 @@ class BuildCmd extends NodeCommandBase {
                 $newVanillaBuildContents = $vanillaBuild + $newVanillaBuildContents;
             }
 
-            CliUtil::write("Writing new `vanillabuild.json` file.");
+            $isVerbose && CliUtil::write("Writing new `vanillabuild.json` file.");
             file_put_contents('vanillabuild.json', json_encode($newVanillaBuildContents));
         }
     }
@@ -120,7 +170,7 @@ class BuildCmd extends NodeCommandBase {
      */
     public function runBuildSetup(bool $isVerbose) {
         $workingDirectory = getcwd();
-        $baseToolsPath = realpath(__DIR__ . '/../../FrontendTools');
+        $baseToolsPath = realpath(__DIR__.'/../../FrontendTools');
         $processVersionPaths = glob("$baseToolsPath/versions/*", \GLOB_ONLYDIR);
 
         $this->installNodeDepsForFolder($baseToolsPath, false, $isVerbose);
@@ -128,8 +178,9 @@ class BuildCmd extends NodeCommandBase {
             $this->installNodeDepsForFolder($processVersionPath, false, $isVerbose);
         }
 
-            // Change the working directory back
-
+        // Change the working directory back
         chdir($workingDirectory);
     }
+
+
 }

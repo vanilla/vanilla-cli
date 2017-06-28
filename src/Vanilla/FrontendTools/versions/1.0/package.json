@@ -5,10 +5,7 @@
     "main": "index.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam@charrondev.com>",
-    "license": "GNU GPL v2",
-    "scripts": {
-        "build": "gulp"
-    },
+    "license": "GPL-2.0",
     "dependencies": {
         "babel-core": "^6.25.0",
         "babel-loader": "^7.1.0",

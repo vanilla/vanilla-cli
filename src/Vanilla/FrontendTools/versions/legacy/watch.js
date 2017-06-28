@@ -17,7 +17,6 @@ async function runWatchProcess(addonPath) {
         return;
     }
 
-    console.log(Messages.STARTING_WATCH_PROCESS("legacy"));
     process.chdir(addonPath);
     spawn("npm", ["run", "watch", "--","--color"], { stdio: "inherit" });
 }

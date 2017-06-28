@@ -17,7 +17,6 @@ async function runBuildProcess(addonPath) {
         return;
     }
 
-    console.log(Messages.STARTING_BUILD_PROCESS('legacy'));
     process.chdir(addonPath);
     spawn("npm", ["run", "build", "--","--color"], {stdio: "inherit"});
 }
