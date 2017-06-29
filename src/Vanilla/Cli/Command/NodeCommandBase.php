@@ -16,7 +16,8 @@ use \Vanilla\Cli\CliUtil;
  */
 abstract class NodeCommandBase extends Command {
 
-    const MINIMUM_NODE_VERSION = '6.0.0';
+    // We require node 8 because it is the latest LTS with support for async/await
+    const MINIMUM_NODE_VERSION = '8.0.0';
 
     /**
      * NodeCommandBase constructor.

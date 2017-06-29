@@ -12,6 +12,8 @@ composer install
 
 If you would like to use the frontend build tools as well, you will need to have `node` and `yarn` installed.
 
+The minimum supported Node version `8.0.0` and the minimum supported PHP version is `7.1.0`.
+
 **For OS X:**
 ```bash
 brew install node
@@ -43,17 +45,3 @@ try {
     ...
 }
 ```
-
-## Debugging the during local development
-
-> **Notice**: Debugging the build process requires at least Node.js 8.x in order to benefit from the new node debugging process.
-
-The build tooling contained in this CLI are written in node and are process forked from the primary PHP one. If you pass `--debug` as an argument to `vanilla build` then each node process will be spawned with a the `--inspect` and `--insect-brk` arguments. They will break on the first line to allow you to connect a debugger.
-
-#### Child Processes 
-The `build` command will spawn a different child process based on which version of the build process you are using. As a result they also break on the first line and wait to attatch a debugger, but they will listen on a different port. The primary node process listens on port `9229` and the child process will listen on port `9230`.
-
-#### Tools
-Node.js 8.x and onwards use the Chrome Debugger Protocol, which is the same protocol used by Google Chrome. This means thats once a node process has been started on your local machine with the `--inspect --inspect-brk` flags, you can go to [`chrome://inspect`](chrome://inspect) in Google Chrome and attatch your debugger in the chrome developer tools.
-
-This project also comes with debugging configurations for [VSCode](https://code.visualstudio.com/) a popular Javascript editor. Simply start your process and run one of the included debugging configurations.

@@ -34,7 +34,7 @@ module.exports = (addonDirectory, options, entries) => {
                     use: [{
                         loader: 'babel-loader',
                         options: {
-                            presets: ['env'],
+                            presets: path.resolve(__dirname, './node_modules/babel-preset-env'),
                             cacheDirectory: true
                         }
                     }]
@@ -42,7 +42,7 @@ module.exports = (addonDirectory, options, entries) => {
             ]
         },
         resolve: {
-            modules: [path.resolve(addonDirectory, "./src"), "node_modules"],
+            modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src")],
             extensions: [".js", ".jsx"]
         },
         output: {
