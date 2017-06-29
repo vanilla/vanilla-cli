@@ -44,7 +44,7 @@ try {
 }
 ```
 
-## Debugging the Build process for local development
+## Debugging the during local development
 
 > **Notice**: Debugging the build process requires at least Node.js 8.x in order to benefit from the new node debugging process.
 

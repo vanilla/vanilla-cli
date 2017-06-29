@@ -28,7 +28,6 @@ class BuildCmd extends NodeCommandBase {
         $cli->description('Run the javascirpt build process.')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browsre extension.', false, 'bool')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
-            ->opt('setup', 'Install dependencies for the javascript build process. Run this after every update.')
             ->opt('verbose:v', 'Show detailed build process output', false, 'bool');
 
         $this->basePath = realpath(__DIR__.'/../../FrontendTools/versions/');
