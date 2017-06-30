@@ -17,9 +17,9 @@ use \Vanilla\Cli\CliUtil;
 abstract class NodeCommandBase extends Command {
 
     // We require node 8 because it is the latest LTS with support for async/await
-    const MINIMUM_NODE_VERSION = '8.0.0';
+    protected const MINIMUM_NODE_VERSION = '8.0.0';
 
-    public $nodeVersion;
+    protected $nodeVersion;
 
     /**
      * NodeCommandBase constructor.
@@ -60,7 +60,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    public function spawnNodeProcessFromFile(string $nodeFilePath, Args $args) {
+    protected function spawnNodeProcessFromFile($nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
@@ -75,11 +75,11 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    public function spawnNodeProcessFromPackageMain(string $directory, Args $args) {
+    protected function spawnNodeProcessFromPackageMain($directory, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
         $packageJson = json_decode(file_get_contents($directory.'/package.json'), true);
-        $command = $packageJson['main'] ?? false;
+        $command = $packageJson['main'] ?: false;
         $scriptPath = realpath("$directory/$command");
 
         if ($command && $scriptPath) {

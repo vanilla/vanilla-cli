@@ -18,7 +18,7 @@ use \Garden\Cli\Args;
  */
 class BuildCmd extends NodeCommandBase {
 
-    public $basePath;
+    protected $basePath;
 
     /**
      * BuildCmd constructor.
@@ -40,8 +40,8 @@ class BuildCmd extends NodeCommandBase {
      * @inheritdoc
      */
     protected function doRun(Args $args) {
-        $isVerbose = $args->getOpt('verbose') ?? false;
-        $shouldRunReset = $args->getOpt('reset') ?? false;
+        $isVerbose = $args->getOpt('verbose') ?: false;
+        $shouldRunReset = $args->getOpt('reset') ?: false;
 
         if ($shouldRunReset) {
             $this->runBuildReset($isVerbose);
@@ -60,7 +60,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return string
      */
-    public function determineBuildProcessFolder(Args $args): string {
+    protected function determineBuildProcessFolder(Args $args) {
         $processVersion = $args->getOpt('process');
 
         if (!$processVersion) {
@@ -109,7 +109,7 @@ Available build process versions are
      *
      * @return void
      */
-    private function installNodeDepsForFolder(string $directoryPath, bool $shouldResetDirectory = true, bool $isVerbose = false) {
+    protected function installNodeDepsForFolder($directoryPath, $shouldResetDirectory = true, $isVerbose = false) {
         $workingDirectory = getcwd();
         $packageJsonPath = "$directoryPath/package.json";
         $vanillaBuildPath = "$directoryPath/vanillabuild.json";
@@ -182,7 +182,7 @@ $folderName's dependencies will need to be reinstalled");
      *
      * @return void
      */
-    private function deleteNodeDepsForFolder(string $directoryPath, bool $isVerbose = false) {
+    private function deleteNodeDepsForFolder($directoryPath, $isVerbose = false) {
         $vanillaBuildPath = "$directoryPath/vanillabuild.json";
         $folderName = basename($directoryPath);
 
@@ -210,7 +210,7 @@ $folderName's dependencies will need to be reinstalled");
      *
      * @return void
      */
-    public function runBuildReset(bool $isVerbose = false) {
+    protected function runBuildReset($isVerbose = false) {
         $baseToolsPath = realpath(__DIR__.'/../../FrontendTools');
         $processVersionPaths = glob("$baseToolsPath/versions/*", \GLOB_ONLYDIR);
 
@@ -230,7 +230,7 @@ $folderName's dependencies will need to be reinstalled");
      *
      * @return void
      */
-    public function runBuildSetup(bool $isVerbose) {
+    protected function runBuildSetup($isVerbose) {
         $workingDirectory = getcwd();
         $baseToolsPath = realpath(__DIR__.'/../../FrontendTools');
         $processVersionPaths = glob("$baseToolsPath/versions/*", \GLOB_ONLYDIR);
