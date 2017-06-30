@@ -11,7 +11,7 @@ Additionally the command `build` requires a minimum Node.js version of `8.0.0` a
 
 ## Table of Contents
 
-* [Instasdallation](#installation)
+* [Installation](#installation)
 * [Usage](#usage)
 * [Build Tool](#build-tool)
 * [Debugging](#debugging)
