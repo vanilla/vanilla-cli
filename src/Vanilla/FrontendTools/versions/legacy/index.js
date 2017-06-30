@@ -10,7 +10,6 @@ const fs = require("fs");
 const { spawn, exec } = require("child_process");
 const VanillaUtility = require("../../VanillaUtility");
 
-const addonpath = argv.addonpath;
 const options = JSON.parse(argv.options);
 const isVerbose = options.verbose || false;
 let command = options.watch ? "watch" : "build";
@@ -34,6 +33,7 @@ if (isVerbose) {
  * @throws {Error} Some kind of build error.
  */
 async function run() {
+    createLegacyBuildShim();
     const npmTaskExists = await runNpmTaskIfExists();
 
     if (!npmTaskExists) {
@@ -54,6 +54,17 @@ run()
         console.error(err);
     });
 
+function createLegacyBuildShim() {
+    // Create an empty bower_components folder if bower.json exists and there isn't one.
+    // This is a shim for some older build tools that don't handle this well.
+    console.log()
+    const $bowerJsonPath = path.join(workingDirectory, 'bower.json');
+    const $bowerComponentsPath = path.join(workingDirectory, 'bower_components');
+
+    if (fs.existsSync($bowerJsonPath) && !fs.existsSync($bowerComponentsPath)) {
+        fs.mkdirSync($bowerComponentsPath);
+    }
+}
 
 /**
  * Spawn a child build process. Wraps child_process.spawn
