@@ -34,7 +34,7 @@ abstract class NodeCommandBase extends Command {
     /**
      * @inheritdoc
      */
-    public function run(Args $args) {
+    final public function run(Args $args) {
         $validNode = $this->isValidNodeInstall();
         $this->doRun($args);
     }
@@ -60,7 +60,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    final public function spawnNodeProcessFromFile(string $nodeFilePath, Args $args) {
+    public function spawnNodeProcessFromFile(string $nodeFilePath, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedArgs'";
@@ -75,7 +75,7 @@ abstract class NodeCommandBase extends Command {
      *
      * @return void
      */
-    final public function spawnNodeProcessFromPackageMain(string $directory, Args $args) {
+    public function spawnNodeProcessFromPackageMain(string $directory, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
         $packageJson = json_decode(file_get_contents($directory.'/package.json'), true);
