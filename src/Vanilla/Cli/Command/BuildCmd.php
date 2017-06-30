@@ -178,6 +178,7 @@ $folderName's dependencies will need to be reinstalled");
      * Delete the node_modules folder and vanillabuild.json file for a directory
      *
      * @param string $directoryPath The directory to do the deletion in.
+     * @param bool $isVerbose Whether to verbose output
      *
      * @return void
      */

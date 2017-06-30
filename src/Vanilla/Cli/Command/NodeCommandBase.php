@@ -67,6 +67,14 @@ abstract class NodeCommandBase extends Command {
         system($command);
     }
 
+    /**
+     * Spawn a node.js process based on the main script defined in its `package.json`
+     *
+     * @param string $directory The directory to search for the `package.json` in.
+     * @param Args $args The CLI arguments
+     *
+     * @return void
+     */
     final public function spawnNodeProcessFromPackageMain(string $directory, Args $args) {
         $serializedArgs = json_encode($args->getOpts());
         $debugArg = $args->getOpt('debug') ? '--inspect --inspect-brk --nolazy' : '';
@@ -93,7 +101,7 @@ abstract class NodeCommandBase extends Command {
 
         if (empty($nodeExists) || empty($yarnExists)) {
             CliUtil::error('Node and Yarn are not installed properly or are not visible on your path.
-            \nCheck http://github.com/vanilla/vanilla-cli for installation instructions.');
+    Check http://github.com/vanilla/vanilla-cli for installation instructions.');
             return false;
         }
 
