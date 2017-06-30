@@ -11,7 +11,7 @@ Additionally the command `build` requires a minimum Node.js version of `8.0.0` a
 
 ## Table of Contents
 
-* [Installation](#installation)
+* [Instasdallation](#installation)
 * [Usage](#usage)
 * [Build Tool](#build-tool)
 * [Debugging](#debugging)
@@ -38,13 +38,13 @@ ln -s ~/bin
 
 If you would like to use the frontend build tools as well, you will need to have `node` and `yarn` installed.
 
-**For OS X**
+#### For OS X
 ```bash
 brew install node
 brew install yarn
 ```
 
-**For Debian/Ubuntu Linux:**
+#### For Debian/Ubuntu Linux
 ```bash
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
