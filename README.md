@@ -5,7 +5,7 @@ Current functionalities include addon-related utilities such as cache regenerati
 as well as full front-end build tooling for vanilla addons.
 
 ## Prerequisites
-The CLI requires PHP `7.1.0` or greater installed to run. 
+The CLI requires PHP `5.6.0` or greater installed to run. 
 
 Additionally the command `build` requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions [below](#for-os-x).
 
