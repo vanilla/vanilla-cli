@@ -7,7 +7,7 @@ as well as full front-end build tooling for vanilla addons.
 ## Prerequisites
 The CLI requires PHP `7.1.0` or greater installed to run. 
 
-Additionally the command `build` requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed.
+Additionally the command `build` requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions [below](#for-os-x).
 
 ## Table of Contents
 
@@ -38,7 +38,7 @@ ln -s ~/bin
 
 If you would like to use the frontend build tools as well, you will need to have `node` and `yarn` installed.
 
-**For OS X:**
+**For OS X**
 ```bash
 brew install node
 brew install yarn
