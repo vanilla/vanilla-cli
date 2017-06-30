@@ -102,9 +102,9 @@ During local development you main want to run a debugger. This is supported for 
 
 Ensure you IDE is properly configured for [`XDebug`](https://xdebug.org/index.php).
 
-[**How to setup PHPStorm for XDebug**](https://www.jetbrains.com/help/phpstorm/configuring-xdebug.html)
+[How to setup PHPStorm for XDebug](https://www.jetbrains.com/help/phpstorm/configuring-xdebug.html)
 
-[**Debugging in VsCode**](https://code.visualstudio.com/Docs/editor/debugging)
+[Debugging in VsCode](https://code.visualstudio.com/Docs/editor/debugging)
 
 If you use [VSCode](https://code.visualstudio.com/) a debugging script is included called `Listen for XDebug`
 
