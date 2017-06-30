@@ -19,6 +19,8 @@ abstract class NodeCommandBase extends Command {
     // We require node 8 because it is the latest LTS with support for async/await
     const MINIMUM_NODE_VERSION = '8.0.0';
 
+    public $nodeVersion;
+
     /**
      * NodeCommandBase constructor.
      *
@@ -90,24 +92,23 @@ abstract class NodeCommandBase extends Command {
         $yarnExists = `which yarn`;
 
         if (empty($nodeExists) || empty($yarnExists)) {
+            CliUtil::error('Node and Yarn are not installed properly or are not visible on your path.
+            \nCheck http://github.com/vanilla/vanilla-cli for installation instructions.');
             return false;
         }
 
         $nodeVersionString = `node --version`;
 
         // Drop the 'v' of the begining of the version string
-        $droppedFirstCharacter = substr($nodeVersionString, 1);
+        $droppedFirstCharacter = trim(substr($nodeVersionString, 1));
 
         $comparisonResult = version_compare($droppedFirstCharacter, self::MINIMUM_NODE_VERSION);
+        if ($comparisonResult) {
+            $this->nodeVersion = $droppedFirstCharacter;
+        } else {
+            CliUtil::error("Node.js version out of date. Minimum required version is ${self::MINIMUM_NODE_VERSION}
+Check http://github.com/vanilla/vanilla-cli for installation instructions.");
+        }
         return $comparisonResult;
-    }
-
-    /**
-     * Print an error message about node not being installed
-     *
-     * @return void
-     */
-    final protected function printInvalidNodeError() {
-        CliUtil::error('Node and yarn are not installed correctly. Check http://github.com/vanilla/vanilla-cli for installation instructions.');
     }
 }
