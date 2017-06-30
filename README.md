@@ -28,7 +28,7 @@ cd VANILLA_CLI_FOLDER
 composer install
 ```
 
-Then symlink the tool somewhere on your path where you have `read/write` permissions.
+Then symlink the tool somewhere on your path.
 ```bash
 ln -s /usr/local/bin
 ```
