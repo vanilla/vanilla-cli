@@ -7,7 +7,8 @@
             "name": "Attach to Primary Process",
             "port": 9229,
             "stopOnEntry": true
-        }, {
+        },
+        {
             "type": "node",
             "request": "attach",
             "name": "Attatch to Child Process",
