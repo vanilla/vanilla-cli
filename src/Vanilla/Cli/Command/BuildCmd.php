@@ -27,8 +27,8 @@ class BuildCmd extends NodeCommandBase {
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
-        $cli->description('Run the javascirpt build process.')
-            ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browsre extension.', false, 'bool')
+        $cli->description('Run the javascript build process.')
+            ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('verbose:v', 'Show detailed build process output', false, 'bool')
             ->opt('reset:r', 'Reinstall the build tools dependencies before building.', false, 'bool');
@@ -87,9 +87,9 @@ class BuildCmd extends NodeCommandBase {
             }
 
             $validString = implode(', ', $validBuildDirectories);
-            CliUtil::error("Could not find build process version $processVersion
-Available build process versions are
-    $validString");
+            CliUtil::error("Could not find build process version $processVersion"
+                           ."    Available build process versions are"
+                           .$validString);
         }
 
         CliUtil::write("\nStarting build process version $processVersion");
@@ -134,10 +134,11 @@ Available build process versions are
             $installedVersion = $vanillaBuild['installedVersion'];
 
             if ($hasHadNodeUpdate) {
-                CliUtil::write("
-This tools dependencies were installed with Node.js version {$vanillaBuild['nodeVersion']}
-    Current Node.js version is {$this->nodeVersion}
-$folderName's dependencies will need to be reinstalled");
+                CliUtil::write(
+                    "\nThis tools dependencies were installed with Node.js version {$vanillaBuild['nodeVersion']}"
+                    ."    Current Node.js version is {$this->nodeVersion}"
+                    ."$folderName's dependencies will need to be reinstalled"
+                );
                 $this->deleteNodeDepsForFolder($directoryPath, $isVerbose);
                 $shouldUpdate = true;
             } else {
@@ -145,13 +146,17 @@ $folderName's dependencies will need to be reinstalled");
             }
 
             if ($shouldUpdate) {
-                CliUtil::write("Installing dependencies for $folderName
-    Installed Version - $installedVersion
-    Current Version - $packageVersion");
+                CliUtil::write(
+                    "Installing dependencies for $folderName"
+                    ."    Installed Version - $installedVersion"
+                    ."    Current Version - $packageVersion"
+                );
             } elseif ($isVerbose) {
-                CliUtil::write("Skipping install for $folderName - Already installed
-    Installed Version - $installedVersion
-    Current Version - $packageVersion");
+                CliUtil::write(
+                    "Skipping install for $folderName - Already installed"
+                    ."    Installed Version - $installedVersion"
+                    ."    Current Version - $packageVersion"
+                );
             }
         } else {
             CliUtil::write("Installing dependencies for $folderName - No Installed Version Found");

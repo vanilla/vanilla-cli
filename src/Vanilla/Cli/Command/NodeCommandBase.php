@@ -100,8 +100,10 @@ abstract class NodeCommandBase extends Command {
         $yarnExists = `which yarn`;
 
         if (empty($nodeExists) || empty($yarnExists)) {
-            CliUtil::error('Node and Yarn are not installed properly or are not visible on your path.
-    Check http://github.com/vanilla/vanilla-cli for installation instructions.');
+            CliUtil::error(
+                'Node and Yarn are not installed properly or are not visible on your path.'
+                .'Check http://github.com/vanilla/vanilla-cli for installation instructions.'
+            );
             return false;
         }
 
@@ -114,8 +116,10 @@ abstract class NodeCommandBase extends Command {
         if ($comparisonResult) {
             $this->nodeVersion = $droppedFirstCharacter;
         } else {
-            CliUtil::error("Node.js version out of date. Minimum required version is ${self::MINIMUM_NODE_VERSION}
-Check http://github.com/vanilla/vanilla-cli for installation instructions.");
+            CliUtil::error(
+                "Node.js version out of date. Minimum required version is ${self::MINIMUM_NODE_VERSION}"
+                ."Check http://github.com/vanilla/vanilla-cli for installation instructions."
+            );
         }
         return $comparisonResult;
     }
