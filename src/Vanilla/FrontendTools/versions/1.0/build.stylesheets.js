@@ -18,6 +18,16 @@ const size = require('gulp-size');
 module.exports = buildStylesheets;
 
 /**
+ * Swallow the error and print it prevent gulp watch tasks from erroring out.
+ *
+ * @param {Error} error
+ */
+function swallowError(error) {
+    console.log(error.toString());
+    this.emit("end");
+}
+
+/**
  * Create the stylesheet gulp task function;
  * @export
  *
@@ -30,7 +40,9 @@ function buildStylesheets(addonDirectory, options) {
 
     const process = gulp
         .src(path.resolve(addonDirectory, 'src/scss/*.scss'))
-        .pipe(plumber())
+        .pipe(plumber({
+            errorHandler: swallowError
+        }))
         .pipe(sourcemaps.init())
         // .pipe(
         //     stylelint({
@@ -41,6 +53,7 @@ function buildStylesheets(addonDirectory, options) {
         .pipe(autoprefixer())
         .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
+        .on('error', swallowError)
         .pipe(gulp.dest(destination));
 
     if (options.isVerboseMode) {
