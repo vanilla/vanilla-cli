@@ -88,8 +88,8 @@ class BuildCmd extends NodeCommandBase {
 
             $validString = implode(', ', $validBuildDirectories);
             CliUtil::error("Could not find build process version $processVersion"
-                           ."    Available build process versions are"
-                           .$validString);
+                           ."\n    Available build process versions are"
+                           ."\n$validString");
         }
 
         CliUtil::write("\nStarting build process version $processVersion");
@@ -136,8 +136,8 @@ class BuildCmd extends NodeCommandBase {
             if ($hasHadNodeUpdate) {
                 CliUtil::write(
                     "\nThis tools dependencies were installed with Node.js version {$vanillaBuild['nodeVersion']}"
-                    ."    Current Node.js version is {$this->nodeVersion}"
-                    ."$folderName's dependencies will need to be reinstalled"
+                    ."\n    Current Node.js version is {$this->nodeVersion}"
+                    ."\n$folderName's dependencies will need to be reinstalled"
                 );
                 $this->deleteNodeDepsForFolder($directoryPath, $isVerbose);
                 $shouldUpdate = true;
@@ -148,14 +148,14 @@ class BuildCmd extends NodeCommandBase {
             if ($shouldUpdate) {
                 CliUtil::write(
                     "Installing dependencies for $folderName"
-                    ."    Installed Version - $installedVersion"
-                    ."    Current Version - $packageVersion"
+                    ."\n    Installed Version - $installedVersion"
+                    ."\n    Current Version - $packageVersion"
                 );
             } elseif ($isVerbose) {
                 CliUtil::write(
                     "Skipping install for $folderName - Already installed"
-                    ."    Installed Version - $installedVersion"
-                    ."    Current Version - $packageVersion"
+                    ."\n    Installed Version - $installedVersion"
+                    ."\n    Current Version - $packageVersion"
                 );
             }
         } else {
