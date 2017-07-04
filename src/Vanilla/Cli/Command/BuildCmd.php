@@ -27,7 +27,7 @@ class BuildCmd extends NodeCommandBase {
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
-        $cli->description('Run the javascript build process.')
+        $cli->description('Build frontend assets (scripts, stylesheets, and images).')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('verbose:v', 'Show detailed build process output', false, 'bool')
@@ -115,10 +115,10 @@ class BuildCmd extends NodeCommandBase {
         $vanillaBuildPath = "$directoryPath/vanillabuild.json";
         $folderName = basename($directoryPath);
 
-        $isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for $folderName");
+        $isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $folderName");
 
         if (!file_exists($packageJsonPath)) {
-            CliUtil::write("Skipping install for $folderName - No package.json exists");
+            CliUtil::write("Skipping install for build process version $folderName - No package.json exists");
             return;
         }
 
@@ -137,7 +137,7 @@ class BuildCmd extends NodeCommandBase {
                 CliUtil::write(
                     "\nThis tools dependencies were installed with Node.js version {$vanillaBuild['nodeVersion']}"
                     ."\n    Current Node.js version is {$this->nodeVersion}"
-                    ."\n$folderName's dependencies will need to be reinstalled"
+                    ."\nBuild process version $folderName's dependencies will need to be reinstalled"
                 );
                 $this->deleteNodeDepsForFolder($directoryPath, $isVerbose);
                 $shouldUpdate = true;
@@ -147,19 +147,19 @@ class BuildCmd extends NodeCommandBase {
 
             if ($shouldUpdate) {
                 CliUtil::write(
-                    "Installing dependencies for $folderName"
+                    "Installing dependencies for build process version $folderName"
                     ."\n    Installed Version - $installedVersion"
                     ."\n    Current Version - $packageVersion"
                 );
             } elseif ($isVerbose) {
                 CliUtil::write(
-                    "Skipping install for $folderName - Already installed"
+                    "Skipping install for build process version $folderName - Already installed"
                     ."\n    Installed Version - $installedVersion"
                     ."\n    Current Version - $packageVersion"
                 );
             }
         } else {
-            CliUtil::write("Installing dependencies for $folderName - No Installed Version Found");
+            CliUtil::write("Installing dependencies for build process version $folderName - No Installed Version Found");
         }
 
         if ($shouldUpdate) {
@@ -191,7 +191,7 @@ class BuildCmd extends NodeCommandBase {
         $vanillaBuildPath = "$directoryPath/vanillabuild.json";
         $folderName = basename($directoryPath);
 
-        CliUtil::write("Deleting dependencies for $folderName");
+        CliUtil::write("Deleting dependencies for build process version $folderName");
 
         $dir = realpath("$directoryPath/node_modules");
         if (PHP_OS === 'Windows') {
@@ -202,7 +202,7 @@ class BuildCmd extends NodeCommandBase {
 
         $isVerbose ? system($command) : `$command`;
         unlink($vanillaBuildPath);
-        CliUtil::write("Dependencies deleted for $folderName");
+        CliUtil::write("Dependencies deleted for build process version $folderName");
     }
 
     /**

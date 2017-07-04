@@ -1,8 +1,14 @@
 # Vanilla's (C)ommand (L)ine (I)nterface
 
-This tool is used to execute various Vanilla Forums related commands during local development.
-Current functionalities include addon-related utilities such as cache regeneration and conversion,
-as well as full front-end build tooling for vanilla addons.
+This tool is used to make various tasks easier for developers working on Vanilla Forums core or addons.
+
+Current functionalities include:
+
+- Building frontend assets (scripts, stylesheets, and images)
+- Generating cache files for addons
+- Converting addons' info arrays to json
+
+See the [wiki](https://github.com/vanilla/vanilla-cli/wiki) for documentation about the different commands.
 
 ## Prerequisites
 The CLI requires PHP `5.6.0` or greater installed to run. 
@@ -75,25 +81,13 @@ try {
 ```
 
 ### Build Tool
+Both the core of Vanilla and its many addons often have their own tools to build their frontend dependencies. Normally these tools bundle, concatenate, and/or minify the javascript and styles, compress images and other assets, and may include a CSS authoring tool such as [Sass](http://sass-lang.com/) or [Less](http://lesscss.org/). Many of these build toolchains accomplish the same objective but in different ways.
 
-The build tool gives a consistant UX to building a Vanilla Forums addon. By default it will check your project for an existing build process and attempt to hook into that, but it provides its own mature, well tested build processes.
+The build tool aims to provide a consistant experience to building a frontend assets for vanilla (js/css/images). By default it will check your project for an existing build process and attempt to hook into that, but it provides its own mature, well tested build processes as well.
 
 You can choose which build process to use by defining a `buildProcessVersion` in your project's [addon.json](http://docs.vanillaforums.com/developer) file and settings it to a valid build process version. Currently valid versions are `1.0` and `legacy`
 
-```
-usage: vanilla build [<options>]
-
-Run the javascript build process.
-
-OPTIONS
-  --help, -?      Display this help.
-  --watch, -w     Run the build process in watch mode. Best used with the
-                  livereload browser extensions.
-  --process, -p   Which version of the build process to use. This will override
-                  the one specified in the addon.json
-  --reset, -r     Reinstall the build tools dependencies before building.
-  --verbose, -v   Show detailed build process output
-```
+For information on the build process and its configuration, check the [wiki](https://github.com/vanilla/vanilla-cli/wiki/Build-Tools)
 
 ## Debugging
 During local development you main want to run a debugger. This is supported for both php process and JS process.

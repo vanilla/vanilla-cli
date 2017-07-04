@@ -37,15 +37,23 @@ async function run() {
     const npmTaskExists = await runNpmTaskIfExists();
 
     if (!npmTaskExists) {
-        await runGulpTaskIfExists();
-        await runGruntTaskIfExists();
-        await runRubyTaskIfExists();
+        const gulpTaskExists = await runGulpTaskIfExists();
+        const gruntTaskExists = await runGruntTaskIfExists();
+        const rubyTaskExists = await runRubyTaskIfExists();
+
+        return gulpTaskExists || gruntTaskExists || rubyTaskExists;
     }
+
+    return true;
 }
 
 run()
-    .then(() => {
-        console.log(chalk.green("Build process completed successfully."));
+    .then(taskExists => {
+        if (taskExists) {
+            console.log(chalk.green("Build process completed successfully."));
+        } else {
+            console.log(chalk.red("No legacy build tasks found.") + "\nVisit https://github.com/vanilla/vanilla-cli/wiki/Build-Tools#legacy for more information.")
+        }
     })
     .catch(err => {
         console.error(
@@ -207,7 +215,7 @@ async function runGulpTaskIfExists() {
                 )}. Skipping gulp task check`
             );
 
-        return;
+        return false;
     }
 
     const gulpfile = require(gulpFilePath);
@@ -298,7 +306,7 @@ async function runGruntTaskIfExists() {
                 )}. Skipping grunt task checks`
             );
 
-        return;
+        return false;
     }
 
     await checkGlobalNodeDependancyInstalled("grunt");
@@ -400,7 +408,7 @@ async function runRubyTaskIfExists() {
                 )}. Skipping ruby checks.`
             );
 
-        return;
+        return false;
     }
 
     await checkDependencyOnPath("ruby");
