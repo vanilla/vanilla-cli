@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "checkJs": true
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "typeAcquisition": {
+        "node": true
+    }
+}
