@@ -124,8 +124,6 @@ class BuildCmd extends NodeCommandBase {
 
         $packageJson = json_decode(file_get_contents($packageJsonPath), true);
         $shouldUpdate = true;
-        $vanillaBuild = false;
-        $outputMessage = '';
 
         if (file_exists($vanillaBuildPath)) {
             $vanillaBuild = json_decode(file_get_contents($vanillaBuildPath), true);

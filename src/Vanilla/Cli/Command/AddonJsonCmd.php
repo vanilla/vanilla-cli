@@ -40,7 +40,7 @@ class AddonJsonCmd extends AddonCommandBase {
     /**
      * @inheritdoc
      */
-    public function doRun(Args $args, AddonManager $addonManager) {
+    protected function doRun(Args $args, AddonManager $addonManager) {
         $addonsOutput = '';
         $warningsOutput = '';
         foreach (array_keys($addonManager->getScanDirs()) as $addonType) {

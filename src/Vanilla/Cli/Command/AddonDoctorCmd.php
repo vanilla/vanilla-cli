@@ -40,7 +40,7 @@ class AddonDoctorCmd extends AddonCommandBase {
     /**
      * @inheritdoc
      */
-    public function doRun(Args $args, AddonManager $addonManager) {
+    protected function doRun(Args $args, AddonManager $addonManager) {
         $getRelativePath = function($from, $path) {
             $path = explode(DIRECTORY_SEPARATOR, $path);
             $from = explode(DIRECTORY_SEPARATOR, $from);

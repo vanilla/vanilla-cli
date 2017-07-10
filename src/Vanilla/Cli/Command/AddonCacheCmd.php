@@ -24,16 +24,14 @@ class AddonCacheCmd extends AddonCommandBase {
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
-        $cli
-            ->description('Generate addons\'s cache files.')
-            ->opt('regenerate:r', 'Regenerate the cache files.')
-        ;
+        $cli->description('Generate addons\'s cache files.')
+            ->opt('regenerate:r', 'Regenerate the cache files.');
     }
 
     /**
      * @inheritdoc
      */
-    public function doRun(Args $args, AddonManager $addonManager) {
+    protected function doRun(Args $args, AddonManager $addonManager) {
         if ($args->getOpt('regenerate', false) !== false) {
             $addonManager->clearCache();
         }

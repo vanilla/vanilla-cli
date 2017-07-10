@@ -46,5 +46,5 @@ abstract class Command {
      * @param Args $args
      * @return mixed
      */
-    abstract function run(Args $args);
+    public abstract function run(Args $args);
 }
