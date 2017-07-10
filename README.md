@@ -88,4 +88,4 @@ vanilla some-command --some-argument
 Documentation can be found at this repo's [wiki](https://github.com/vanilla/vanilla-cli/wiki).
 
 ## License
-[GNU GPL v2](http://www.opensource.org/licenses/gpl-2.0.php)
+[GNU GPL v2](LICENSE.md)
