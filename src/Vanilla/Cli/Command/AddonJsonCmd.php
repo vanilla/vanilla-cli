@@ -58,15 +58,16 @@ class AddonJsonCmd extends AddonCommandBase {
                 }
                 $info = $addon->getInfo();
                 if (!$addon->getInfoValue('Issues')) {
-                    unset($info['Issues'], $info['oldType']);
-
                     // This kludge is only needed if the application manager exist.
                     if ($info['oldType'] === 'plugin' || !class_exists('Gdn_ApplicationManager')) {
                         unset($info['keyRaw']);
                     }
+
                     if ($info['priority'] === Addon::PRIORITY_NORMAL) {
                         unset($info['priority']);
                     }
+
+                    unset($info['Issues'], $info['oldType']);
 
                     CliUtil::write($addonDefinitionPath.' generated.');
                     file_put_contents($addonDefinitionPath, json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)."\n");
