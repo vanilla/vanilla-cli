@@ -86,4 +86,4 @@ vanilla some-command --some-argument
 
 ## Documentation
 
-Documentation can be found at this repo's [wiki](https://github.com/vanilla/vanilla-cli/wiki).
+
