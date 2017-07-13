@@ -1,4 +1,4 @@
-# Vanilla's (C)ommand (L)ine (I)nterface
+# Vanilla's Command Line Interface
 
 This tool is used to make various tasks easier for developers working on Vanilla Forums core or addons.
 
@@ -10,11 +10,6 @@ Current functionalities include:
 
 See the [wiki](https://github.com/vanilla/vanilla-cli/wiki) for documentation about the different commands.
 
-## Prerequisites
-The CLI requires PHP `5.6.0` or greater installed to run. 
-
-Some commands, currently `build`, requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions are located [in the wik](https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes).
-
 ## Table of Contents
 
 * [Installation](#installation)
@@ -25,7 +20,12 @@ Some commands, currently `build`, requires a minimum Node.js version of `8.0.0` 
 
 ## Installation
 
-**BEFORE YOU INSTALL:** please read the [prerequisites](#prerequisites)
+### Prerequisites
+The CLI requires PHP `5.6.0` or greater installed to run. 
+
+Some commands, currently `build`, requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions are located [in the wik](https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes).
+
+### Setup
 
 Install the PHP dependencies in the directory where you cloned this project.
 ```bash
@@ -85,7 +85,5 @@ vanilla some-command --some-argument
 ```
 
 ## Documentation
-Documentation can be found at this repo's [wiki](https://github.com/vanilla/vanilla-cli/wiki).
 
-## License
-[GNU GPL v2](LICENSE.md)
+
