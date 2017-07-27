@@ -1,12 +1,20 @@
 {
     "name": "vanilla/vanilla-cli",
-    "description": "Vanilla CLI",
+    "description": "Vanilla Forums Command Line Interface. Simplify common forum development related tasks.",
     "type": "project",
     "license": "GPL-2.0",
     "authors": [
         {
             "name": "Todd Burry",
             "email": "todd@vanillaforums.com"
+        },
+        {
+            "name": "Adam Charron",
+            "email": "adam@charrondev.com"
+        },
+        {
+            "name": "Alexandre (DaazKu) Chouinard",
+            "email": "alexandre.c@vanillaforums.com"
         }
     ],
     "require": {
@@ -17,5 +25,14 @@
         "psr-4": {
             "Vanilla\\Cli\\": "src/Vanilla/Cli"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:vanilla/vanilla-cli.git"
+        }
+    ],
+    "bin": [
+        "bin/vanilla"
+    ]
 }
