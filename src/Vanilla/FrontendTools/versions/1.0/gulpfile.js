@@ -46,15 +46,15 @@ gulp.task("watch", ["build"], () => {
             path.resolve(addonpath, "design/*.css"),
             path.resolve(addonpath, "design/images/**/*"),
             path.resolve(addonpath, "js/*.js"),
-            path.resolve(addonpath, "views/**/*")
+            path.resolve(addonpath, "views/**/*"),
         ],
         file => {
             return livereload.changed(file.path);
         }
     );
 
-    gulp.watch(path.resolve(addonpath, "src/scss/**/*.scss"), ["build:styles"]);
-    gulp.watch(path.resolve(addonpath, "src/js/**/*.js"), ["build:js"]);
+    gulp.watch(path.resolve(addonpath, "**/*.scss"), ["build:styles"]);
+    gulp.watch(path.resolve(addonpath, "**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
 });
 
