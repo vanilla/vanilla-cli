@@ -2,7 +2,7 @@
     "name": "vanilla/vanilla-cli",
     "description": "Vanilla Forums Command Line Interface. Simplify common forum development related tasks.",
     "type": "project",
-    "license": "GPL-2.0",
+    "license": "MIT",
     "authors": [
         {
             "name": "Todd Burry",
