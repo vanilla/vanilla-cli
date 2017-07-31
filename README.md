@@ -21,25 +21,31 @@ See the [wiki](https://github.com/vanilla/vanilla-cli/wiki) for documentation ab
 ## Installation
 
 ### Prerequisites
-The CLI requires PHP `5.6.0` or greater installed to run. 
+The CLI requires PHP `5.6.0` or greater installed to run. It also requires [composer](https://getcomposer.org/).
 
 Some commands, currently `build`, requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions are located [in the wik](https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes).
 
 ### Setup
 
-Install the PHP dependencies in the directory where you cloned this project.
+#### Installation with Composer
+
+1. Run `composer global require 'vanilla/vanilla-cli'`.
+2. If your composer bin directory is on your path, you can now run the tool with `vanilla`. Try `vanilla --help` to get started.
+
+#### Manual Installation
+
+1. Clone this repo to the installation directory 
 ```bash
-cd VANILLA_CLI_FOLDER
+cd INSTALLATION_FOLDER
+git clone git@github.com:vanilla/vanilla-cli.git
+```
+2. Install the PHP dependancies in the directory where you clone this project.
+```bash
+cd vanilla-cli
 composer install
 ```
-
-Then symlink the tool somewhere on your path.
-```bash
-ln -s /usr/local/bin
-```
-```bash
-ln -s ~/bin
-```
+3. Run the tool `./bin/vanilla --help`
+4. (Optional) Symlink the tool somewhere on your path. `ln -s ./bin/vanilla SOME_BIN_DIRECTORY`
 
 ## Usage
 
@@ -63,7 +69,7 @@ try {
 ```
 
 ## Debugging
-During local development you main want to run a debugger. This is supported for both php process and JS process.
+During local development you main want to run a debugger. This is supported for the primary PHP process.
 
 ### PHP
 

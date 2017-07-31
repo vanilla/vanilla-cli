@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright 2009-2017 Vanilla Forums Inc.
- * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
+ * @license MIT
  * @package Vanilla\Cli\Command
  */
 
@@ -102,7 +102,7 @@ abstract class NodeCommandBase extends Command {
         if (empty($nodeExists) || empty($yarnExists)) {
             CliUtil::error(
                 'Node and Yarn are not installed properly or are not visible on your path.'
-                ."\nCheck https://github.com/vanilla/vanilla-cli for installation instructions."
+                ."\nCheck https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes for installation instructions."
             );
             return false;
         }
@@ -119,7 +119,7 @@ abstract class NodeCommandBase extends Command {
             $minimum = self::MINIMUM_NODE_VERSION;
             CliUtil::error(
                 "Node.js version out of date. Minimum required version is $minimum"
-                ."\nCheck https://github.com/vanilla/vanilla-cli for installation instructions."
+                ."\nCheck https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes for installation instructions."
             );
         }
         return $comparisonResult;

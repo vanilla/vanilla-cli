@@ -5,7 +5,7 @@
     "main": "index.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam@charrondev.com>",
-    "license": "GPL-2.0",
+    "license": "MIT",
     "dependencies": {
         "babel-core": "^6.25.0",
         "babel-loader": "^7.1.0",
