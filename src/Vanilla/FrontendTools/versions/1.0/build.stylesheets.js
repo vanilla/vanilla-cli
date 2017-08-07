@@ -5,6 +5,7 @@
 
 const gulp = require('gulp');
 const path = require('path');
+const fs = require('fs');
 
 const plumber = require('gulp-plumber');
 const sourcemaps = require('gulp-sourcemaps');
@@ -13,7 +14,6 @@ const stylelint = require('gulp-stylelint');
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const size = require('gulp-size');
-
 
 module.exports = buildStylesheets;
 
@@ -24,7 +24,7 @@ module.exports = buildStylesheets;
  */
 function swallowError(error) {
     console.log(error.toString());
-    this.emit("end");
+    this.emit('end');
 }
 
 /**
@@ -36,20 +36,61 @@ function swallowError(error) {
  * @returns {Gulp.Src} A gulp src funtion
  */
 function buildStylesheets(addonDirectory, options) {
+    /**
+     * Create a custom Sass importer to search node modules folder with ~ prefix
+     *
+     * @param {string} url The filepath
+     * @param {string} prev The previous filepath
+     * @param {function} done Completion callback
+     */
+    function importer(url, prev, done) {
+        var regex = /^~/;
+        if (!url.match(regex)) {
+            var cssImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
+            // if we don't escape this, then it's breaking the normal css @import
+            if (url.match(cssImportRegex)) {
+                return done({ file: `'` + url + `'` });
+            }
+
+            return done({ file: url });
+        }
+
+        var baseDirectory = fs.realpathSync(path.join(
+            addonDirectory,
+            'node_modules',
+            url.replace(regex, '')
+        ));
+
+        const jsonDirectory = path.resolve(baseDirectory, 'package.json');
+        if (fs.existsSync(jsonDirectory)) {
+            const json = require(jsonDirectory);
+            if (json.style) {
+                return done({file: path.resolve(baseDirectory, json.style)});
+            } else if (json.main && json.main.match(/.scss$/)) {
+                return done({file: path.resolve(baseDirectory, json.main)});
+            } else {
+                throw new Error(`No SCSS file found for module ${baseDirectory}}`);
+            }
+        } else {
+            throw new Error(`No package.json found for ${jsonDirectory}}`);
+        }
+    }
     const destination = path.resolve(addonDirectory, 'design');
 
     const process = gulp
         .src(path.resolve(addonDirectory, 'src/scss/*.scss'))
-        .pipe(plumber({
-            errorHandler: swallowError
-        }))
+        .pipe(
+            plumber({
+                errorHandler: swallowError
+            })
+        )
         .pipe(sourcemaps.init())
         // .pipe(
         //     stylelint({
         //         reporters: [{ formatter: 'string', console: true }]
         //     })
         // )
-        .pipe(sass())
+        .pipe(sass({importer}))
         .pipe(autoprefixer())
         .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
