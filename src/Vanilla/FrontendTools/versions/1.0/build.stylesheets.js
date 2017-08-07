@@ -3,17 +3,17 @@
  * @license MIT
  */
 
-const gulp = require("gulp");
-const path = require("path");
+const gulp = require('gulp');
+const path = require('path');
 const fs = require('fs');
 
-const plumber = require("gulp-plumber");
-const sourcemaps = require("gulp-sourcemaps");
-const cssnano = require("gulp-cssnano");
-const stylelint = require("gulp-stylelint");
-const sass = require("gulp-sass");
-const autoprefixer = require("gulp-autoprefixer");
-const size = require("gulp-size");
+const plumber = require('gulp-plumber');
+const sourcemaps = require('gulp-sourcemaps');
+const cssnano = require('gulp-cssnano');
+const stylelint = require('gulp-stylelint');
+const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
+const size = require('gulp-size');
 
 module.exports = buildStylesheets;
 
@@ -24,7 +24,7 @@ module.exports = buildStylesheets;
  */
 function swallowError(error) {
     console.log(error.toString());
-    this.emit("end");
+    this.emit('end');
 }
 
 /**
@@ -39,9 +39,9 @@ function buildStylesheets(addonDirectory, options) {
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix
      *
-     * @param {string} url
-     * @param {function} prev
-     * @param {function} done
+     * @param {string} url The filepath
+     * @param {string} prev The previous filepath
+     * @param {function} done Completion callback
      */
     function importer(url, prev, done) {
         var regex = /^~/;
@@ -49,7 +49,7 @@ function buildStylesheets(addonDirectory, options) {
             var cssImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
             // if we don't escape this, then it's breaking the normal css @import
             if (url.match(cssImportRegex)) {
-                return done({ file: "'" + url + "'" });
+                return done({ file: `'` + url + `'` });
             }
 
             return done({ file: url });
@@ -57,8 +57,8 @@ function buildStylesheets(addonDirectory, options) {
 
         var baseDirectory = fs.realpathSync(path.join(
             addonDirectory,
-            "node_modules",
-            url.replace(regex, "")
+            'node_modules',
+            url.replace(regex, '')
         ));
 
         const jsonDirectory = path.resolve(baseDirectory, 'package.json');
@@ -75,10 +75,10 @@ function buildStylesheets(addonDirectory, options) {
             throw new Error(`No package.json found for ${jsonDirectory}}`);
         }
     }
-    const destination = path.resolve(addonDirectory, "design");
+    const destination = path.resolve(addonDirectory, 'design');
 
     const process = gulp
-        .src(path.resolve(addonDirectory, "src/scss/*.scss"))
+        .src(path.resolve(addonDirectory, 'src/scss/*.scss'))
         .pipe(
             plumber({
                 errorHandler: swallowError
@@ -90,15 +90,11 @@ function buildStylesheets(addonDirectory, options) {
         //         reporters: [{ formatter: 'string', console: true }]
         //     })
         // )
-        .pipe(
-            sass({
-                importer
-            })
-        )
+        .pipe(sass({importer}))
         .pipe(autoprefixer())
         .pipe(cssnano())
-        .pipe(sourcemaps.write("."))
-        .on("error", swallowError)
+        .pipe(sourcemaps.write('.'))
+        .on('error', swallowError)
         .pipe(gulp.dest(destination));
 
     if (options.isVerboseMode) {
