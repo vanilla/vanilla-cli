@@ -36,6 +36,13 @@ function swallowError(error) {
  * @returns {Gulp.Src} A gulp src funtion
  */
 function buildStylesheets(addonDirectory, options) {
+    /**
+     * Create a custom Sass importer to search node modules folder with ~ prefix
+     *
+     * @param {string} url
+     * @param {function} prev
+     * @param {function} done
+     */
     function importer(url, prev, done) {
         var regex = /^~/;
         if (!url.match(regex)) {
