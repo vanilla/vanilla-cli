@@ -62,18 +62,25 @@ function buildStylesheets(addonDirectory, options) {
         ));
 
         const jsonDirectory = path.resolve(baseDirectory, 'package.json');
+        let fileName = "";
         if (fs.existsSync(jsonDirectory)) {
             const json = require(jsonDirectory);
             if (json.style) {
-                return done({file: path.resolve(baseDirectory, json.style)});
+                fileName = path.resolve(baseDirectory, json.style);
             } else if (json.main && json.main.match(/.scss$/)) {
-                return done({file: path.resolve(baseDirectory, json.main)});
+                fileName = path.resolve(baseDirectory, json.main);
             } else {
                 throw new Error(`No SCSS file found for module ${baseDirectory}}`);
             }
         } else {
             throw new Error(`No package.json found for ${jsonDirectory}}`);
         }
+
+        if (fileName.endsWith('.css')) {
+            fileName = fileName.slice(0, -4);
+        }
+
+        return done({file: fileName});
     }
     const destination = path.resolve(addonDirectory, 'design');
 
