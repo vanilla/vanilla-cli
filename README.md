@@ -79,8 +79,6 @@ Ensure you IDE is properly configured for [`XDebug`](https://xdebug.org/index.ph
 
 [Debugging in VsCode](https://code.visualstudio.com/Docs/editor/debugging)
 
-If you use [VSCode](https://code.visualstudio.com/) a debugging script is included called `Listen for XDebug`
-
 #### Running the Debugger
 
 Just export `XDEBUG_CONFIG` from your shell, set up your IDE to listen for XDebug, and run your vanilla command.
