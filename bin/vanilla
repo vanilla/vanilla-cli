@@ -1,11 +1,42 @@
 #!/usr/bin/env php
 <?php
+
 /**
  * @copyright 2009-2017 Vanilla Forums Inc.
  * @license MIT
  */
 
-require(__DIR__.'/../vendor/autoload.php');
+/**
+ * Loading autoload files the normal way only works for tools installed locally, not globally
+ * Inspired by PHPUnit https://github.com/sebastianbergmann/phpunit/blob/master/phpunit
+ */
+$possibleAutoloadFiles = [
+    __DIR__.'/../../../autoload.php',
+    __DIR__.'/../../autoload.php',
+    __DIR__.'/../vendor/autoload.php',
+];
+
+foreach ($possibleAutoloadFiles as $file) {
+    if (file_exists($file)) {
+        define('VANILLA_CLI_AUTOLOADER_PATH', $file);
+        break;
+    }
+}
+
+unset($file);
+
+if (!defined('VANILLA_CLI_AUTOLOADER_PATH')) {
+    fwrite(
+        STDERR,
+        'You need to set up the project dependencies using Composer:'.PHP_EOL.PHP_EOL.
+        '    composer install'.PHP_EOL.PHP_EOL.
+        'You can learn all about Composer on https://getcomposer.org/.'.PHP_EOL
+    );
+    die(1);
+}
+
+require VANILLA_CLI_AUTOLOADER_PATH;
+
 $cli = new \Vanilla\Cli\Cli();
 try {
     $cli->run();
