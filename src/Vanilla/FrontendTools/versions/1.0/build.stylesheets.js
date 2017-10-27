@@ -98,7 +98,13 @@ function buildStylesheets(addonDirectory, options) {
         //     })
         // )
         .pipe(sass({importer}))
-        .pipe(autoprefixer())
+        .pipe(autoprefixer({
+            browsers: [
+                "ie > 9",
+                "last 6 iOS versions",
+                "last 4 versions"
+            ]
+        }))
         .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
         .on('error', swallowError)
