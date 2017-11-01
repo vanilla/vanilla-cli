@@ -12,14 +12,17 @@
  */
 
 const path = require("path");
+const chalk = require("chalk");
 const fs = require("fs");
-const yargs = require("yargs");
+const { spawn, exec } = require("child_process");
 
 module.exports = {
     getJsEntries,
     parseCliOptions,
     getPackageJson,
     getSubDirectories,
+    spawnChildProcess,
+    isCommandOnPath
 };
 
 /**
@@ -141,5 +144,64 @@ function getSubDirectories(rootDirectory) {
                 }
             }
         });
+    })
+}
+
+const defaultSpawnOptions = {
+    stdio: "inherit"
+};
+
+/**
+ * Spawn a child build process. Wraps child_process.spawn
+ *
+ * @param {string} command
+ * @param {string[]} args
+ * @param {Object} options
+ * @returns Promise<boolean> Return if the process exits cleanly.
+ * @throws {Error} If the process throws and error
+ */
+async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
+    return new Promise((resolve, reject) => {
+        const task = spawn(command, args, options);
+
+        task.on("close", () => {
+            return resolve(true);
+        });
+
+        task.on("error", err => {
+            return reject(err);
+        });
+    });
+}
+
+/**
+ * Determine whethor or not a command is the user's $PATH
+ *
+ * @param {string} command The command to check for
+
+ *
+ */
+function isCommandOnPath(command) {
+    return new Promise((resolve, reject) => {
+        exec(
+            `which ${command}`,
+            (err, stdout, stderr) => {
+                if (stdout) {
+                    console.log(
+                        chalk.green(
+                            `${command} is installed globally. Proceding with build process.`
+                        )
+                    );
+                    return resolve(true);
+                }
+
+                console.log(
+                    chalk.yellow(
+                        `${command} is not installed globally. Installing it now.`
+                    )
+                );
+                reject();
+            }
+        );
     })
 }

@@ -18,7 +18,13 @@ use \Garden\Cli\Args;
  */
 class BuildCmd extends NodeCommandBase {
 
-    protected $basePath;
+    /** @var string  */
+    protected $buildToolBaseDirectory;
+
+    /** @var array */
+    private $buildConfig = [
+        'processVersion' => 'legacy'
+    ];
 
     /**
      * BuildCmd constructor.
@@ -29,221 +35,97 @@ class BuildCmd extends NodeCommandBase {
         parent::__construct($cli);
         $cli->description('Build frontend assets (scripts, stylesheets, and images).')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
-            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
-            ->opt('verbose:v', 'Show detailed build process output', false, 'bool')
-            ->opt('reset:r', 'Reinstall the build tools dependencies before building.', false, 'bool');
+            ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json');
 
-        $this->basePath = realpath(__DIR__.'/../../FrontendTools/versions/');
+        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/BuildTools';
+        $this->dependencyDirectories = [
+            $this->buildToolBaseDirectory,
+            $this->buildToolBaseDirectory.'/versions/v1/',
+            $this->buildToolBaseDirectory.'/versions/legacy/',
+        ];
     }
 
     /**
      * @inheritdoc
      */
     protected function doRun(Args $args) {
-        $isVerbose = $args->getOpt('verbose') ?: false;
-        $shouldRunReset = $args->getOpt('reset') ?: false;
+        $processOptions = [
+            $args->getOpt('watch') ?: false,
+        ];
 
-        if ($shouldRunReset) {
-            $this->runBuildReset($isVerbose);
-        }
-        $this->runBuildSetup($isVerbose);
+        $this->determineBuildProcessVersion($args);
+
         $this->spawnNodeProcessFromPackageMain(
-            $this->determineBuildProcessFolder($args),
-            $args
+            $this->getBuildProcessDirectory(),
+            $processOptions
         );
+    }
+
+    /**
+     * Determine which build process to use.
+     *
+     * Will search in the following order
+     * -> Argument passed directly the CLI
+     * -> `build.processVersion` in addon.json
+     * -> `buildProcessVersion` in addon.json
+     * -> 'legacy' as the default
+     *
+     * @param Args $args The CLI arguments
+     */
+    protected function determineBuildProcessVersion(Args $args) {
+        $cliArg = $args->getOpt('process') ?: false;
+        if ($cliArg) {
+            $this->buildConfig['processVersion'] = $cliArg;
+        } else {
+            $addonJsonPath = getcwd().'/addon.json';
+            if (file_exists($addonJsonPath)) {
+                $addonJson = json_decode(file_get_contents($addonJsonPath), true);
+                if (array_key_exists('build', $addonJson)) {
+                    $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
+                    // Check for legacy key name
+                } else if (array_key_exists('buildProcessVersion', $addonJson)){
+                    $this->buildConfig['processVersion'] = $addonJson['buildProcessVersion'];
+                }
+            }
+        }
+        // Map old values to new ones
+        if ($this->buildConfig['processVersion'] === '1.0') {
+            $this->buildConfig['processVersion'] = 'v1';
+            CliUtil::write("The build process version '1.0' has been renamed to 'v1'. Please update your build configuration");
+        }
+    }
+
+    /**
+     * Return all of the current build process versions
+     *
+     * @return array The directory names
+     */
+    protected function getPossibleBuildProcessVersions() {
+        $buildDirectories = glob($this->buildToolBaseDirectory.'/versions/*');
+        $validBuildDirectories = [];
+        foreach ($buildDirectories as $directory) {
+            $validBuildDirectories[] = basename($directory);
+        }
+        return $validBuildDirectories;
     }
 
     /**
      * Get the directory of the build process to execute
      *
-     * @param Args $args The arguments from the CLI
+     * @param string $processVersion The arguments from the CLI
      *
      * @return string
      */
-    protected function determineBuildProcessFolder(Args $args) {
-        $processVersion = $args->getOpt('process');
-
-        if (!$processVersion) {
-            $addonJsonPath = getcwd().'/addon.json';
-
-            if (file_exists($addonJsonPath)) {
-                $addonJson = json_decode(file_get_contents($addonJsonPath), true);
-                $processVersion = array_key_exists('buildProcessVersion', $addonJson) ?
-                    $addonJson['buildProcessVersion'] :
-                    'legacy';
-            } else {
-                $processVersion = 'legacy';
-            }
-        }
-
-        $path = $this->basePath.'/'.$processVersion;
-
+    protected function getBuildProcessDirectory() {
+        $processVersion = $this->buildConfig['processVersion'];
+        $path = $this->buildToolBaseDirectory.'/versions/'.$processVersion;
         if (!file_exists($path)) {
-            $buildDirectories = glob($this->basePath.'/*');
-            $validBuildDirectories = [];
-
-            foreach ($buildDirectories as $directory) {
-                $validBuildDirectories []= basename($directory);
-            }
-
-            $validString = implode(', ', $validBuildDirectories);
+            $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::error("Could not find build process version $processVersion"
-                           ."\n    Available build process versions are"
-                           ."\n$validString");
+                ."\n    Available build process versions are"
+                ."\n$buildVersions");
         }
-
         CliUtil::write("\nStarting build process version $processVersion");
         return $path;
-    }
-
-    /**
-     * Install the node dependencies for a folder.
-     *
-     * Compares the `installedVersion` in vanillabuild.json
-     * and the `version` in package.json to determine if installation is needed.
-     * Creates vanillabuild.json if it doesn't exist.
-     *
-     * @param string $directoryPath The absolute path to run the command in
-     * @param bool $shouldResetDirectory Whether or not to set the directory back to the working directory
-     * @param bool $isVerbose Determines if verbose output should be printed
-     *
-     * @return void
-     */
-    protected function installNodeDepsForFolder($directoryPath, $shouldResetDirectory = true, $isVerbose = false) {
-        $workingDirectory = getcwd();
-        $packageJsonPath = "$directoryPath/package.json";
-        $vanillaBuildPath = "$directoryPath/vanillabuild.json";
-        $folderName = basename($directoryPath);
-
-        $isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $folderName");
-
-        if (!file_exists($packageJsonPath)) {
-            CliUtil::write("Skipping install for build process version $folderName - No package.json exists");
-            return;
-        }
-
-        $packageJson = json_decode(file_get_contents($packageJsonPath), true);
-        $shouldUpdate = true;
-
-        if (file_exists($vanillaBuildPath)) {
-            $vanillaBuild = json_decode(file_get_contents($vanillaBuildPath), true);
-            $hasHadNodeUpdate = version_compare($vanillaBuild['nodeVersion'], $this->nodeVersion, '<');
-            $packageVersion = $packageJson['version'];
-            $installedVersion = $vanillaBuild['installedVersion'];
-
-            if ($hasHadNodeUpdate) {
-                CliUtil::write(
-                    "\nThis tools dependencies were installed with Node.js version {$vanillaBuild['nodeVersion']}"
-                    ."\n    Current Node.js version is {$this->nodeVersion}"
-                    ."\nBuild process version $folderName's dependencies will need to be reinstalled"
-                );
-                $this->deleteNodeDepsForFolder($directoryPath, $isVerbose);
-                $shouldUpdate = true;
-            } else {
-                $shouldUpdate = version_compare($packageVersion, $installedVersion, '>');
-            }
-
-            if ($shouldUpdate) {
-                CliUtil::write(
-                    "Installing dependencies for build process version $folderName"
-                    ."\n    Installed Version - $installedVersion"
-                    ."\n    Current Version - $packageVersion"
-                );
-            } elseif ($isVerbose) {
-                CliUtil::write(
-                    "Skipping install for build process version $folderName - Already installed"
-                    ."\n    Installed Version - $installedVersion"
-                    ."\n    Current Version - $packageVersion"
-                );
-            }
-        } else {
-            CliUtil::write("Installing dependencies for build process version $folderName - No Installed Version Found");
-        }
-
-        if ($shouldUpdate) {
-            $command = 'yarn install';
-
-            chdir($directoryPath);
-            $isVerbose ? system($command) : `$command`;
-            $shouldResetDirectory && chdir($workingDirectory);
-
-            $newVanillaBuildContents = [
-                'installedVersion' => $packageJson['version'],
-                'nodeVersion' => $this->nodeVersion,
-            ];
-
-            $isVerbose && CliUtil::write("Writing new `vanillabuild.json` file.");
-            file_put_contents('vanillabuild.json', json_encode($newVanillaBuildContents));
-        }
-    }
-
-    /**
-     * Delete the node_modules folder and vanillabuild.json file for a directory
-     *
-     * @param string $directoryPath The directory to do the deletion in.
-     * @param bool $isVerbose Whether to verbose output
-     *
-     * @return void
-     */
-    private function deleteNodeDepsForFolder($directoryPath, $isVerbose = false) {
-        $vanillaBuildPath = "$directoryPath/vanillabuild.json";
-        $folderName = basename($directoryPath);
-
-        CliUtil::write("Deleting dependencies for build process version $folderName");
-
-        $dir = realpath("$directoryPath/node_modules");
-        if (PHP_OS === 'Windows') {
-            $command = "rd /s /q {$dir}";
-        } else {
-            $command = "rm -rf {$dir}";
-        }
-
-        $isVerbose ? system($command) : `$command`;
-        unlink($vanillaBuildPath);
-        CliUtil::write("Dependencies deleted for build process version $folderName");
-    }
-
-    /**
-     * Delete all build tool installation artificts, delete dependencies to start fresh.
-     *
-     * This tool manages its own dependencies. Sometimes there can be an issue if say, node
-     * is upgraded and a native dependancy needs to be rebuilt.
-     *
-     * @param bool $isVerbose Whether to verbose output
-     *
-     * @return void
-     */
-    protected function runBuildReset($isVerbose = false) {
-        $baseToolsPath = realpath(__DIR__.'/../../FrontendTools');
-        $processVersionPaths = glob("$baseToolsPath/versions/*", \GLOB_ONLYDIR);
-
-        $this->deleteNodeDepsForFolder($baseToolsPath, $isVerbose);
-        foreach ($processVersionPaths as $processVersionPath) {
-            $this->deleteNodeDepsForFolder($processVersionPath, $isVerbose);
-        }
-    }
-
-    /**
-     * Run the setup for the build process.
-     *
-     * This will only re-install dependencies if the `installedVersion` of
-     * the vanillabuild.json file is less than the `version` in its package.json
-     *
-     * @param bool $isVerbose Whether to verbose output
-     *
-     * @return void
-     */
-    protected function runBuildSetup($isVerbose) {
-        $workingDirectory = getcwd();
-        $baseToolsPath = realpath(__DIR__.'/../../FrontendTools');
-        $processVersionPaths = glob("$baseToolsPath/versions/*", \GLOB_ONLYDIR);
-
-        $this->installNodeDepsForFolder($baseToolsPath, false, $isVerbose);
-        foreach ($processVersionPaths as $processVersionPath) {
-            $this->installNodeDepsForFolder($processVersionPath, false, $isVerbose);
-        }
-
-        // Change the working directory back
-        chdir($workingDirectory);
     }
 }

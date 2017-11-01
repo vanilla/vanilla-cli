@@ -9,7 +9,7 @@ const fs = require('fs');
 
 const plumber = require('gulp-plumber');
 const sourcemaps = require('gulp-sourcemaps');
-const cssnano = require('gulp-cssnano');
+const cleanCSS = require('gulp-clean-css');
 const stylelint = require('gulp-stylelint');
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
@@ -36,6 +36,8 @@ function swallowError(error) {
  * @returns {Gulp.Src} A gulp src funtion
  */
 function buildStylesheets(addonDirectory, options) {
+
+    console.log(addonDirectory);
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix
      *
@@ -64,7 +66,7 @@ function buildStylesheets(addonDirectory, options) {
         const jsonDirectory = path.resolve(baseDirectory, 'package.json');
         let fileName = "";
         if (fs.existsSync(jsonDirectory)) {
-            const json = require(jsonDirectory);
+            const json = JSON.parse(fs.readFileSync(jsonDirectory, 'utf8'));
             if (json.style) {
                 fileName = path.resolve(baseDirectory, json.style);
             } else if (json.main && json.main.match(/.scss$/)) {
@@ -92,11 +94,6 @@ function buildStylesheets(addonDirectory, options) {
             })
         )
         .pipe(sourcemaps.init())
-        // .pipe(
-        //     stylelint({
-        //         reporters: [{ formatter: 'string', console: true }]
-        //     })
-        // )
         .pipe(sass({importer}))
         .pipe(autoprefixer({
             browsers: [
@@ -105,14 +102,11 @@ function buildStylesheets(addonDirectory, options) {
                 "last 4 versions"
             ]
         }))
-        .pipe(cssnano())
+        .pipe(cleanCSS())
         .pipe(sourcemaps.write('.'))
         .on('error', swallowError)
-        .pipe(gulp.dest(destination));
-
-    if (options.isVerboseMode) {
-        process.pipe(size({ showFiles: true }));
-    }
+        .pipe(gulp.dest(destination))
+        .pipe(size({ showFiles: true }));
 
     return process;
 }

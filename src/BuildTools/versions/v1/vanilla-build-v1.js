@@ -14,12 +14,11 @@ const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
 
-const addonpath = argv.workingDirectory;
-const passedOptions = JSON.parse(argv.options);
+const addonpath = process.cwd();
 
 const options = {
-    isVerboseMode: passedOptions.verbose || false,
-    isWatchMode: passedOptions.watch || false
+    isVerboseMode: argv.verbose || false,
+    isWatchMode: argv.watch || false
 }
 
 gulp.task("build:js", () => {
@@ -65,3 +64,5 @@ const tasksToExecute = [
 
 gulp.task("default", tasksToExecute, () => {
 });
+
+gulp.start('default');

@@ -10,9 +10,8 @@ const fs = require("fs");
 const { spawn, exec } = require("child_process");
 const VanillaUtility = require("../../VanillaUtility");
 
-const options = JSON.parse(argv.options);
 const isVerbose = options.verbose || false;
-let command = options.watch ? "watch" : "build";
+let command = argv.watch ? "watch" : "build";
 const workingDirectory = process.cwd();
 
 // For when want to output to the CLI
@@ -66,35 +65,12 @@ function createLegacyBuildShim() {
     // Create an empty bower_components folder if bower.json exists and there isn't one.
     // This is a shim for some older build tools that don't handle this well.
     console.log()
-    const $bowerJsonPath = path.join(workingDirectory, 'bower.json');
-    const $bowerComponentsPath = path.join(workingDirectory, 'bower_components');
+    const $bowerJsonPath = path.resolve(workingDirectory, 'bower.json');
+    const $bowerComponentsPath = path.resolve(workingDirectory, 'bower_components');
 
     if (fs.existsSync($bowerJsonPath) && !fs.existsSync($bowerComponentsPath)) {
         fs.mkdirSync($bowerComponentsPath);
     }
-}
-
-/**
- * Spawn a child build process. Wraps child_process.spawn
- *
- * @param {string} command
- * @param {string[]} args
- * @param {Object} options
- * @returns Promise<boolean> Return if the process exits cleanly.
- * @throws {Error} If the process throws and error
- */
-async function spawnChildBuildProcess(command, args, options) {
-    return new Promise((resolve, reject) => {
-        const task = spawn(command, args, options);
-
-        task.on("close", () => {
-            return resolve(true);
-        });
-
-        task.on("error", err => {
-            return reject(err);
-        });
-    });
 }
 
 /**
@@ -205,7 +181,7 @@ async function runNpmTaskIfExists() {
  * @returns {undefined}
  */
 async function runGulpTaskIfExists() {
-    const gulpFilePath = path.join(workingDirectory, "gulpfile.js");
+    const gulpFilePath = path.resolve(workingDirectory, "gulpfile.js");
 
     if (!fs.existsSync(gulpFilePath)) {
         isVerbose &&
@@ -218,7 +194,7 @@ async function runGulpTaskIfExists() {
         return false;
     }
 
-    const gulpfile = require(gulpFilePath);
+    const gulpfile = JSON.parse(fs.readFileSync(gulpFilePath, 'utf8'));
     if (!gulpfile.tasks) {
         throw new Error(
             `${chalk.yellow(
@@ -296,7 +272,7 @@ async function getGruntTasks() {
  * @returns
  */
 async function runGruntTaskIfExists() {
-    const gruntfilePath = path.join(workingDirectory, "gruntfile.js");
+    const gruntfilePath = path.resolve(workingDirectory, "gruntfile.js");
 
     if (!fs.existsSync(gruntfilePath)) {
         isVerbose &&
@@ -343,12 +319,12 @@ async function runGruntTaskIfExists() {
 /**
  * Check if a package is installed and on the path
  *
- * @param {string} package The name of the package
+ * @param {string} packageName The name of the package
  * @returns {Promise}
  */
-async function checkDependencyOnPath(package) {
+async function checkDependencyOnPath(packageName) {
     return new Promise((resolve, reject) => {
-        exec(`which ${package}`, (err, stdout, stderr) => {
+        exec(`which ${packageName}`, (err, stdout, stderr) => {
             if (err) {
                 return reject(err);
             }
@@ -356,7 +332,7 @@ async function checkDependencyOnPath(package) {
             if (!stdout) {
                 return reject(
                     `Package ${chalk.yellow(
-                        package
+                        packageName
                     )} does not exist or found in your path. It is required for a legacy ruby build process.`
                 );
             }
@@ -398,7 +374,7 @@ async function runBundler() {
  * @returns {Promise}
  */
 async function runRubyTaskIfExists() {
-    const gemfilePath = path.join(workingDirectory, "Gemfile");
+    const gemfilePath = path.resolve(workingDirectory, "Gemfile");
 
     if (!fs.existsSync(gemfilePath)) {
         isVerbose &&

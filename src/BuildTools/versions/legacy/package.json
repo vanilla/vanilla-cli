@@ -2,8 +2,11 @@
     "name": "vanilla-build-legacy",
     "version": "1.0.0",
     "description": "The legacy build process. Will attempt to use build process provided by the addon",
-    "main": "index.js",
-    "dependencies": {},
+    "main": "vanilla-build-legacy.js",
+    "dependencies": {
+        "chalk": "^2.1.0",
+        "yargs": "^9.0.1"
+    },
     "devDependencies": {},
     "repository": {
         "type": "git",
