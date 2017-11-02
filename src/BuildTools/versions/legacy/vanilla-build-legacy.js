@@ -10,8 +10,10 @@ const fs = require("fs");
 const { spawn, exec } = require("child_process");
 const VanillaUtility = require("../../VanillaUtility");
 
+const options = JSON.parse(argv.options);
+
 const isVerbose = options.verbose || false;
-let command = argv.watch ? "watch" : "build";
+let command = options.watch ? "watch" : "build";
 const workingDirectory = process.cwd();
 
 // For when want to output to the CLI
@@ -168,7 +170,7 @@ async function runNpmTaskIfExists() {
             )} found. Starting script.`
         );
 
-    return await spawnChildBuildProcess(
+    return await VanillaUtility.spawnChildProcess(
         "npm",
         ["run", command, "--", "--color"],
         spawnOptions
@@ -233,7 +235,7 @@ async function runGulpTaskIfExists() {
     // Task exists. Execute it.
     await checkGlobalNodeDependancyInstalled("gulp");
     console.log(`Gulp task ${command} found. Starting gulp ${command} process`);
-    await spawnChildBuildProcess(
+    await VanillaUtility.spawnChildProcess(
         "gulp",
         [command, "--", "--color"],
         spawnOptions
@@ -313,7 +315,7 @@ async function runGruntTaskIfExists() {
     console.log(
         `Grunt task ${command} found. Starting grunt ${command} process`
     );
-    await spawnChildBuildProcess("grunt", [command, "--color"], spawnOptions);
+    await VanillaUtility.spawnChildProcess("grunt", [command, "--color"], spawnOptions);
 }
 
 /**
@@ -392,8 +394,8 @@ async function runRubyTaskIfExists() {
 
     isVerbose && console.log("Beginning Ruby build process");
     if (command === "build") {
-        await spawnChildBuildProcess("compass", ["compile"], spawnOptions);
+        await VanillaUtility.spawnChildProcess("compass", ["compile"], spawnOptions);
     } else if (command === "watch") {
-        await spawnChildBuildProcess("compass", ["watch"], spawnOptions);
+        await VanillaUtility.spawnChildProcess("compass", ["watch"], spawnOptions);
     }
 }

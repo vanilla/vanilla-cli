@@ -32,11 +32,6 @@
             "url": "git@github.com:vanilla/vanilla-cli.git"
         }
     ],
-    "scripts": {
-        "post-install-cmd": [
-            "\\Vanilla\\Cli\\Command\\BuildCmd::initialize"
-        ]
-    },
     "bin": [
         "bin/vanilla"
     ]

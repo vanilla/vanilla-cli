@@ -18,7 +18,6 @@
         "gulp": "^3.9.1",
         "gulp-autoprefixer": "^4.0.0",
         "gulp-cache": "^0.4.6",
-        "gulp-clean-css": "^3.9.0",
         "gulp-cssnano": "^2.1.2",
         "gulp-eslint": "^4.0.0",
         "gulp-imagemin": "^3.3.0",
@@ -39,9 +38,6 @@
         "webpack-stream": "^3.2.0",
         "wrappy": "^1.0.2"
     },
-    "nativeModules": [
-        "https://github.com/sass/node-sass/releases/download/v4.5.3/[%platform%]-[%architecture%]]-57_binding.node"
-    ],
     "browserslist": [
         "ie > 9",
         "last 6 iOS versions",

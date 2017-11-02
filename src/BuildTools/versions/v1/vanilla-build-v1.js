@@ -16,9 +16,11 @@ const buildAssets = require("./build.assets");
 
 const addonpath = process.cwd();
 
+const options = JSON.parse(argv.options);
+
 const options = {
-    isVerboseMode: argv.verbose || false,
-    isWatchMode: argv.watch || false
+    isVerboseMode: options.verbose || false,
+    isWatchMode: options.watch || false
 }
 
 gulp.task("build:js", () => {

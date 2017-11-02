@@ -9,7 +9,7 @@ const fs = require('fs');
 
 const plumber = require('gulp-plumber');
 const sourcemaps = require('gulp-sourcemaps');
-const cleanCSS = require('gulp-clean-css');
+const cssnano = require('gulp-cssnano');
 const stylelint = require('gulp-stylelint');
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
@@ -36,8 +36,6 @@ function swallowError(error) {
  * @returns {Gulp.Src} A gulp src funtion
  */
 function buildStylesheets(addonDirectory, options) {
-
-    console.log(addonDirectory);
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix
      *
@@ -102,7 +100,7 @@ function buildStylesheets(addonDirectory, options) {
                 "last 4 versions"
             ]
         }))
-        .pipe(cleanCSS())
+        .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
         .on('error', swallowError)
         .pipe(gulp.dest(destination))

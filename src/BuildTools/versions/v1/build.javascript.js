@@ -10,11 +10,6 @@ const path = require("path");
 const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
-
-// Manually require webpack loaders so that they can get picked up by pkg
-require("babel-loader");
-require("babel-preset-env");
-
 const gulp = require("gulp");
 
 /**
@@ -25,7 +20,7 @@ module.exports = (addonDirectory, options, entries) => {
 
     if (typeof entries === "string") {
         entries = {
-            custom: entries,
+            custom: entries
         };
     }
 
@@ -42,16 +37,16 @@ module.exports = (addonDirectory, options, entries) => {
                             loader: "babel-loader",
                             options: {
                                 presets: path.resolve(__dirname, "./node_modules/babel-preset-env"),
-                                cacheDirectory: true,
-                            },
-                        },
-                    ],
-                },
-            ],
+                                cacheDirectory: true
+                            }
+                        }
+                    ]
+                }
+            ]
         },
         resolve: {
             modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src")],
-            extensions: [".js", ".jsx"],
+            extensions: [".js", ".jsx"]
         },
         /**
          * We need to manually tell webpack where to resolve our loaders.
@@ -59,11 +54,11 @@ module.exports = (addonDirectory, options, entries) => {
          * We are expecting this tool to be used in a different directory than itself.
          */
         resolveLoader: {
-            modules: [path.resolve(__dirname, "node_modules")],
+            modules: [path.resolve(__dirname, "node_modules")]
         },
         output: {
-            filename: "[name].js",
-        },
+            filename: "[name].js"
+        }
     };
 
     const webpackDevConfig = merge(webpackBaseConfig, {
@@ -76,13 +71,13 @@ module.exports = (addonDirectory, options, entries) => {
             new webpack.NoEmitOnErrorsPlugin(),
             // Some libraries have dev enviroment specific behaviour
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify("development"),
+                "process.env.NODE_ENV": JSON.stringify("development")
             }),
 
             new webpack.LoaderOptionsPlugin({
-                debug: true,
-            }),
-        ],
+                debug: true
+            })
+        ]
     });
 
     const webpackProdConfig = merge(webpackBaseConfig, {
@@ -90,24 +85,26 @@ module.exports = (addonDirectory, options, entries) => {
         plugins: [
             // NODE_ENV should be production so that modules do not perform certain development checks
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify("production"),
+                "process.env.NODE_ENV": JSON.stringify("production")
             }),
             new webpack.optimize.UglifyJsPlugin({
-                sourceMap: true,
-            }),
-        ],
+                sourceMap: true
+            })
+        ]
     });
+
+    const configToRun = options.isWatchMode ? webpackDevConfig : webpackProdConfig;
 
     return gulp
         .src("")
         .pipe(
-            webpackStream(options.isWatchMode ? webpackDevConfig : webpackProdConfig, webpack, (err, stats) => {
+            webpackStream(configToRun, webpack, (err, stats) => {
                 console.log(
                     stats.toString({
-                        colors: true,
-                    }),
+                        colors: true
+                    })
                 );
-            }),
+            })
         )
         .pipe(gulp.dest(path.resolve(addonDirectory, "./js")));
 };
