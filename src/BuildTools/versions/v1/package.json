@@ -1,6 +1,6 @@
 {
     "name": "vanilla-build-process",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "The v1 version of vanilla the vanilla forums frontend build process. Uses gulp, webpack, node-sass, and babel.",
     "main": "vanilla-build-v1.js",
     "repository": "https://github.com/vanilla/vanilla-cli",

@@ -1,6 +1,6 @@
 {
     "name": "vanilla-build-legacy",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "The legacy build process. Will attempt to use build process provided by the addon",
     "main": "vanilla-build-legacy.js",
     "repository": {

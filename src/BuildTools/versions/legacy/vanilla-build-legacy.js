@@ -60,7 +60,7 @@ run()
         console.error(
             `${chalk.red("There was an error in the build process\n")}`
         );
-        console.error(err);
+        console.log(err);
     });
 
 function createLegacyBuildShim() {
@@ -152,6 +152,16 @@ async function runNpmTaskIfExists() {
         return false;
     }
 
+    if (!packageJson.scripts) {
+        isVerbose &&
+            console.log(
+                `Scripts not found in ${chalk.cyan(
+                    `${workingDirectory}/package.json`
+                )}. Skipping npm tasks check.`
+            );
+        return false;
+    }
+
     if (!packageJson.scripts[command]) {
         isVerbose &&
             console.log(
@@ -196,7 +206,7 @@ async function runGulpTaskIfExists() {
         return false;
     }
 
-    const gulpfile = JSON.parse(fs.readFileSync(gulpFilePath, 'utf8'));
+    const gulpfile = require(gulpFilePath);
     if (!gulpfile.tasks) {
         throw new Error(
             `${chalk.yellow(
