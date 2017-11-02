@@ -93,7 +93,13 @@ abstract class NodeCommandBase extends Command {
      */
     protected function spawnNodeProcessFromFile($nodeFilePath, $options = []) {
         $debugArg = $this->isDebugMode ? '--inspect --inspect-brk --nolazy' : '';
+
+        $verboseOptions = [
+            'verbose' => $this->isVerbose ?: false,
+        ];
+        $options = array_merge($verboseOptions, $options);
         $serializedOptions = json_encode($options);
+
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedOptions'";
         system($command);
     }

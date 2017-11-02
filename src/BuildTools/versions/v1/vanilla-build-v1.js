@@ -7,6 +7,7 @@ const path = require("path");
 const gulp = require("gulp");
 const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
+const chalk = require('chalk');
 
 const utility = require("../../utility");
 
@@ -57,14 +58,11 @@ gulp.task("watch", ["build"], () => {
     gulp.watch(path.resolve(addonpath, "src/**/*.scss"), ["build:styles"]);
     gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
+
+    console.log("\n" + chalk.green('Watching for changes in src files...'));
 });
 
 
-const tasksToExecute = [
-    options.isWatchMode ? "watch" : "build"
-]
+const taskToExecute = options.isWatchMode ? "watch" : "build";
 
-gulp.task("default", tasksToExecute, () => {
-});
-
-gulp.start('default');
+gulp.start(taskToExecute);

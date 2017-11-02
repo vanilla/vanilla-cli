@@ -50,7 +50,7 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function doRun(Args $args) {
         $processOptions = [
-            $args->getOpt('watch') ?: false,
+            'watch' => $args->getOpt('watch') ?: false,
         ];
 
         $this->determineBuildProcessVersion($args);
