@@ -8,7 +8,7 @@ const chalk = require("chalk");
 const path = require("path");
 const fs = require("fs");
 const { spawn, exec } = require("child_process");
-const VanillaUtility = require("../../VanillaUtility");
+const utility = require("../../utility");
 
 const options = JSON.parse(argv.options);
 
@@ -140,7 +140,7 @@ async function checkGlobalNodeDependancyInstalled(packageName) {
  * @returns {boolean} Whether or not the task existed
  */
 async function runNpmTaskIfExists() {
-    const packageJson = await VanillaUtility.getPackageJson(workingDirectory);
+    const packageJson = await utility.getPackageJson(workingDirectory);
 
     if (!packageJson) {
         isVerbose &&
@@ -170,7 +170,7 @@ async function runNpmTaskIfExists() {
             )} found. Starting script.`
         );
 
-    return await VanillaUtility.spawnChildProcess(
+    return await utility.spawnChildProcess(
         "npm",
         ["run", command, "--", "--color"],
         spawnOptions
@@ -235,7 +235,7 @@ async function runGulpTaskIfExists() {
     // Task exists. Execute it.
     await checkGlobalNodeDependancyInstalled("gulp");
     console.log(`Gulp task ${command} found. Starting gulp ${command} process`);
-    await VanillaUtility.spawnChildProcess(
+    await utility.spawnChildProcess(
         "gulp",
         [command, "--", "--color"],
         spawnOptions
@@ -315,7 +315,7 @@ async function runGruntTaskIfExists() {
     console.log(
         `Grunt task ${command} found. Starting grunt ${command} process`
     );
-    await VanillaUtility.spawnChildProcess("grunt", [command, "--color"], spawnOptions);
+    await utility.spawnChildProcess("grunt", [command, "--color"], spawnOptions);
 }
 
 /**
@@ -394,8 +394,8 @@ async function runRubyTaskIfExists() {
 
     isVerbose && console.log("Beginning Ruby build process");
     if (command === "build") {
-        await VanillaUtility.spawnChildProcess("compass", ["compile"], spawnOptions);
+        await utility.spawnChildProcess("compass", ["compile"], spawnOptions);
     } else if (command === "watch") {
-        await VanillaUtility.spawnChildProcess("compass", ["watch"], spawnOptions);
+        await utility.spawnChildProcess("compass", ["watch"], spawnOptions);
     }
 }

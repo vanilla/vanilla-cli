@@ -1,7 +1,7 @@
 /**
  * @copyright 2009-2017 Vanilla Forums Inc.
  * @license MIT
- * @module VanillaUtility
+ * @module utility
  */
 
 const path = require("path");
