@@ -98,7 +98,7 @@ const defaultSpawnOptions = {
  * @throws {Error} If the process throws and error
  */
 async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
-    return new Promise((resolve, reject) => {r
+    return new Promise((resolve, reject) => {
         const task = spawn(command, args, options);
 
         task.on("close", () => {
