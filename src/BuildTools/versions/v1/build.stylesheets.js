@@ -11,11 +11,8 @@ const plumber = require('gulp-plumber');
 const sourcemaps = require('gulp-sourcemaps');
 const cssnano = require('gulp-cssnano');
 const stylelint = require('gulp-stylelint');
-const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const size = require('gulp-size');
-
-module.exports = buildStylesheets;
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
@@ -35,7 +32,52 @@ function swallowError(error) {
  *
  * @returns {Gulp.Src} A gulp src funtion
  */
-function buildStylesheets(addonDirectory, options) {
+module.exports = (addonDirectory, options) => {
+    const destination = path.resolve(addonDirectory, 'design');
+
+    function makeProcess() {
+        return gulp
+            .src(getSourceFiles())
+            .pipe(
+                plumber({
+                    errorHandler: swallowError
+                })
+            )
+            .pipe(sourcemaps.init())
+            .pipe(getStyleSheetBuilder())
+            .pipe(autoprefixer({
+                browsers: [
+                    "ie > 9",
+                    "last 6 iOS versions",
+                    "last 4 versions"
+                ]
+            }))
+            .pipe(cssnano())
+            .pipe(sourcemaps.write('.'))
+            .on('error', swallowError)
+            .pipe(gulp.dest(destination))
+            .pipe(size({ showFiles: true }));
+    }
+
+    function getSourceFiles() {
+        if (options.cssTool === 'less') {
+            const srcDir = path.resolve(addonDirectory, 'src');
+            return [path.join(srcDir, 'less/**/*.less'), '!' + path.join(srcDir, 'less/**/_*.less')];
+        } else {
+            return path.resolve(addonDirectory, 'src/scss/*.scss')
+        }
+    }
+
+    function getStyleSheetBuilder() {
+        if (options.cssTool === 'less') {
+            const less = require('gulp-less');
+            return less();
+        } else {
+            const sass = require('gulp-sass');
+            return sass({importer});
+        }
+    }
+
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix
      *
@@ -82,29 +124,6 @@ function buildStylesheets(addonDirectory, options) {
 
         return done({file: fileName});
     }
-    const destination = path.resolve(addonDirectory, 'design');
 
-    const process = gulp
-        .src(path.resolve(addonDirectory, 'src/scss/*.scss'))
-        .pipe(
-            plumber({
-                errorHandler: swallowError
-            })
-        )
-        .pipe(sourcemaps.init())
-        .pipe(sass({importer}))
-        .pipe(autoprefixer({
-            browsers: [
-                "ie > 9",
-                "last 6 iOS versions",
-                "last 4 versions"
-            ]
-        }))
-        .pipe(cssnano())
-        .pipe(sourcemaps.write('.'))
-        .on('error', swallowError)
-        .pipe(gulp.dest(destination))
-        .pipe(size({ showFiles: true }));
-
-    return process;
+    return makeProcess();
 }

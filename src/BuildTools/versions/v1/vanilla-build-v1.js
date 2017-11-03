@@ -21,7 +21,8 @@ const passedOptions = JSON.parse(argv.options);
 
 const options = {
     isVerboseMode: passedOptions.verbose || false,
-    isWatchMode: passedOptions.watch || false
+    isWatchMode: passedOptions.watch || false,
+    cssTool: passedOptions.cssTool || 'scss',
 }
 
 gulp.task("build:js", () => {
