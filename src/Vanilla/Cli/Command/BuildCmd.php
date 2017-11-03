@@ -21,7 +21,7 @@ class BuildCmd extends NodeCommandBase {
     /** @var string  */
     protected $buildToolBaseDirectory;
 
-    /** @var array The build configuration options
+    /** @var array The build configuration options.
      *
      * - processVersion: 'legacy' | '1.0'
      * - cssTool: 'scss' | 'less'
@@ -34,7 +34,7 @@ class BuildCmd extends NodeCommandBase {
     /**
      * BuildCmd constructor.
      *
-     * @param Cli $cli The CLI instance
+     * @param Cli $cli The CLI instance.
      */
     public function __construct(Cli $cli) {
         parent::__construct($cli);
@@ -93,7 +93,7 @@ class BuildCmd extends NodeCommandBase {
     /**
      * Determine build options passed as args. These override anything else.
      *
-     * @param Args $args The CLI arguments
+     * @param Args $args The CLI arguments.
      */
     protected function getBuildOptionsFromArgs(Args $args) {
         $processArg = $args->getOpt('process') ?: false;
@@ -109,11 +109,11 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
-     * Validate that options passed are compatible with each other
+     * Validate that options passed are compatible with each other.
      *
      * Currently checks
-     * - that `--csstool` is v1 only.
-     * - Maps `processVersion` 1.0 -> v1
+     * - that csstool is v1 only.
+     * - Maps `processVersion` 1.0 -> v1.
      *
      * @param Args $args
      */
@@ -134,7 +134,7 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
-     * Return all of the current build process versions
+     * Return all of the current build process versions.
      *
      * @return array The directory names
      */
@@ -148,9 +148,9 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
-     * Get the directory of the build process to execute
+     * Get the directory of the build process to execute.
      *
-     * @param string $processVersion The arguments from the CLI
+     * @param string $processVersion The arguments from the CLI.
      *
      * @return string
      */
