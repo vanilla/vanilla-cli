@@ -1,5 +1,5 @@
 {
-    "name": "vanilla-build-legacy",
+    "name": "vanilla-cli-build-legacy",
     "version": "1.1.0",
     "description": "The legacy build process. Will attempt to use build process provided by the addon",
     "main": "vanilla-build-legacy.js",

@@ -43,11 +43,11 @@ class BuildCmd extends NodeCommandBase {
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string');
 
-        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/BuildTools';
+        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
             $this->buildToolBaseDirectory,
-            $this->buildToolBaseDirectory.'/versions/v1/',
-            $this->buildToolBaseDirectory.'/versions/legacy/',
+            $this->buildToolBaseDirectory.'/BuildProcess/v1/',
+            $this->buildToolBaseDirectory.'/BuildProcess/legacy/',
         ];
     }
 
@@ -75,23 +75,14 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJsonBuildOptions() {
-        $addonJsonPath = getcwd().'/addon.json';
+    protected function getAddonJson() {
+        $addonJson = CliUtil::getAddonJsonForCWD();
 
-        if (file_exists($addonJsonPath)) {
-            $addonJson = json_decode(file_get_contents($addonJsonPath), true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                CliUtil::write("\n\nThere were some issues parsing your addon.json file. Please ensure that it is valid JSON");
-                CliUtil::error("\nError Type: ".json_last_error_msg());
-            }
-
-            // Get the build key and map the old key name
-            if (array_key_exists('build', $addonJson)) {
-                $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
-            } else if (array_key_exists('buildProcessVersion', $addonJson)){
-                $this->buildConfig['processVersion'] = $addonJson['buildProcessVersion'];
-            }
+        // Get the build key and map the old key name
+        if (array_key_exists('build', $addonJson)) {
+            $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
+        } else if (array_key_exists('buildProcessVersion', $addonJson)){
+            $this->buildConfig['processVersion'] = $addonJson['buildProcessVersion'];
         }
     }
 
@@ -144,7 +135,7 @@ class BuildCmd extends NodeCommandBase {
      * @return array The directory names
      */
     protected function getPossibleBuildProcessVersions() {
-        $buildDirectories = glob($this->buildToolBaseDirectory.'/versions/*');
+        $buildDirectories = glob($this->buildToolBaseDirectory.'/BuildProcess/*');
         $validBuildDirectories = [];
         foreach ($buildDirectories as $directory) {
             $validBuildDirectories[] = basename($directory);
@@ -161,7 +152,7 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function getBuildProcessDirectory() {
         $processVersion = $this->buildConfig['processVersion'];
-        $path = $this->buildToolBaseDirectory.'/versions/'.$processVersion;
+        $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
         if (!file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::error("Could not find build process version $processVersion"

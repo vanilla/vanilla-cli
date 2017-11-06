@@ -177,7 +177,7 @@ abstract class NodeCommandBase extends Command {
      */
     private function checkNeedsInstallation($directoryPath) {
         $packageJsonPath = "$directoryPath/package.json";
-        $vanillaBuildPath = "$directoryPath/vanillabuild.json";
+        $vanillaCliJsonPath = "$directoryPath/vanillacli.json";
         $folderName = basename($directoryPath);
 
         $this->isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $folderName");
@@ -187,25 +187,25 @@ abstract class NodeCommandBase extends Command {
             return;
         }
 
-        if (!file_exists($vanillaBuildPath)) {
+        if (!file_exists($vanillaCliJsonPath)) {
             $reason = "Installing dependencies for build process version $folderName - No Installed Version Found";
             $this->installDependenciesForDirectory($directoryPath, $reason);
             return;
         }
 
         $packageJson = json_decode(file_get_contents($packageJsonPath), true);
-        $vanillaBuildJson = json_decode(file_get_contents($vanillaBuildPath), true);
-        $installedVersion = $vanillaBuildJson['installedVersion'];
+        $vanillaCliJson = json_decode(file_get_contents($vanillaCliJsonPath), true);
+        $installedVersion = $vanillaCliJson['installedVersion'];
         $packageVersion = $packageJson['version'];
 
         $currentNodeVersion = self::getCurrentNodeVersion();
 
-        $hasHadNodeUpdate = version_compare($vanillaBuildJson['nodeVersion'], $currentNodeVersion, '<');
+        $hasHadNodeUpdate = version_compare($vanillaCliJson['nodeVersion'], $currentNodeVersion, '<');
         $hasHadPackageUpdate = version_compare($packageVersion, $installedVersion, '>');
 
         if ($hasHadNodeUpdate) {
             CliUtil::write(
-                "\nThis tool's dependencies were installed with Node.js version {$vanillaBuildJson['nodeVersion']}"
+                "\nThis tool's dependencies were installed with Node.js version {$vanillaCliJson['nodeVersion']}"
                 ."\n    Current Node.js version is {$currentNodeVersion}"
                 ."\nBuild process version $folderName's dependencies will need to be reinstalled"
             );
@@ -232,9 +232,9 @@ abstract class NodeCommandBase extends Command {
     /**
      * Install the node dependencies for a folder.
      *
-     * Compares the `installedVersion` in vanillabuild.json
+     * Compares the `installedVersion` in vanillacli.json
      * and the `version` in package.json to determine if installation is needed.
-     * Creates vanillabuild.json if it doesn't exist.
+     * Creates vanillacli.json if it doesn't exist.
      *
      * @param string $directoryPath The absolute path to run the command in
      * @param string $reason Why the dependencies are being installed
@@ -255,14 +255,14 @@ abstract class NodeCommandBase extends Command {
     }
 
     /**
-     * Delete the node_modules folder and vanillabuild.json file for a directory
+     * Delete the node_modules folder and vanillacli.json file for a directory
      *
      * @param string $directoryPath The directory to do the deletion in.
      *
      * @return void
      */
     private function deleteDependenciesForDirectory($directoryPath) {
-        $vanillaBuildPath = "$directoryPath/vanillabuild.json";
+        $vanillaCliJsonPath = "$directoryPath/vanillacli.json";
         $folderName = basename($directoryPath);
 
         CliUtil::write("Deleting dependencies for build process version $folderName");
@@ -276,14 +276,14 @@ abstract class NodeCommandBase extends Command {
 
         $this->isVerbose ? system($command) : `$command`;
 
-        if (file_exists($vanillaBuildPath)) {
-            unlink($vanillaBuildPath);
+        if (file_exists($vanillaCliJsonPath)) {
+            unlink($vanillaCliJsonPath);
         }
         CliUtil::write("Dependencies deleted for build process version $folderName");
     }
 
     /**
-     * Write a vanillaBuild.json file to the directory containing details of the installation.
+     * Write a vanillacli.json file to the directory containing details of the installation.
      *
      * Made up of:
      * - installedVersion: The version of that build process that dependencies have been installed for.
@@ -294,14 +294,14 @@ abstract class NodeCommandBase extends Command {
     private function writeInstallationVersions($directoryPath) {
         $packageJson = json_decode(file_get_contents($directoryPath.'/package.json'), true);
         echo $directoryPath.'/package.json';
-        $vanillaBuildJsonPath = "$directoryPath/vanillabuild.json";
+        $vanillaCliJsonPath = "$directoryPath/vanillacli.json";
 
-        $newVanillaBuildContents = [
+        $newVanillaCliContents = [
             'installedVersion' => $packageJson['version'],
             'nodeVersion' => self::getCurrentNodeVersion(),
         ];
 
-        $this->isVerbose && CliUtil::write("Writing new `vanillabuild.json` file.");
-        file_put_contents($vanillaBuildJsonPath, json_encode($newVanillaBuildContents));
+        $this->isVerbose && CliUtil::write("Writing new `vanillacli.json` file.");
+        file_put_contents($vanillaCliJsonPath, json_encode($newVanillaCliContents));
     }
 }
