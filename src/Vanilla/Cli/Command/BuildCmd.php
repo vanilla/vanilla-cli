@@ -81,6 +81,11 @@ class BuildCmd extends NodeCommandBase {
         if (file_exists($addonJsonPath)) {
             $addonJson = json_decode(file_get_contents($addonJsonPath), true);
 
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                CliUtil::write("\n\nThere were some issues parsing your addon.json file. Please ensure that it is valid JSON");
+                CliUtil::error("\nError Type: ".json_last_error_msg());
+            }
+
             // Get the build key and map the old key name
             if (array_key_exists('build', $addonJson)) {
                 $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
