@@ -21,16 +21,16 @@ abstract class NodeCommandBase extends Command {
     const MINIMUM_NODE_VERSION = '8.0.0';
 
     /** @var array */
-    public $dependencyDirectories = [];
+    protected $dependencyDirectories = [];
 
     /** @var string The absolute directory of the tools installation */
-    public $toolRealPath;
+    protected $toolRealPath;
 
     /** @var bool */
-    public $isDebugMode = false;
+    protected $isDebugMode = false;
 
     /** @var bool */
-    public $isVerbose = false;
+    protected $isVerbose = false;
 
     /**
      * NodeCommandBase constructor.
@@ -133,7 +133,7 @@ abstract class NodeCommandBase extends Command {
      * @return string
      * @throws Exception If Node & Yarn are not installed
      */
-    public static function getCurrentNodeVersion() {
+    protected static function getCurrentNodeVersion() {
         $nodeExists = `which node`;
         $yarnExists = `which yarn`;
 

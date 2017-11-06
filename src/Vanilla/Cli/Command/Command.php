@@ -16,17 +16,13 @@ use \Garden\Cli\Args;
  */
 abstract class Command {
 
-    /** @var bool */
-    public $isVerbose = false;
-
     /**
      * Command constructor.
      *
      * @param Cli $cli
      */
     public function __construct(Cli $cli) {
-        $cli
-            ->command($this->getName());
+        $cli->command($this->getName());
     }
 
     /**
