@@ -64,7 +64,7 @@ function buildStylesheets(addonDirectory, options) {
         const jsonDirectory = path.resolve(baseDirectory, 'package.json');
         let fileName = "";
         if (fs.existsSync(jsonDirectory)) {
-            const json = require(jsonDirectory);
+            const json = JSON.parse(fs.readFileSync(jsonDirectory, 'utf8'));
             if (json.style) {
                 fileName = path.resolve(baseDirectory, json.style);
             } else if (json.main && json.main.match(/.scss$/)) {
@@ -92,11 +92,6 @@ function buildStylesheets(addonDirectory, options) {
             })
         )
         .pipe(sourcemaps.init())
-        // .pipe(
-        //     stylelint({
-        //         reporters: [{ formatter: 'string', console: true }]
-        //     })
-        // )
         .pipe(sass({importer}))
         .pipe(autoprefixer({
             browsers: [
@@ -108,11 +103,8 @@ function buildStylesheets(addonDirectory, options) {
         .pipe(cssnano())
         .pipe(sourcemaps.write('.'))
         .on('error', swallowError)
-        .pipe(gulp.dest(destination));
-
-    if (options.isVerboseMode) {
-        process.pipe(size({ showFiles: true }));
-    }
+        .pipe(gulp.dest(destination))
+        .pipe(size({ showFiles: true }));
 
     return process;
 }

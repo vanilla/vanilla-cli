@@ -8,9 +8,10 @@ const chalk = require("chalk");
 const path = require("path");
 const fs = require("fs");
 const { spawn, exec } = require("child_process");
-const VanillaUtility = require("../../VanillaUtility");
+const utility = require("../../utility");
 
 const options = JSON.parse(argv.options);
+
 const isVerbose = options.verbose || false;
 let command = options.watch ? "watch" : "build";
 const workingDirectory = process.cwd();
@@ -59,42 +60,19 @@ run()
         console.error(
             `${chalk.red("There was an error in the build process\n")}`
         );
-        console.error(err);
+        console.log(err);
     });
 
 function createLegacyBuildShim() {
     // Create an empty bower_components folder if bower.json exists and there isn't one.
     // This is a shim for some older build tools that don't handle this well.
     console.log()
-    const $bowerJsonPath = path.join(workingDirectory, 'bower.json');
-    const $bowerComponentsPath = path.join(workingDirectory, 'bower_components');
+    const $bowerJsonPath = path.resolve(workingDirectory, 'bower.json');
+    const $bowerComponentsPath = path.resolve(workingDirectory, 'bower_components');
 
     if (fs.existsSync($bowerJsonPath) && !fs.existsSync($bowerComponentsPath)) {
         fs.mkdirSync($bowerComponentsPath);
     }
-}
-
-/**
- * Spawn a child build process. Wraps child_process.spawn
- *
- * @param {string} command
- * @param {string[]} args
- * @param {Object} options
- * @returns Promise<boolean> Return if the process exits cleanly.
- * @throws {Error} If the process throws and error
- */
-async function spawnChildBuildProcess(command, args, options) {
-    return new Promise((resolve, reject) => {
-        const task = spawn(command, args, options);
-
-        task.on("close", () => {
-            return resolve(true);
-        });
-
-        task.on("error", err => {
-            return reject(err);
-        });
-    });
 }
 
 /**
@@ -162,13 +140,23 @@ async function checkGlobalNodeDependancyInstalled(packageName) {
  * @returns {boolean} Whether or not the task existed
  */
 async function runNpmTaskIfExists() {
-    const packageJson = await VanillaUtility.getPackageJson(workingDirectory);
+    const packageJson = await utility.getPackageJson(workingDirectory);
 
     if (!packageJson) {
         isVerbose &&
             console.log(
                 `No ${chalk.yellow("package.json")} found in ${chalk.cyan(
                     workingDirectory
+                )}. Skipping npm tasks check.`
+            );
+        return false;
+    }
+
+    if (!packageJson.scripts) {
+        isVerbose &&
+            console.log(
+                `Scripts not found in ${chalk.cyan(
+                    `${workingDirectory}/package.json`
                 )}. Skipping npm tasks check.`
             );
         return false;
@@ -192,7 +180,7 @@ async function runNpmTaskIfExists() {
             )} found. Starting script.`
         );
 
-    return await spawnChildBuildProcess(
+    return await utility.spawnChildProcess(
         "npm",
         ["run", command, "--", "--color"],
         spawnOptions
@@ -205,7 +193,7 @@ async function runNpmTaskIfExists() {
  * @returns {undefined}
  */
 async function runGulpTaskIfExists() {
-    const gulpFilePath = path.join(workingDirectory, "gulpfile.js");
+    const gulpFilePath = path.resolve(workingDirectory, "gulpfile.js");
 
     if (!fs.existsSync(gulpFilePath)) {
         isVerbose &&
@@ -257,7 +245,7 @@ async function runGulpTaskIfExists() {
     // Task exists. Execute it.
     await checkGlobalNodeDependancyInstalled("gulp");
     console.log(`Gulp task ${command} found. Starting gulp ${command} process`);
-    await spawnChildBuildProcess(
+    await utility.spawnChildProcess(
         "gulp",
         [command, "--", "--color"],
         spawnOptions
@@ -296,7 +284,7 @@ async function getGruntTasks() {
  * @returns
  */
 async function runGruntTaskIfExists() {
-    const gruntfilePath = path.join(workingDirectory, "gruntfile.js");
+    const gruntfilePath = path.resolve(workingDirectory, "gruntfile.js");
 
     if (!fs.existsSync(gruntfilePath)) {
         isVerbose &&
@@ -337,18 +325,18 @@ async function runGruntTaskIfExists() {
     console.log(
         `Grunt task ${command} found. Starting grunt ${command} process`
     );
-    await spawnChildBuildProcess("grunt", [command, "--color"], spawnOptions);
+    await utility.spawnChildProcess("grunt", [command, "--color"], spawnOptions);
 }
 
 /**
  * Check if a package is installed and on the path
  *
- * @param {string} package The name of the package
+ * @param {string} packageName The name of the package
  * @returns {Promise}
  */
-async function checkDependencyOnPath(package) {
+async function checkDependencyOnPath(packageName) {
     return new Promise((resolve, reject) => {
-        exec(`which ${package}`, (err, stdout, stderr) => {
+        exec(`which ${packageName}`, (err, stdout, stderr) => {
             if (err) {
                 return reject(err);
             }
@@ -356,7 +344,7 @@ async function checkDependencyOnPath(package) {
             if (!stdout) {
                 return reject(
                     `Package ${chalk.yellow(
-                        package
+                        packageName
                     )} does not exist or found in your path. It is required for a legacy ruby build process.`
                 );
             }
@@ -398,7 +386,7 @@ async function runBundler() {
  * @returns {Promise}
  */
 async function runRubyTaskIfExists() {
-    const gemfilePath = path.join(workingDirectory, "Gemfile");
+    const gemfilePath = path.resolve(workingDirectory, "Gemfile");
 
     if (!fs.existsSync(gemfilePath)) {
         isVerbose &&
@@ -416,8 +404,8 @@ async function runRubyTaskIfExists() {
 
     isVerbose && console.log("Beginning Ruby build process");
     if (command === "build") {
-        await spawnChildBuildProcess("compass", ["compile"], spawnOptions);
+        await utility.spawnChildProcess("compass", ["compile"], spawnOptions);
     } else if (command === "watch") {
-        await spawnChildBuildProcess("compass", ["watch"], spawnOptions);
+        await utility.spawnChildProcess("compass", ["watch"], spawnOptions);
     }
 }

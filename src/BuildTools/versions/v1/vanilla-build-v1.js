@@ -7,14 +7,16 @@ const path = require("path");
 const gulp = require("gulp");
 const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
+const chalk = require('chalk');
 
-const VanillaUtility = require("../../VanillaUtility");
+const utility = require("../../utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
 
-const addonpath = argv.workingDirectory;
+const addonpath = process.cwd();
+
 const passedOptions = JSON.parse(argv.options);
 
 const options = {
@@ -23,7 +25,7 @@ const options = {
 }
 
 gulp.task("build:js", () => {
-    return VanillaUtility.getJsEntries(addonpath).then(jsfiles => {
+    return utility.getJsEntries(addonpath).then(jsfiles => {
         return buildJs(addonpath, options, jsfiles);
     });
 });
@@ -56,12 +58,11 @@ gulp.task("watch", ["build"], () => {
     gulp.watch(path.resolve(addonpath, "src/**/*.scss"), ["build:styles"]);
     gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
+
+    console.log("\n" + chalk.green('Watching for changes in src files...'));
 });
 
 
-const tasksToExecute = [
-    options.isWatchMode ? "watch" : "build"
-]
+const taskToExecute = options.isWatchMode ? "watch" : "build";
 
-gulp.task("default", tasksToExecute, () => {
-});
+gulp.start(taskToExecute);

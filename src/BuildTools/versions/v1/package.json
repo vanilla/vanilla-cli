@@ -1,8 +1,8 @@
 {
     "name": "vanilla-build-process",
-    "version": "1.1.0",
-    "description": "The 1.0 version of vanilla the vanilla forums frontend build process. Uses gulp, webpack, node-sass, and babel.",
-    "main": "index.js",
+    "version": "1.2.1",
+    "description": "The v1 version of vanilla the vanilla forums frontend build process. Uses gulp, webpack, node-sass, and babel.",
+    "main": "vanilla-build-v1.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
@@ -35,7 +35,8 @@
         "uglify": "^0.1.5",
         "webpack": "^3.0.0",
         "webpack-merge": "^4.1.0",
-        "webpack-stream": "^3.2.0"
+        "webpack-stream": "^3.2.0",
+        "wrappy": "^1.0.2"
     },
     "browserslist": [
         "ie > 9",

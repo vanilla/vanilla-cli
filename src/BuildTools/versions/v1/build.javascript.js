@@ -10,13 +10,14 @@ const path = require("path");
 const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
-
 const gulp = require("gulp");
 
 /**
- * create the javascript build process
+ * Create the javascript build process
  */
 module.exports = (addonDirectory, options, entries) => {
+    console.log("Attempting to resolve CLI deps in" + path.resolve(__dirname, "node_modules"));
+
     if (typeof entries === "string") {
         entries = {
             custom: entries
@@ -31,19 +32,29 @@ module.exports = (addonDirectory, options, entries) => {
                     test: /\.jsx?$/,
                     include: [path.resolve(addonDirectory, "./src")],
                     exclude: ["node_modules"],
-                    use: [{
-                        loader: 'babel-loader',
-                        options: {
-                            presets: path.resolve(__dirname, './node_modules/babel-preset-env'),
-                            cacheDirectory: true
+                    use: [
+                        {
+                            loader: "babel-loader",
+                            options: {
+                                presets: path.resolve(__dirname, "./node_modules/babel-preset-env"),
+                                cacheDirectory: true
+                            }
                         }
-                    }]
+                    ]
                 }
             ]
         },
         resolve: {
             modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src")],
             extensions: [".js", ".jsx"]
+        },
+        /**
+         * We need to manually tell webpack where to resolve our loaders.
+         * This is because process.cwd() probably won't contain the loaders we need
+         * We are expecting this tool to be used in a different directory than itself.
+         */
+        resolveLoader: {
+            modules: [path.resolve(__dirname, "node_modules")]
         },
         output: {
             filename: "[name].js"
@@ -82,22 +93,18 @@ module.exports = (addonDirectory, options, entries) => {
         ]
     });
 
+    const configToRun = options.isWatchMode ? webpackDevConfig : webpackProdConfig;
+
     return gulp
         .src("")
         .pipe(
-            webpackStream(
-                options.isWatchMode ? webpackDevConfig : webpackProdConfig,
-                webpack,
-                (err, stats) => {
-                    if (options.isVerboseMode) {
-                        console.log(
-                            stats.toString({
-                                colors: true
-                            })
-                        );
-                    }
-                }
-            )
+            webpackStream(configToRun, webpack, (err, stats) => {
+                console.log(
+                    stats.toString({
+                        colors: true
+                    })
+                );
+            })
         )
         .pipe(gulp.dest(path.resolve(addonDirectory, "./js")));
 };
