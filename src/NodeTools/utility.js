@@ -12,6 +12,7 @@ module.exports = {
     getJsEntries,
     getPackageJson,
     spawnChildProcess,
+    pluralize,
 };
 
 /**
@@ -110,3 +111,8 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
         });
     });
 }
+
+function pluralize(word, count) {
+    const plural = count === 1 ? word : word + 's';
+    return plural;
+};

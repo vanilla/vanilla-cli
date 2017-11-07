@@ -63,7 +63,6 @@ abstract class NodeCommandBase extends Command {
                 $this->deleteDependenciesForDirectory($directory);
             }
             $this->checkNeedsInstallation($directory);
-            echo $directory;
         }
 
         $this->doRun($args);
@@ -101,7 +100,7 @@ abstract class NodeCommandBase extends Command {
         $serializedOptions = json_encode($options);
 
         $command = "node $debugArg '$nodeFilePath' --color --options '$serializedOptions'";
-        system($command);
+        passthru($command);
     }
 
     /**
@@ -119,7 +118,7 @@ abstract class NodeCommandBase extends Command {
         $scriptPath = realpath("$directory/$command");
 
         if (!$command || !$scriptPath ) {
-            CliUtil::error("Command not found.");
+            CliUtil::error("Command not found in `main` of $directory/package.json.");
         }
 
         $this->spawnNodeProcessFromFile($scriptPath, $options);
@@ -178,17 +177,20 @@ abstract class NodeCommandBase extends Command {
     private function checkNeedsInstallation($directoryPath) {
         $packageJsonPath = "$directoryPath/package.json";
         $vanillaCliJsonPath = "$directoryPath/vanillacli.json";
+        $parentFolderName = basename(realpath($directoryPath.'/../'));
         $folderName = basename($directoryPath);
 
-        $this->isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $folderName");
+        $displayName = $parentFolderName.'/'.$folderName;
+
+        $this->isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $displayName");
 
         if (!file_exists($packageJsonPath)) {
-            CliUtil::write("Skipping install for build process version $folderName - No package.json exists");
+            CliUtil::error("Unable to install dependencies for node process at $directoryPath - No package.json exists");
             return;
         }
 
         if (!file_exists($vanillaCliJsonPath)) {
-            $reason = "Installing dependencies for build process version $folderName - No Installed Version Found";
+            $reason = "Installing dependencies for node process $displayName - No Installed Version Found";
             $this->installDependenciesForDirectory($directoryPath, $reason);
             return;
         }
@@ -207,13 +209,13 @@ abstract class NodeCommandBase extends Command {
             CliUtil::write(
                 "\nThis tool's dependencies were installed with Node.js version {$vanillaCliJson['nodeVersion']}"
                 ."\n    Current Node.js version is {$currentNodeVersion}"
-                ."\nBuild process version $folderName's dependencies will need to be reinstalled"
+                ."\nNode process $displayName's dependencies will need to be reinstalled"
             );
             $this->deleteDependenciesForDirectory($directoryPath);
         }
 
         if ($hasHadPackageUpdate) {
-            $reason = "Installing dependencies for build process version $folderName"
+            $reason = "Installing dependencies for node process $displayName"
                 ."\n    Installed Version - $installedVersion"
                 ."\n    Current Version - $packageVersion";
             $this->installDependenciesForDirectory($directoryPath, $reason);
@@ -222,7 +224,7 @@ abstract class NodeCommandBase extends Command {
 
         if ($this->isVerbose) {
             CliUtil::write(
-                "Skipping install for build process version $folderName - Already installed"
+                "Skipping install for node process $displayName - Already installed"
                 ."\n    Installed Version - $installedVersion"
                 ."\n    Current Version - $packageVersion"
             );
@@ -293,7 +295,6 @@ abstract class NodeCommandBase extends Command {
      */
     private function writeInstallationVersions($directoryPath) {
         $packageJson = json_decode(file_get_contents($directoryPath.'/package.json'), true);
-        echo $directoryPath.'/package.json';
         $vanillaCliJsonPath = "$directoryPath/vanillacli.json";
 
         $newVanillaCliContents = [

@@ -75,7 +75,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJson() {
+    protected function getAddonJsonBuildOptions() {
         $addonJson = CliUtil::getAddonJsonForCWD();
 
         // Get the build key and map the old key name
