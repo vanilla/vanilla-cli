@@ -6,13 +6,16 @@
 
 const path = require("path");
 const fs = require("fs");
-const { spawn, exec } = require("child_process");
+const chalk = require('chalk');
+const { spawn } = require("child_process");
 
 module.exports = {
     getJsEntries,
     getPackageJson,
     spawnChildProcess,
     pluralize,
+    print,
+    printError,
 };
 
 /**
@@ -115,4 +118,12 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
 function pluralize(word, count) {
     const plural = count === 1 ? word : word + "s";
     return plural;
+}
+
+function print(contents) {
+    console.log(contents);
+}
+
+function printError(error) {
+    console.error(chalk.bold.red(error));
 }

@@ -4,14 +4,13 @@
  */
 
 const path = require("path");
-const gulp = require("gulp");
-const eslint = require("gulp-eslint");
-const stylelint = require("gulp-stylelint");
 const argv = require("yargs").argv;
 const chalk = require("chalk");
-const beep = require("beepbeep");
-const lintfix = require("./eslint-fix");
-const {formatSummary} = require("./eslint-util");
+const chokidar = require("chokidar");
+
+const { print } = require("../utility");
+const fixScripts = require("./vanilla-fix-scripts");
+const lintScripts = require("./vanilla-lint-scripts");
 
 const addonpath = process.cwd();
 const passedOptions = JSON.parse(argv.options);
@@ -27,64 +26,46 @@ const options = {
     paths: passedOptions.paths,
 };
 
+print(`
+Linting with the following config files:
+- ESLint: ${chalk.yellow(options.eslintFileLocation)}
+- StyleLint: ${chalk.yellow(options.stylelintFileLocation)}
+`);
+print(chalk.green("Starting linting process..."));
 
-gulp.task("lint:scripts", () => {
-    const src = [
+if (options.shouldLintScripts) {
+    const eslintOptions = {
+        configFile: options.eslintFileLocation,
+        warnFileIgnored: true,
+        ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
+    };
+
+    const files = [
         ...options.paths,
         "!**/vendor/**",
         "!**/node_modules/**",
     ];
 
-    return gulp.src(src)
-        .pipe(eslint({
-            configFile: options.eslintFileLocation,
-            warnFileIgnored: true,
-            ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
-        }))
-        .pipe(eslint.results(results => {
-            console.log(formatSummary(results));
-        }))
-        .pipe(eslint.format())
-        .on("error", beep);
-});
-
-gulp.task("lint:styles", () => {
-    const src = path.join(addonpath, "src/**/*.js");
-
-    return gulp.src(src)
-        .pipe(stylelint());
-});
-
-gulp.task("lint", ["lint:scripts"]);
-
-gulp.task("watch", ["lint:scripts"], () => {
-
-});
-
-console.log(`
-Linting with the following config files:
-- ESLint: ${chalk.yellow(options.eslintFileLocation)}
-- StyleLint: ${chalk.yellow(options.stylelintFileLocation)}
-`);
-console.log(chalk.green("Starting linting process..."));
-
-if (options.shouldLintScripts) {
-    console.log(options.paths);
+    lintScripts(files, eslintOptions);
 
     if (options.shouldFix) {
-        const src = [
-            ...options.paths,
-            "!**/vendor/**",
-            "!**/node_modules/**",
-        ];
+        fixScripts(files, eslintOptions);
+    } else if (options.isWatchMode) {
+        const scriptsWatcher = chokidar.watch(files, {
+            ignored: [
+                "**/vendor/**",
+                "**/node_modules/**",
+            ],
+        });
 
-        lintfix(src, options.eslintFileLocation)
-            .then(() => {})
-            .catch(e => {
-                console.error(e);
+        scriptsWatcher
+            .on("ready", () => {
+                print(chalk.green("Listening for file changes..."));
+            })
+            .on("change", (path) => {
+                print(chalk.bold(`\nChange detected in ${path}.`));
+                lintScripts([path], eslintOptions);
+                print(chalk.green(`Listening for file changes...`));
             });
-    } else {
-        gulp.start("lint:scripts");
     }
 }
-
