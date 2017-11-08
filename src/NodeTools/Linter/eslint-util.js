@@ -25,6 +25,13 @@ function formatFixableArray(results) {
     return Array.from(fixableRules);
 }
 
+/**
+ * Print a short table summary of the different
+ *
+ * @param results
+ *
+ * @returns {string}
+ */
 function formatSummary(results) {
     let errorCount = 0;
     let failureCount = 0;
@@ -73,7 +80,7 @@ function makeFixFunction(rules) {
         return true;
     }
 
-    if (typeof rules === 'boolean') {
+    if (typeof rules === "boolean") {
         return rules;
     }
 

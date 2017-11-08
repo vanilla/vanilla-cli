@@ -4,16 +4,14 @@
  */
 
 const path = require("path");
-const gulp = require('gulp');
-const through = require('through2');
-const gulpIf = require('gulp-if');
-const eslint = require('gulp-eslint');
-const stylelint = require('gulp-stylelint');
+const gulp = require("gulp");
+const eslint = require("gulp-eslint");
+const stylelint = require("gulp-stylelint");
 const argv = require("yargs").argv;
-const chalk = require('chalk');
-const beep = require('beepbeep');
-const lintfix = require('./eslint-fix');
-const {formatSummary} = require('./eslint-util');
+const chalk = require("chalk");
+const beep = require("beepbeep");
+const lintfix = require("./eslint-fix");
+const {formatSummary} = require("./eslint-util");
 
 const addonpath = process.cwd();
 const passedOptions = JSON.parse(argv.options);
@@ -26,62 +24,67 @@ const options = {
     shouldLintStyles: passedOptions.styles.enable,
     eslintFileLocation: path.resolve(addonpath, passedOptions.scripts.configFile),
     stylelintFileLocation: path.resolve(addonpath, passedOptions.styles.configFile),
-}
+    paths: passedOptions.paths,
+};
 
 
-gulp.task('lint:scripts', () => {
+gulp.task("lint:scripts", () => {
     const src = [
-        path.join(addonpath, 'src/**/*.js'),
-        path.join(addonpath, 'src/**/*.jsx'),
-        '!vendor/**',
-        '!node_modules/**',
+        ...options.paths,
+        "!**/vendor/**",
+        "!**/node_modules/**",
     ];
 
     return gulp.src(src)
         .pipe(eslint({
             configFile: options.eslintFileLocation,
             warnFileIgnored: true,
+            ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
         }))
         .pipe(eslint.results(results => {
             console.log(formatSummary(results));
         }))
         .pipe(eslint.format())
-        .on('error', beep);
+        .on("error", beep);
 });
 
-gulp.task('lint:styles', () => {
-    const src = path.join(addonpath, 'src/**/*.js');
+gulp.task("lint:styles", () => {
+    const src = path.join(addonpath, "src/**/*.js");
 
-    return gulp.src('')
+    return gulp.src(src)
         .pipe(stylelint());
 });
 
-gulp.task('lint', ['lint:scripts']);
+gulp.task("lint", ["lint:scripts"]);
 
-gulp.task('watch', ['lint:scripts'], () => {
+gulp.task("watch", ["lint:scripts"], () => {
 
-})
+});
 
 console.log(`
 Linting with the following config files:
 - ESLint: ${chalk.yellow(options.eslintFileLocation)}
 - StyleLint: ${chalk.yellow(options.stylelintFileLocation)}
 `);
-console.log(chalk.green('Starting linting process...'));
+console.log(chalk.green("Starting linting process..."));
 
-if (options.shouldFix) {
-    const src = [
-        path.join(addonpath, 'src/**/*.js'),
-        path.join(addonpath, 'src/**/*.jsx'),
-        '!vendor/**',
-        '!node_modules/**',
-    ];
+if (options.shouldLintScripts) {
+    console.log(options.paths);
 
-    lintfix(src, options.eslintFileLocation)
-        .then(() => {})
-        .catch(e => {
-        console.error(e);
-    });
-} else {
-    gulp.start('lint:scripts');
+    if (options.shouldFix) {
+        const src = [
+            ...options.paths,
+            "!**/vendor/**",
+            "!**/node_modules/**",
+        ];
+
+        lintfix(src, options.eslintFileLocation)
+            .then(() => {})
+            .catch(e => {
+                console.error(e);
+            });
+    } else {
+        gulp.start("lint:scripts");
+    }
 }
+

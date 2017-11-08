@@ -11,7 +11,9 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "jquery": true
+        "jquery": true,
+        "es6": true,
+        "node": true
     },
     "globals": {
         "gdn": true
@@ -29,7 +31,7 @@
             "error",
             "always"
         ],
-        "no-console": "error",
+        "no-console": "warn",
         "no-dupe-args": "error",
         "no-dupe-keys": "error",
         "no-duplicate-case": "error",
@@ -42,6 +44,7 @@
         "no-negated-in-lhs": 1,
         "no-unreachable": "error",
         "use-isnan": "error",
+        // Map JSDoc tags to be more similar to our PHP DocBlocks
         "valid-jsdoc": [
             "error",
             {
@@ -145,7 +148,7 @@
         "no-multiple-empty-lines": "error",
         "no-nested-ternary": "error",
         "no-trailing-spaces": "error",
-        "one-var": "error",
+        "one-var": ["error", "never"],
         "quote-props": [
             "error",
             "as-needed"

@@ -3,15 +3,15 @@
  * @license MIT
  */
 
-const gulp = require('gulp');
-const path = require('path');
-const fs = require('fs');
+const gulp = require("gulp");
+const path = require("path");
+const fs = require("fs");
 
-const plumber = require('gulp-plumber');
-const sourcemaps = require('gulp-sourcemaps');
-const cssnano = require('gulp-cssnano');
-const autoprefixer = require('gulp-autoprefixer');
-const size = require('gulp-size');
+const plumber = require("gulp-plumber");
+const sourcemaps = require("gulp-sourcemaps");
+const cssnano = require("gulp-cssnano");
+const autoprefixer = require("gulp-autoprefixer");
+const size = require("gulp-size");
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
@@ -20,7 +20,7 @@ const size = require('gulp-size');
  */
 function swallowError(error) {
     console.log(error.toString());
-    this.emit('end');
+    this.emit("end");
 }
 
 /**
@@ -32,14 +32,14 @@ function swallowError(error) {
  * @returns {Gulp.Src} A gulp src funtion
  */
 module.exports = (addonDirectory, options) => {
-    const destination = path.resolve(addonDirectory, 'design');
+    const destination = path.resolve(addonDirectory, "design");
 
     function makeProcess() {
         return gulp
             .src(getSourceFiles())
             .pipe(
                 plumber({
-                    errorHandler: swallowError
+                    errorHandler: swallowError,
                 })
             )
             .pipe(sourcemaps.init())
@@ -48,31 +48,31 @@ module.exports = (addonDirectory, options) => {
                 browsers: [
                     "ie > 9",
                     "last 6 iOS versions",
-                    "last 4 versions"
-                ]
+                    "last 4 versions",
+                ],
             }))
             .pipe(cssnano())
-            .pipe(sourcemaps.write('.'))
-            .on('error', swallowError)
+            .pipe(sourcemaps.write("."))
+            .on("error", swallowError)
             .pipe(gulp.dest(destination))
             .pipe(size({ showFiles: true }));
     }
 
     function getSourceFiles() {
-        if (options.cssTool === 'less') {
-            const srcDir = path.resolve(addonDirectory, 'src');
-            return [path.join(srcDir, 'less/**/*.less'), '!' + path.join(srcDir, 'less/**/_*.less')];
+        if (options.cssTool === "less") {
+            const srcDir = path.resolve(addonDirectory, "src");
+            return [path.join(srcDir, "less/**/*.less"), "!" + path.join(srcDir, "less/**/_*.less")];
         } else {
-            return path.resolve(addonDirectory, 'src/scss/*.scss')
+            return path.resolve(addonDirectory, "src/scss/*.scss");
         }
     }
 
     function getStyleSheetBuilder() {
-        if (options.cssTool === 'less') {
-            const less = require('gulp-less');
+        if (options.cssTool === "less") {
+            const less = require("gulp-less");
             return less();
         } else {
-            const sass = require('gulp-sass');
+            const sass = require("gulp-sass");
             return sass({importer});
         }
     }
@@ -85,9 +85,10 @@ module.exports = (addonDirectory, options) => {
      * @param {function} done Completion callback
      */
     function importer(url, prev, done) {
-        var regex = /^~/;
+        const regex = /^~/;
         if (!url.match(regex)) {
-            var cssImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
+            const cssImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
+
             // if we don't escape this, then it's breaking the normal css @import
             if (url.match(cssImportRegex)) {
                 return done({ file: `'` + url + `'` });
@@ -96,16 +97,16 @@ module.exports = (addonDirectory, options) => {
             return done({ file: url });
         }
 
-        var baseDirectory = fs.realpathSync(path.join(
+        const baseDirectory = fs.realpathSync(path.join(
             addonDirectory,
-            'node_modules',
-            url.replace(regex, '')
+            "node_modules",
+            url.replace(regex, "")
         ));
 
-        const jsonDirectory = path.resolve(baseDirectory, 'package.json');
+        const jsonDirectory = path.resolve(baseDirectory, "package.json");
         let fileName = "";
         if (fs.existsSync(jsonDirectory)) {
-            const json = JSON.parse(fs.readFileSync(jsonDirectory, 'utf8'));
+            const json = JSON.parse(fs.readFileSync(jsonDirectory, "utf8"));
             if (json.style) {
                 fileName = path.resolve(baseDirectory, json.style);
             } else if (json.main && json.main.match(/.scss$/)) {
@@ -117,7 +118,7 @@ module.exports = (addonDirectory, options) => {
             throw new Error(`No package.json found for ${jsonDirectory}}`);
         }
 
-        if (fileName.endsWith('.css')) {
+        if (fileName.endsWith(".css")) {
             fileName = fileName.slice(0, -4);
         }
 
@@ -125,4 +126,4 @@ module.exports = (addonDirectory, options) => {
     }
 
     return makeProcess();
-}
+};

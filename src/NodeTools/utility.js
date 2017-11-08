@@ -69,7 +69,7 @@ function getIndexJs(addonDirectory) {
  * @returns {string[] | false}
  */
 async function getJsEntries(addonDirectory) {
-    const packageJson =  await getPackageJson(addonDirectory);
+    const packageJson = await getPackageJson(addonDirectory);
     const {entries} = packageJson;
 
     if (entries) {
@@ -86,7 +86,7 @@ async function getJsEntries(addonDirectory) {
 }
 
 const defaultSpawnOptions = {
-    stdio: "inherit"
+    stdio: "inherit",
 };
 
 /**
@@ -113,6 +113,6 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
 }
 
 function pluralize(word, count) {
-    const plural = count === 1 ? word : word + 's';
+    const plural = count === 1 ? word : word + "s";
     return plural;
-};
+}

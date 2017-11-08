@@ -1,7 +1,8 @@
-const {CLIEngine} = require('eslint');
-const ESlintUtils = require('./eslint-util');
-const inquirer = require('inquirer');
-const chalk = require('chalk');
+const {CLIEngine} = require("eslint");
+const ESlintUtils = require("./eslint-util");
+const inquirer = require("inquirer");
+const chalk = require("chalk");
+const path = require("path");
 
 function getCounts(messages) {
     const counts = messages.reduce((result, message) => {
@@ -34,14 +35,14 @@ function getCounts(messages) {
  * @return {object} Report object which only contains messages that pass filter
  */
 function filterResults(report, messageKey, options) {
-    let output = {};
+    const output = {};
     let totalErrors = 0;
     let totalWarnings = 0;
     let totalFixableErrors = 0;
     let totalFixableWarnings = 0;
 
     output.results = report.results.map((result) => {
-        let filteredMessages = result.messages.filter((msg) => {
+        const filteredMessages = result.messages.filter((msg) => {
             if (options.present) {
                 return (msg[messageKey]);
             }
@@ -52,11 +53,12 @@ function filterResults(report, messageKey, options) {
         });
 
         if (filteredMessages) {
-            let {errorCount, warningCount, fixableErrorCount, fixableWarningCount} = getCounts(filteredMessages);
+            const {errorCount, warningCount, fixableErrorCount, fixableWarningCount} = getCounts(filteredMessages);
             totalErrors += errorCount;
             totalWarnings += warningCount;
             totalFixableErrors += fixableErrorCount;
             totalFixableWarnings += fixableWarningCount;
+
             // fixableErrors += fixableErrors;
             return {
                 filePath: result.filePath,
@@ -65,7 +67,7 @@ function filterResults(report, messageKey, options) {
                 errorCount,
                 warningCount,
                 fixableErrorCount,
-                fixableWarningCount
+                fixableWarningCount,
             };
         }
         return {};
@@ -77,7 +79,7 @@ function filterResults(report, messageKey, options) {
     return output;
 }
 
-const getRuleReport = (report, ruleName) => filterResults(report, 'ruleId', {compareVal: ruleName});
+const getRuleReport = (report, ruleName) => filterResults(report, "ruleId", {compareVal: ruleName});
 
 /**
  *
@@ -85,17 +87,23 @@ const getRuleReport = (report, ruleName) => filterResults(report, 'ruleId', {com
  * @param {string} configLocation The location of the configuration file
  */
 module.exports = async function runFix(files, configLocation) {
-    const cli = new CLIEngine({configFile: configLocation});
+    console.log(files);
+
+    const cli = new CLIEngine({
+        configFile: configLocation,
+        ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
+    });
     const report = cli.executeOnFiles(files);
 
     if (report && (report.errorCount > 0 || report.warningCount > 0)) {
+
         // Check if there was a fatal error
-        let fatalReport = getFatalResults(report);
+        const fatalReport = getFatalResults(report);
         if (fatalReport) {
-            const errorFormatter = cli.getFormatter('stylish');
-            let errors = errorFormatter(fatalReport);
+            const errorFormatter = cli.getFormatter("stylish");
+            const errors = errorFormatter(fatalReport);
             console.log(errors);
-            console.error('Fatal error(s) were detected. Please correct and try again.');
+            console.error("Fatal error(s) were detected. Please correct and try again.");
             return 1;
         }
 
@@ -110,6 +118,7 @@ module.exports = async function runFix(files, configLocation) {
             const eslintCli = new CLIEngine({
                 configFile: configLocation,
                 fix: ESlintUtils.makeFixFunction(rules),
+                ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
             });
 
             const toFixReport = eslintCli.executeOnFiles(files);
@@ -119,7 +128,7 @@ module.exports = async function runFix(files, configLocation) {
 
             console.log();
 
-            for (let rule of rules) {
+            for (const rule of rules) {
                 const ruleReport = getRuleReport(fixedReport, rule);
 
                 if (ruleReport.errorCount > 0 || ruleReport.warningCount > 0) {
@@ -129,48 +138,48 @@ module.exports = async function runFix(files, configLocation) {
                 }
             }
         } else {
-            for (let rule of rules) {
-                let ruleReport = getRuleReport(report, rule);
+            for (const rule of rules) {
+                const ruleReport = getRuleReport(report, rule);
                 console.log(ESlintUtils.formatDetails(ruleReport.results));
             }
         }
     } else {
-        console.log(chalk.green('Great job, all lint rules passed.'));
+        console.log(chalk.green("Great job, all lint rules passed."));
     }
-}
+};
 
 function promptFixes(report, stats) {
     const prompts = [{
-        name: 'rules',
-        type: 'checkbox',
-        message: 'Which rules would you like to fix?',
+        name: "rules",
+        type: "checkbox",
+        message: "Which rules would you like to fix?",
         choices: stats,
         pageSize: stats.length,
     }, {
-        name: 'fix',
-        type: 'confirm',
+        name: "fix",
+        type: "confirm",
         message: (answers) => {
-            const selectedRules = answers.rules.join(', ');
+            const selectedRules = answers.rules.join(", ");
             return `Would you like to attempt to auto-fix ${chalk.yellow(selectedRules)}?`;
         },
         default: false,
         when(answers) {
-            for (let rule of answers.rules) {
-                let ruleReport = getRuleReport(report, rule);
+            for (const rule of answers.rules) {
+                const ruleReport = getRuleReport(report, rule);
                 if ( ruleReport.fixableErrorCount > 0 || ruleReport.fixableWarningCount > 0) {
                     return true;
                 }
             }
 
             return false;
-        }
+        },
     }];
 
-    return inquirer.prompt(prompts)
+    return inquirer.prompt(prompts);
 }
 
 function getFatalResults(report) {
-    let fatalResults = filterResults(report, 'fatal', {present: true});
+    const fatalResults = filterResults(report, "fatal", {present: true});
     if (fatalResults.errorCount > 0) {
         return fatalResults;
     }
