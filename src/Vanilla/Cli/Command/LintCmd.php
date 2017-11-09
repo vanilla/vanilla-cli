@@ -7,8 +7,6 @@
 
 namespace Vanilla\Cli\Command;
 
-use \RecursiveDirectoryIterator;
-use \RecursiveIteratorIterator;
 use \Garden\Cli\Cli;
 use \Vanilla\Cli\CliUtil;
 use \Garden\Cli\Args;
