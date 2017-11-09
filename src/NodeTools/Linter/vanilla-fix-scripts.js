@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license MIT
+ */
+
 const { CLIEngine } = require("eslint");
 const ESlintUtils = require("./eslint-util");
 const { print, printError } = require("../utility");

@@ -8,9 +8,12 @@
     "license": "MIT",
     "dependencies": {
         "eslint": "^4.10.0",
+        "eslint-filtered-fix": "^0.1.1",
+        "eslint-friendly-formatter": "^3.0.0",
+        "eslint-nibble": "^4.2.1",
+        "eslint-stats": "^1.0.0",
         "stylelint": "^8.2.0",
         "stylelint-config-recommended-scss": "^2.0.0",
-        "stylelint-scss": "^2.1.0",
-        "yargs": "^10.0.3"
+        "stylelint-scss": "^2.1.0"
     }
 }

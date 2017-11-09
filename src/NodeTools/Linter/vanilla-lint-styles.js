@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license MIT
+ */
+
 const stylelint  = require("stylelint");
 const { print, sleep } = require("../utility");
 

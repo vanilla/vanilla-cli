@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license MIT
+ */
+
 const chalk = require("chalk");
 const table = require("text-table");
 const { pluralize } = require("../utility");
@@ -136,12 +141,18 @@ function filterReportByRule(report, ruleName) {
     return filterReport(report, "ruleId", {compareVal: ruleName});
 }
 
+/**
+ * Return only fatal errors in an ESLint report.
+ *
+ * @param {Object} report - An ESLint report.
+ * @returns {Object|boolean} - An ESLint report or undefined if there were no fatal errors.
+ */
 function filterReportByFatal(report) {
     const fatalResults = filterReport(report, "fatal", {present: true});
     if (fatalResults.errorCount > 0) {
         return fatalResults;
     }
-    return undefined;
+    return false;
 }
 
 /**
