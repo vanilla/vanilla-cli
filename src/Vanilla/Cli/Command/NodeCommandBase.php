@@ -40,9 +40,9 @@ abstract class NodeCommandBase extends Command {
     public function __construct(Cli $cli) {
         parent::__construct($cli);
         $cli
-            ->opt('debug:d', 'Break node process on the first line to attach a debugger', false, 'bool')
+            ->opt('debug:d', 'Break node process on the first line to attach a debugger.', false, 'bool')
             ->opt('reinitialize:r', 'Delete all tool dependencies before building.', false, 'bool')
-            ->opt('verbose:v', 'Show detailed build process output', false, 'bool');
+            ->opt('verbose:v', 'Show additional output.', false, 'bool');
 
         $this->toolRealPath = realpath(__DIR__.'/../../../..');
     }
