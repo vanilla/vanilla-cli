@@ -141,16 +141,23 @@ class LintCmd extends NodeCommandBase {
      * Validate that options passed are compatible with each other.
      *
      * Currently checks
-     * - Fix and Watch are not used together.
+     * - --fix and --watch are not used together.
+     * - --scripts and --styles are not used together.
      *
      * @param Args $args
      */
     protected function validateLintOptions(Args $args) {
         $fixArg = $args->getOpt('fix') ?: false;
         $watchArg = $args->getOpt('watch') ?: false;
+        $scriptsArg = $args->getOpt('scripts') ?: false;
+        $stylesArg = $args->getOpt('styles') ?: false;
 
         if ($fixArg && $watchArg) {
             CliUtil::error('--fix and --watch cannot be used together.');
+        }
+
+        if ($scriptsArg && $stylesArg) {
+            CliUtil::error('--styles and --scripts cannot be used together. Linting both styles and scripts at the same time is the default behaviour.');
         }
     }
 
