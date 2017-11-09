@@ -9,12 +9,13 @@ module.exports = fixScripts;
 /**
  * Interactively fix user supplied rules in the provided files.
  *
+ * @async
  * @param {array} files - An array of file paths or globs to fix.
  * @param {pbject} eslintOptions - The options to spawn ESLint with.
  *
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function fixScripts(files, eslintOptions) {
+async function fixScripts(files, eslintOptions) {
     const cli = new CLIEngine(eslintOptions);
     const report = cli.executeOnFiles(files);
 
@@ -36,42 +37,37 @@ function fixScripts(files, eslintOptions) {
             return;
         }
 
-        promptFixes(report, fixableRules)
-            .then((answers) => {
-                const { rules } = answers;
+        const answers = await promptFixes(report, fixableRules);
+        const { rules } = answers;
 
-                if (answers.fix) {
-                    const fixEslintOptions = Object.assign({}, eslintOptions, {
-                        fix: ESlintUtils.makeFixFunction(rules),
-                    });
-                    const eslintCli = new CLIEngine(fixEslintOptions);
-
-                    const toFixReport = eslintCli.executeOnFiles(files);
-                    CLIEngine.outputFixes(toFixReport);
-
-                    const fixedReport = eslintCli.executeOnFiles(files);
-
-                    print();
-
-                    for (const rule of rules) {
-                        const ruleReport = ESlintUtils.filterReportByRule(fixedReport, rule);
-
-                        if (ruleReport.errorCount > 0 || ruleReport.warningCount > 0) {
-                            print(chalk.yellow(`Unable to automatically fix all errors and warnings for ${rule}.`));
-                        } else {
-                            print(chalk.green(`Fixes applied, ${rule} is now passing`));
-                        }
-                    }
-                } else {
-                    for (const rule of rules) {
-                        const ruleReport = ESlintUtils.filterReportByRule(report, rule);
-                        print(ESlintUtils.formatDetails(ruleReport.results));
-                    }
-                }
-            })
-            .catch(err => {
-                printError(err);
+        if (answers.fix) {
+            const fixEslintOptions = Object.assign({}, eslintOptions, {
+                fix: ESlintUtils.makeFixFunction(rules),
             });
+            const eslintCli = new CLIEngine(fixEslintOptions);
+
+            const toFixReport = eslintCli.executeOnFiles(files);
+            CLIEngine.outputFixes(toFixReport);
+
+            const fixedReport = eslintCli.executeOnFiles(files);
+
+            print();
+
+            for (const rule of rules) {
+                const ruleReport = ESlintUtils.filterReportByRule(fixedReport, rule);
+
+                if (ruleReport.errorCount > 0 || ruleReport.warningCount > 0) {
+                    print(chalk.yellow(`Unable to automatically fix all errors and warnings for ${rule}.`));
+                } else {
+                    print(chalk.green(`Fixes applied, ${rule} is now passing`));
+                }
+            }
+        } else {
+            for (const rule of rules) {
+                const ruleReport = ESlintUtils.filterReportByRule(report, rule);
+                print(ESlintUtils.formatDetails(ruleReport.results));
+            }
+        }
     } else {
         print(chalk.green("Great job, all lint rules passed."));
     }

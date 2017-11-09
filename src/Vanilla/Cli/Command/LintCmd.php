@@ -85,14 +85,17 @@ class LintCmd extends NodeCommandBase {
 
     protected function getDefaultLintOptions() {
         $builtInScriptConfig = $this->lintToolBaseDirectory.'/configs/.eslintrc';
-        $addonScriptConfig = getcwd().'/.eslintrc';
+        $addonScriptConfig = $this->getPossibleESLintConfig();
         $builtInStyleConfig = $this->lintToolBaseDirectory.'/configs/.stylelintrc';
-        $addonStyleConfig = getcwd().'/.stylelintrc';
+        $addonStyleConfig = $this->getPossibleStyleLintConfig();
 
         $this->lintConfig['scripts']['configFile'] = file_exists($addonScriptConfig) ? $addonScriptConfig : $builtInScriptConfig;
         $this->lintConfig['styles']['configFile'] = file_exists($addonStyleConfig) ? $addonStyleConfig : $builtInStyleConfig;
 
-        $this->lintConfig['paths'] = [getcwd().'/src/**/*.js'];
+        $this->lintConfig['paths'] = [
+            getcwd().'/src/**/*.js',
+            getcwd().'/src/**/*.scss',
+        ];
     }
 
     /**
@@ -131,5 +134,49 @@ class LintCmd extends NodeCommandBase {
         if (count($files) > 0) {
             $this->lintConfig['paths'] = array_values($files);
         }
+    }
+
+    /**
+     * Get a possible Stylelint config for the addon.
+     *
+     * @return bool|string A string or false if not found.
+     */
+    private function getPossibleStyleLintConfig() {
+        $possibleConfigs = [
+            getcwd().'/.stylelintrc',
+            getcwd().'/.stylelintrc.yaml',
+            getcwd().'/.stylelintrc.json',
+            getcwd().'/config.stylelintrc.js',
+        ];
+
+        foreach($possibleConfigs as $config) {
+            if (file_exists($config)) {
+                return $config;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get a possible ESLint config for the addon.
+     *
+     * @return bool|string A string or false if not found.
+     */
+    private function getPossibleESLintConfig() {
+        $possibleConfigs = [
+            getcwd().'/.eslintrc',
+            getcwd().'/.eslintrc.yaml',
+            getcwd().'/.eslintrc.json',
+            getcwd().'/config.eslintrc.js',
+        ];
+
+        foreach($possibleConfigs as $config) {
+            if (file_exists($config)) {
+                return $config;
+            }
+        }
+
+        return false;
     }
 }

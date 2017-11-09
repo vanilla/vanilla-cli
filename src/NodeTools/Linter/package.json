@@ -8,9 +8,9 @@
     "license": "MIT",
     "dependencies": {
         "eslint": "^4.10.0",
-        "gulp-eslint": "^4.0.0",
-        "gulp-stylelint": "^5.0.0",
         "stylelint": "^8.2.0",
+        "stylelint-config-recommended-scss": "^2.0.0",
+        "stylelint-scss": "^2.1.0",
         "yargs": "^10.0.3"
     }
 }

@@ -8,9 +8,10 @@ const argv = require("yargs").argv;
 const chalk = require("chalk");
 const chokidar = require("chokidar");
 
-const { print } = require("../utility");
-const fixScripts = require("./vanilla-fix-scripts");
+const { print, printError } = require("../utility");
 const lintScripts = require("./vanilla-lint-scripts");
+const lintStyles = require('./vanilla-lint-styles');
+const fixScripts = require("./vanilla-fix-scripts");
 
 const addonpath = process.cwd();
 const passedOptions = JSON.parse(argv.options);
@@ -26,46 +27,111 @@ const options = {
     paths: passedOptions.paths,
 };
 
-print(`
-Linting with the following config files:
-- ESLint: ${chalk.yellow(options.eslintFileLocation)}
-- StyleLint: ${chalk.yellow(options.stylelintFileLocation)}
-`);
-print(chalk.green("Starting linting process..."));
-
+print(`\nLinting with the following config files:`);
 if (options.shouldLintScripts) {
-    const eslintOptions = {
-        configFile: options.eslintFileLocation,
-        warnFileIgnored: true,
-        ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
-    };
+    print(`- ESLint: ${chalk.yellow(options.eslintFileLocation)}`);
+}
+if (options.shouldLintStyles) {
+    print(`- StyleLint: ${chalk.yellow(options.stylelintFileLocation)}`);
+}
+print(chalk.green("\nStarting linting process..."));
 
-    const files = [
-        ...options.paths,
-        "!**/vendor/**",
-        "!**/node_modules/**",
-    ];
+const files = [
+    ...options.paths,
+    "!**/vendor/**",
+    "!**/node_modules/**",
+];
 
-    lintScripts(files, eslintOptions);
+const stylelintFiles = [
+    ...files,
+    "!**/*.js",
+    "!**/*.jsx",
+];
+
+const eslintFiles = [
+    ...files,
+    "!**/*.scss",
+];
+
+const eslintOptions = {
+    configFile: options.eslintFileLocation,
+    warnFileIgnored: true,
+    ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
+};
+
+const stylelintOptions = {
+    configFile: options.stylelintFileLocation,
+    formatter: 'verbose',
+    syntax: "scss",
+};
+
+startProcess()
+    .then()
+    .catch(err => {
+        printError(err);
+    });
+
+
+/**
+ * Startup the linting process
+ *
+ * @async
+ *
+ * @returns {void}
+ */
+async function startProcess() {
+    if (options.shouldLintStyles) {
+        await lintStyles(stylelintFiles, stylelintOptions);
+    }
+
+    if (options.shouldLintScripts) {
+        await lintScripts(eslintFiles, eslintOptions);
+    }
 
     if (options.shouldFix) {
-        fixScripts(files, eslintOptions);
+        await fixScripts(eslintFiles, eslintOptions);
     } else if (options.isWatchMode) {
-        const scriptsWatcher = chokidar.watch(files, {
-            ignored: [
-                "**/vendor/**",
-                "**/node_modules/**",
-            ],
+        const ignoredFiles = [
+            "**/vendor/**",
+            "**/node_modules/**",
+        ];
+
+        if (!options.shouldLintStyles) {
+            ignoredFiles.push("**/*.scss");
+        }
+
+        if (!options.shouldLintScripts) {
+            ignoredFiles.push("**/*.js");
+        }
+
+        const watcher = chokidar.watch(files, {
+            ignored: ignoredFiles,
         });
 
-        scriptsWatcher
+        watcher
             .on("ready", () => {
                 print(chalk.green("Listening for file changes..."));
             })
             .on("change", (path) => {
                 print(chalk.bold(`\nChange detected in ${path}.`));
-                lintScripts([path], eslintOptions);
+                lintScriptOrStylesheet(path).then();
                 print(chalk.green(`Listening for file changes...`));
             });
+    }
+}
+
+/**
+ * Check the file ending of a changed file and lint it with the proper linter.
+ *
+ * @async
+ * @param {string} filePath - The file to lint.
+ *
+ * @return {void}
+ */
+async function lintScriptOrStylesheet(filePath) {
+    if (filePath.endsWith('.scss')) {
+        await lintStyles([filePath], stylelintOptions);
+    } else if (filePath.endsWith('.js') || filePath.endsWith('.jsx')) {
+        await lintScripts([filePath], eslintOptions);
     }
 }
