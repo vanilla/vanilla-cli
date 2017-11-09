@@ -1,6 +1,6 @@
 {
     "name": "vanilla-cli-linter",
-    "version": "1.0.0",
+    "version": "0.5.0",
     "description": "Linting tools for the Vanilla CLI tool.",
     "main": "vanilla-lint.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
