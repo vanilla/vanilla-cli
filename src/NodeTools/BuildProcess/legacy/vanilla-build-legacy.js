@@ -18,7 +18,7 @@ const workingDirectory = process.cwd();
 
 // For when want to output to the CLI
 const spawnOptions = {
-    stdio: "inherit",
+    stdio: "inherit"
 };
 
 // For when you don't only out in verbose mode
@@ -53,7 +53,7 @@ run()
         if (taskExists) {
             console.log(chalk.green("Build process completed successfully."));
         } else {
-            console.log(chalk.red("No legacy build tasks found.") + "\nVisit https://github.com/vanilla/vanilla-cli/wiki/Build-Tools#legacy for more information.");
+            console.log(chalk.red("No legacy build tasks found.") + "\nVisit https://github.com/vanilla/vanilla-cli/wiki/Build-Tools#legacy for more information.")
         }
     })
     .catch(err => {
@@ -64,12 +64,11 @@ run()
     });
 
 function createLegacyBuildShim() {
-
     // Create an empty bower_components folder if bower.json exists and there isn't one.
     // This is a shim for some older build tools that don't handle this well.
-    console.log();
-    const $bowerJsonPath = path.resolve(workingDirectory, "bower.json");
-    const $bowerComponentsPath = path.resolve(workingDirectory, "bower_components");
+    console.log()
+    const $bowerJsonPath = path.resolve(workingDirectory, 'bower.json');
+    const $bowerComponentsPath = path.resolve(workingDirectory, 'bower_components');
 
     if (fs.existsSync($bowerJsonPath) && !fs.existsSync($bowerComponentsPath)) {
         fs.mkdirSync($bowerComponentsPath);
@@ -221,7 +220,6 @@ async function runGulpTaskIfExists() {
     const gulpTasks = Object.keys(gulpfile.tasks).sort();
 
     if (!gulpTasks[command]) {
-
         // If there command is build, it may also be the default gulp task.
         if (command === "build") {
             if (gulpTasks["default"]) {
@@ -269,9 +267,9 @@ async function getGruntTasks() {
                 );
                 const result = trimmedOutput
                     ? trimmedOutput[1]
-                        .trim()
-                        .split("\n")
-                        .map(x => x.trim().split("  ")[0])
+                          .trim()
+                          .split("\n")
+                          .map(x => x.trim().split("  ")[0])
                     : [];
 
                 resolve(result);
@@ -302,7 +300,6 @@ async function runGruntTaskIfExists() {
     await checkGlobalNodeDependancyInstalled("grunt");
 
     const gruntTasks = await getGruntTasks();
-
     // In vanilla themse grunt build task is called default
     if (command === "build") {
         command = "default";
@@ -368,7 +365,7 @@ async function runBundler() {
 
     return new Promise((resolve, reject) => {
         const bundlerProcess = spawn("bundler", ["install"], {
-            stdio: "inherit",
+            stdio: "inherit"
         });
         bundlerProcess.on("error", err => {
             return reject(err);
