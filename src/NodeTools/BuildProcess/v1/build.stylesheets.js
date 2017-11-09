@@ -10,7 +10,6 @@ const fs = require('fs');
 const plumber = require('gulp-plumber');
 const sourcemaps = require('gulp-sourcemaps');
 const cssnano = require('gulp-cssnano');
-const stylelint = require('gulp-stylelint');
 const autoprefixer = require('gulp-autoprefixer');
 const size = require('gulp-size');
 
