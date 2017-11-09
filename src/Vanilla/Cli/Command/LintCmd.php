@@ -52,7 +52,7 @@ class LintCmd extends NodeCommandBase {
             ->opt('fix:f', "If set, automatically fix fixable errors in the files you're linting.", false, 'bool')
             ->opt('scripts', "Lint only the javascript files.", false, 'bool')
             ->opt('styles', "Lint only the stylesheets.", false, 'bool')
-            ->arg('files', "Files, directories, and globs can be passed as arguments. Defaults to \"src/**/*.js\" and \"src/**/*.scss\".")
+            ->arg('files', "Files, directories, and globs can be passed as arguments. Defaults to \"src/**/*.js\", \"src/**/*.jsx\", and \"src/**/*.scss\".")
         ;
 
         $this->lintToolBaseDirectory = $this->toolRealPath.'/src/NodeTools/Linter';
@@ -84,6 +84,9 @@ class LintCmd extends NodeCommandBase {
         );
     }
 
+    /**
+     * Get the default lint options. These will be overridden by any other values.
+     */
     protected function getDefaultLintOptions() {
         $builtInScriptConfig = $this->lintToolBaseDirectory.'/configs/.eslintrc';
         $addonScriptConfig = $this->getPossibleESLintConfig();
@@ -95,6 +98,7 @@ class LintCmd extends NodeCommandBase {
 
         $this->lintConfig['paths'] = [
             getcwd().'/src/**/*.js',
+            getcwd().'/src/**/*.jsx',
             getcwd().'/src/**/*.scss',
         ];
     }
