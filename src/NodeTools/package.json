@@ -2,7 +2,6 @@
     "name": "vanilla-cli-node-tools",
     "version": "1.1.0",
     "description": "Node.js tooling for the Vanilla Cli.",
-    "main": "index.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
