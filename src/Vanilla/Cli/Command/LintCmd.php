@@ -68,6 +68,7 @@ class LintCmd extends NodeCommandBase {
         $this->getDefaultLintOptions();
         $this->getAddonJsonLintOptions();
         $this->getLintOptionsFromArgs($args);
+        $this->validateLintOptions($args);
 
         $processOptions = array_merge(
             $this->lintConfig,
@@ -133,6 +134,23 @@ class LintCmd extends NodeCommandBase {
 
         if (count($files) > 0) {
             $this->lintConfig['paths'] = array_values($files);
+        }
+    }
+
+    /**
+     * Validate that options passed are compatible with each other.
+     *
+     * Currently checks
+     * - Fix and Watch are not used together.
+     *
+     * @param Args $args
+     */
+    protected function validateLintOptions(Args $args) {
+        $fixArg = $args->getOpt('fix') ?: false;
+        $watchArg = $args->getOpt('watch') ?: false;
+
+        if ($fixArg && $watchArg) {
+            CliUtil::error('--fix and --watch cannot be used together.');
         }
     }
 
