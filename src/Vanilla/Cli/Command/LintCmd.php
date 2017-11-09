@@ -57,6 +57,7 @@ class LintCmd extends NodeCommandBase {
 
         $this->lintToolBaseDirectory = $this->toolRealPath.'/src/NodeTools/Linter';
         $this->dependencyDirectories = [
+            $this->toolRealPath.'src/NodeTools',
             $this->lintToolBaseDirectory,
         ];
     }
