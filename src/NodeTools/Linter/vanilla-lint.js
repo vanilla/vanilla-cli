@@ -59,8 +59,14 @@ const eslintOptions = {
     ignorePath: path.resolve(__dirname, "configs/.eslintignore"),
 };
 
+const stylelintConfigOverrides = {
+    plugins: ["stylelint-scss"]
+}
+
 const stylelintOptions = {
     configFile: options.stylelintFileLocation,
+    configOverrides: stylelintConfigOverrides,
+    configBasedir: path.resolve(__dirname),
     formatter: 'verbose',
     syntax: "scss",
 };
