@@ -77,9 +77,9 @@ class BuildCmd extends NodeCommandBase {
         $addonJson = CliUtil::getAddonJsonForCWD();
 
         // Get the build key and map the old key name
-        if (array_key_exists('build', $addonJson)) {
+        if ($addonJson && array_key_exists('build', $addonJson)) {
             $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
-        } else if (array_key_exists('buildProcessVersion', $addonJson)){
+        } else if ($addonJson && array_key_exists('buildProcessVersion', $addonJson)){
             $this->buildConfig['processVersion'] = $addonJson['buildProcessVersion'];
         }
     }
