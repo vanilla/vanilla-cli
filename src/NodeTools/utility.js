@@ -6,12 +6,17 @@
 
 const path = require("path");
 const fs = require("fs");
-const { spawn, exec } = require("child_process");
+const chalk = require('chalk');
+const { spawn } = require("child_process");
 
 module.exports = {
     getJsEntries,
     getPackageJson,
     spawnChildProcess,
+    pluralize,
+    print,
+    printError,
+    sleep,
 };
 
 /**
@@ -68,7 +73,7 @@ function getIndexJs(addonDirectory) {
  * @returns {string[] | false}
  */
 async function getJsEntries(addonDirectory) {
-    const packageJson =  await getPackageJson(addonDirectory);
+    const packageJson = await getPackageJson(addonDirectory);
     const {entries} = packageJson;
 
     if (entries) {
@@ -85,17 +90,18 @@ async function getJsEntries(addonDirectory) {
 }
 
 const defaultSpawnOptions = {
-    stdio: "inherit"
+    stdio: "inherit",
 };
 
 /**
- * Spawn a child build process. Wraps child_process.spawn
+ * Spawn a child build process. Wraps child_process.spawn.
  *
- * @param {string} command
- * @param {string[]} args
- * @param {Object} options
- * @returns Promise<boolean> Return if the process exits cleanly.
+ * @param {string} command - The command to start.
+ * @param {string[]} args - Arguments for the command.
+ * @param {Object} options - Options to pass to `child_process.spawn`.
+ *
  * @throws {Error} If the process throws and error
+ * @returns Promise<boolean> Return if the process exits cleanly.
  */
 async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
     return new Promise((resolve, reject) => {
@@ -109,4 +115,50 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
             return reject(err);
         });
     });
+}
+
+/**
+ * Conditionally add an 's' to the end of a word.
+ *
+ * @param {string} word - The word to pluralize.
+ * @param {number} count - The number of items.
+ *
+ * @returns {string} The pluralized word.
+ */
+function pluralize(word, count) {
+    const plural = count === 1 ? word : word + "s";
+    return plural;
+}
+
+/**
+ * Log something to STDOUT. Use this instead of console.log();
+ *
+ * @param {string} contents - What to print out.
+ */
+function print(contents) {
+    console.log(contents);
+}
+
+/**
+ * Log an error to STDERR. Colored red if ANSI codes are supported.
+ *
+ * @param {string|Error} error - The error or string to print out.
+ */
+function printError(error) {
+    console.error(chalk.bold.red(error));
+}
+
+/**
+ * Pause for the given amount of milliseconds.
+ *
+ * @param {number} milliseconds - The time to pause for.
+ *
+ * @returns {Promise<void>}
+ */
+function sleep(milliseconds) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, milliseconds)
+    })
 }

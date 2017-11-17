@@ -1,0 +1,19 @@
+{
+    "name": "vanilla-cli-linter",
+    "version": "0.5.0",
+    "description": "Linting tools for the Vanilla CLI tool.",
+    "main": "vanilla-lint.js",
+    "repository": "https://github.com/vanilla/vanilla-cli",
+    "author": "Adam Charron <adam.c@vanillaforums.com>",
+    "license": "MIT",
+    "dependencies": {
+        "eslint": "^4.10.0",
+        "eslint-filtered-fix": "^0.1.1",
+        "eslint-friendly-formatter": "^3.0.0",
+        "eslint-nibble": "^4.2.1",
+        "eslint-stats": "^1.0.0",
+        "stylelint": "^8.2.0",
+        "stylelint-config-recommended-scss": "^2.0.0",
+        "stylelint-scss": "^2.1.0"
+    }
+}

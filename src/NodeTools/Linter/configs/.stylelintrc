@@ -1,0 +1,12 @@
+{
+    "extends": "stylelint-config-recommended-scss",
+    "rules": {
+        "indentation": 4,
+        "no-duplicate-selectors": true,
+        "color-hex-case": "upper",
+        "color-named": "never",
+        "declaration-block-trailing-semicolon": "always",
+        "declaration-no-important": true,
+        "property-no-vendor-prefix": true
+    }
+}
