@@ -8,8 +8,11 @@
 namespace Vanilla\Cli\Command;
 
 use \Garden\Cli\Cli;
-use \Vanilla\Cli\CliUtil;
 use \Garden\Cli\Args;
+use \Vanilla\Cli\CliUtil;
+use \Vanilla\Cli\AddonManagerTrait;
+use \Vanilla\Addon;
+use \Vanilla\AddonManager;
 
 /**
  * Class BuildCmd.

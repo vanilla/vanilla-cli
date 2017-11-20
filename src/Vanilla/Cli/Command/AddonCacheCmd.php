@@ -9,13 +9,16 @@ namespace Vanilla\Cli\Command;
 use \Garden\Cli\Args;
 use \Garden\Cli\Cli;
 use \Vanilla\AddonManager;
+use Vanilla\Cli\AddonManagerTrait;
 
 /**
  * Class AddonCacheCmd
  *
  * @package Vanilla\Cli\Command
  */
-class AddonCacheCmd extends AddonCommandBase {
+class AddonCacheCmd extends Command {
+
+    use AddonManagerTrait;
 
     /**
      * AddonCacheCmd constructor.
@@ -31,13 +34,15 @@ class AddonCacheCmd extends AddonCommandBase {
     /**
      * @inheritdoc
      */
-    protected function doRun(Args $args, AddonManager $addonManager) {
+    public final function run(Args $args) {
+        $this->initializeAddonManager($this->vanillaSrcDir, true);
+
         if ($args->getOpt('regenerate', false) !== false) {
-            $addonManager->clearCache();
+            $this->getAddonManager()->clearCache();
         }
 
-        foreach (array_keys($addonManager->getScanDirs()) as $addonType) {
-            $addonManager->lookupAllByType($addonType);
+        foreach (array_keys($this->getAddonManager()->getScanDirs()) as $addonType) {
+            $this->getAddonManager()->lookupAllByType($addonType);
         }
     }
 }

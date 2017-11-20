@@ -11,13 +11,16 @@ use \Garden\Cli\Cli;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
 use \Vanilla\Cli\CliUtil;
+use Vanilla\Cli\AddonManagerTrait;
 
 /**
  * Class AddonDoctorCmd
  *
  * @package Vanilla\Cli\Command
  */
-class AddonDoctorCmd extends AddonCommandBase {
+class AddonDoctorCmd extends Command {
+
+    use AddonManagerTrait;
 
     /**
      * AddonDoctorCmd constructor.
@@ -32,15 +35,9 @@ class AddonDoctorCmd extends AddonCommandBase {
     /**
      * @inheritdoc
      */
-    protected function preAddonManagerInit(Args $args, array &$scanDirs, &$addonManagerCachePath) {
-        // Set cache path to null so make sure that we do not mess with the cache.
-        $addonManagerCachePath = null;
-    }
+    public final function run(Args $args) {
+        $this->initializeAddonManager($this->vanillaSrcDir);
 
-    /**
-     * @inheritdoc
-     */
-    protected function doRun(Args $args, AddonManager $addonManager) {
         $getRelativePath = function($from, $path) {
             $path = explode(DIRECTORY_SEPARATOR, $path);
             $from = explode(DIRECTORY_SEPARATOR, $from);
@@ -56,13 +53,13 @@ class AddonDoctorCmd extends AddonCommandBase {
 
         $sickAddonsCount = 0;
         $issuesCount = 0;
-        foreach ($addonManager->getScanDirs() as $addonType => $scanDirectories) {
+        foreach ($this->getAddonManager()->getScanDirs() as $addonType => $scanDirectories) {
             foreach ($scanDirectories as $scanDirectory) {
-                $addonDirs = glob(PATH_ROOT."$scanDirectory/*", GLOB_ONLYDIR);
+                $addonDirs = glob($this->vanillaSrcDir."$scanDirectory/*", GLOB_ONLYDIR);
                 foreach ($addonDirs as $subdir) {
                     $addon = null;
-                    $addonRealPathFromVanilla = $getRelativePath(PATH_ROOT, realpath($subdir));
-                    $addonRelativePath = str_replace(PATH_ROOT, '', $subdir);
+                    $addonRealPathFromVanilla = $getRelativePath($this->vanillaSrcDir, realpath($subdir));
+                    $addonRelativePath = str_replace($this->vanillaSrcDir, '', $subdir);
                     $addonIssues = [];
                     try {
                         ob_start();
@@ -101,7 +98,7 @@ class AddonDoctorCmd extends AddonCommandBase {
                         $issuesCount += count($addonIssues);
                         ksort($addonIssues);
 
-                        CliUtil::write("[$addonRealPathFromVanilla] has somme issues:");
+                        CliUtil::write("[$addonRealPathFromVanilla] has some issues:");
                         $outputArray = explode(PHP_EOL, print_r($addonIssues, true));
                         unset($outputArray[count($outputArray) - 2], $outputArray[0], $outputArray[1]);
                         CliUtil::write(implode("\n", $outputArray));
