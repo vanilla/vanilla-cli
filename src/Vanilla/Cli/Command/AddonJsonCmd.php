@@ -36,6 +36,8 @@ class AddonJsonCmd extends Command {
      * @inheritdoc
      */
     public final function run(Args $args) {
+        parent::run($args);
+
         $this->initializeAddonManager($this->vanillaSrcDir);
 
         $addonsOutput = '';

@@ -53,7 +53,6 @@ class Cli {
     private function dispatch(Args $args) {
             /** @var Command $command */
             $command = $this->commands[$args->getCommand()];
-            $command->setup($args);
             $command->run($args);
     }
 

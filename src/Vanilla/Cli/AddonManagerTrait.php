@@ -10,6 +10,9 @@ use \Exception;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
 
+/**
+ * Trait for getting and using the AddonManager.
+ */
 trait AddonManagerTrait {
 
     /** @var AddonManager */
@@ -19,7 +22,8 @@ trait AddonManagerTrait {
     /**
      * Initialize the addon manager.
      *
-     * @param string $addonManagerCachePath The cache path for the addon manager.
+     * @param string $vanillaSrcDir The directory of the Vanilla installation to use.
+     * @param string $useEnvironmentalCachePath Whether or not to use the cache path in the Vanilla enviroment.php file.
      *
      * @return void
      */

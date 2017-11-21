@@ -35,6 +35,8 @@ class AddonCacheCmd extends Command {
      * @inheritdoc
      */
     public final function run(Args $args) {
+        parent::run($args);
+
         $this->initializeAddonManager($this->vanillaSrcDir, true);
 
         if ($args->getOpt('regenerate', false) !== false) {

@@ -55,7 +55,9 @@ class BuildCmd extends NodeCommandBase {
     /**
      * @inheritdoc
      */
-    protected function doRun(Args $args) {
+    public final function run(Args $args) {
+        parent::run($args);
+
         $this->getAddonJsonBuildOptions();
         $this->getBuildOptionsFromArgs($args);
         $this->validateBuildOptions($args);

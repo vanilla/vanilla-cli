@@ -15,7 +15,7 @@ use \Exception;
 /**
  * Class NodeCommandBase.
  */
-abstract class NodeCommandBase extends Command {
+class NodeCommandBase extends Command {
 
     /** @var string We require node 8 because it is the latest LTS with support for async/await */
     const MINIMUM_NODE_VERSION = '8.0.0';
@@ -42,7 +42,7 @@ abstract class NodeCommandBase extends Command {
         $cli
             ->opt('debug:d', 'Break node process on the first line to attach a debugger.', false, 'bool')
             ->opt('reinitialize:r', 'Delete all tool dependencies before building.', false, 'bool')
-            ->opt('verbose:v', 'Show additional output.', false, 'bool');
+        ;
 
         $this->toolRealPath = realpath(__DIR__.'/../../../..');
     }
@@ -50,7 +50,9 @@ abstract class NodeCommandBase extends Command {
     /**
      * @inheritdoc
      */
-    final public function run(Args $args) {
+    public function run(Args $args) {
+        parent::run($args);
+
         $this->isVerbose = $args->getOpt('verbose') ?: false;
         $this->isDebugMode = $args->getOpt('debug') ?: false;
 
@@ -64,18 +66,7 @@ abstract class NodeCommandBase extends Command {
             }
             $this->checkNeedsInstallation($directory);
         }
-
-        $this->doRun($args);
     }
-
-    /**
-     * The NodeCommand's execution function
-     *
-     * @param Args $args The CLI arguments
-     *
-     * @return void
-     */
-    abstract protected function doRun(Args $args);
 
     /**
      * Spawn the child node process.

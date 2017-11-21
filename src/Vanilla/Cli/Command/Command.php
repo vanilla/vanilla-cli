@@ -15,7 +15,7 @@ use Vanilla\Cli\CliUtil;
  *
  * @package Vanilla\Cli\Command
  */
-abstract class Command {
+class Command {
 
     /** @var string */
     protected $vanillaSrcDir;
@@ -55,11 +55,15 @@ abstract class Command {
     }
 
     /**
-     * Run setup and automatically fetch some options that can be used in every command.
+     * Command's execution function.
      *
-     * @return void
+     * This base command class has some common setup, so be sure to call parent::run($args);
+     *
+     * @param Args $args
+     *
+     * @return mixed
      */
-    public function setup(Args $args) {
+    public function run(Args $args) {
         $this->isVerbose = $args->getOpt('verbose') ?: false;
         $potentialSrcDirectory = $args->getOpt('vanillasrc', getenv('VANILLACLI_VANILLA_SRC_DIR'));
 
@@ -73,12 +77,4 @@ abstract class Command {
 
         $this->vanillaSrcDir = realpath($potentialSrcDirectory);
     }
-
-    /**
-     * Command's execution function.
-     *
-     * @param Args $args
-     * @return mixed
-     */
-    public abstract function run(Args $args);
 }

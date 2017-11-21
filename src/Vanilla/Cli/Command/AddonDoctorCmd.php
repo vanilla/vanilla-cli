@@ -36,6 +36,8 @@ class AddonDoctorCmd extends Command {
      * @inheritdoc
      */
     public final function run(Args $args) {
+        parent::run($args);
+
         $this->initializeAddonManager($this->vanillaSrcDir);
 
         $getRelativePath = function($from, $path) {
