@@ -16,19 +16,10 @@ const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
 
 const addonpath = process.cwd();
-
-const passedOptions = JSON.parse(argv.options);
-
-const options = {
-    isVerboseMode: passedOptions.verbose || false,
-    isWatchMode: passedOptions.watch || false,
-    cssTool: passedOptions.cssTool || 'scss',
-}
+const options = JSON.parse(argv.options);
 
 gulp.task("build:js", () => {
-    return utility.getJsEntries(addonpath).then(jsfiles => {
-        return buildJs(addonpath, options, jsfiles);
-    });
+    return buildJs(addonpath, options);
 });
 
 gulp.task("build:styles", () => {
@@ -64,6 +55,6 @@ gulp.task("watch", ["build"], () => {
 });
 
 
-const taskToExecute = options.isWatchMode ? "watch" : "build";
+const taskToExecute = options.watch ? "watch" : "build";
 
 gulp.start(taskToExecute);

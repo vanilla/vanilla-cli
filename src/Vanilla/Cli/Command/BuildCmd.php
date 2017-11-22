@@ -19,6 +19,9 @@ use \Vanilla\AddonManager;
  */
 class BuildCmd extends NodeCommandBase {
 
+    /** @var string */
+    protected $initialCWD;
+
     /** @var string  */
     protected $buildToolBaseDirectory;
 
@@ -26,11 +29,19 @@ class BuildCmd extends NodeCommandBase {
      *
      * - processVersion: 'legacy' | '1.0'
      * - cssTool: 'scss' | 'less'
+     * - js.entry: Object A mapping of chunkname -> entrypoint.
      */
     private $buildConfig = [
         'processVersion' => 'legacy',
         'cssTool' => 'scss',
+        'js' => [
+            'entry' => [
+                'custom' => 'index.js',
+            ],
+        ],
     ];
+
+    private $childConfigs = [];
 
     /**
      * BuildCmd constructor.
@@ -62,10 +73,12 @@ class BuildCmd extends NodeCommandBase {
         $this->getBuildOptionsFromArgs($args);
         $this->validateBuildOptions($args);
 
-        $processOptions = [
-            'watch' => $args->getOpt('watch') ?: false,
-            'cssTool' => $this->buildConfig['cssTool'],
-        ];
+        $processOptions = array_merge(
+            $this->rootConfig,
+            [
+                'watch' => $args->getOpt('watch') ?: false,
+            ]
+        );
 
         $this->spawnNodeProcessFromPackageMain(
             $this->getBuildProcessDirectory(),
@@ -78,15 +91,24 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJsonBuildOptions() {
-        $addonJson = CliUtil::getAddonJsonForCWD();
+    protected function getAddonJsonBuildOptions($addonJson) {
 
         // Get the build key and map the old key name
         if ($addonJson && array_key_exists('build', $addonJson)) {
-            $this->buildConfig = array_merge($this->buildConfig, $addonJson['build']);
+            $this->rootConfig = array_merge($this->rootConfig, $addonJson['build']);
         } else if ($addonJson && array_key_exists('buildProcessVersion', $addonJson)){
-            $this->buildConfig['processVersion'] = $addonJson['buildProcessVersion'];
+            $this->rootConfig['processVersion'] = $addonJson['buildProcessVersion'];
         }
+    }
+
+    /**
+     * Map old build keys to new ones (for compatibility).
+     *
+     * @param array $addonJson
+     * @return void
+     */
+    protected function mapOldBuildKeys($addonJson) {
+
     }
 
     /**
@@ -99,11 +121,11 @@ class BuildCmd extends NodeCommandBase {
         $cssToolArg = $args->getOpt('csstool');
 
         if ($processArg) {
-            $this->buildConfig['processVersion'] = $processArg;
+            $this->rootConfig['processVersion'] = $processArg;
         }
 
         if ($cssToolArg) {
-            $this->buildConfig['cssTool'] = $cssToolArg;
+            $this->rootConfig['cssTool'] = $cssToolArg;
         }
     }
 
@@ -120,16 +142,27 @@ class BuildCmd extends NodeCommandBase {
         $csstoolOpt = $args->getOpt('csstool') ?: false;
 
         if ($csstoolOpt) {
-            if ($this->buildConfig['processVersion'] === 'legacy') {
+            if ($this->rootConfig['processVersion'] === 'legacy') {
                 CliUtil::error('The CSSTool option is only available for the built in build process.');
             }
         }
 
         // Map old values to new ones
-        if ($this->buildConfig['processVersion'] === '1.0') {
-            $this->buildConfig['processVersion'] = 'v1';
+        if ($this->rootConfig['processVersion'] === '1.0') {
+            $this->rootConfig['processVersion'] = 'v1';
             CliUtil::write("The build process version '1.0' has been renamed to 'v1'. Please update your build configuration");
         }
+    }
+
+    /**
+     * Get the oldest parent of the addon's config
+     *
+     *
+     *
+     * @return void
+     */
+    protected function getRootAddonConfiguration() {
+
     }
 
     /**
@@ -154,7 +187,7 @@ class BuildCmd extends NodeCommandBase {
      * @return string
      */
     protected function getBuildProcessDirectory() {
-        $processVersion = $this->buildConfig['processVersion'];
+        $processVersion = $this->rootConfig['processVersion'];
         $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
         if (!file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());

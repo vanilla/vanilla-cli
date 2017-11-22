@@ -27,7 +27,7 @@ module.exports = (addonDirectory, options) => {
         )
         .pipe(gulp.dest(path.resolve(addonDirectory, 'design/images')));
 
-    if (options.isVerboseMode) {
+    if (options.verbose) {
         process.pipe(size({ showFiles: true }));
     }
 

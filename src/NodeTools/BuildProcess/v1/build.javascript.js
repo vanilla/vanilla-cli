@@ -15,17 +15,11 @@ const gulp = require("gulp");
 /**
  * Create the javascript build process
  */
-module.exports = (addonDirectory, options, entries) => {
+module.exports = (addonDirectory, options) => {
     console.log("Attempting to resolve CLI deps in" + path.resolve(__dirname, "node_modules"));
 
-    if (typeof entries === "string") {
-        entries = {
-            custom: entries
-        };
-    }
-
     const webpackBaseConfig = {
-        entry: entries,
+        entry: options.js.entry,
         module: {
             rules: [
                 {
@@ -93,7 +87,7 @@ module.exports = (addonDirectory, options, entries) => {
         ]
     });
 
-    const configToRun = options.isWatchMode ? webpackDevConfig : webpackProdConfig;
+    const configToRun = options.watch ? webpackDevConfig : webpackProdConfig;
 
     return gulp
         .src("")
