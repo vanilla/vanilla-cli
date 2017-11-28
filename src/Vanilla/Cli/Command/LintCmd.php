@@ -63,7 +63,9 @@ class LintCmd extends NodeCommandBase {
     /**
      * @inheritdoc
      */
-    protected function doRun(Args $args) {
+    public final function run(Args $args) {
+        parent::run($args);
+
         $this->getDefaultLintOptions();
         $this->getAddonJsonLintOptions();
         $this->getLintOptionsFromArgs($args);

@@ -11,13 +11,16 @@ use \Garden\Cli\Cli;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
 use \Vanilla\Cli\CliUtil;
+use Vanilla\Cli\AddonManagerTrait;
 
 /**
  * Class AddonJsonCmd
  *
  * @package Vanilla\Cli\Command
  */
-class AddonJsonCmd extends AddonCommandBase {
+class AddonJsonCmd extends Command {
+
+    use AddonManagerTrait;
 
     /**
      * AddonJsonCmd constructor.
@@ -32,20 +35,16 @@ class AddonJsonCmd extends AddonCommandBase {
     /**
      * @inheritdoc
      */
-    protected function preAddonManagerInit(Args $args, array &$scanDirs, &$addonManagerCachePath) {
-        // Set cache path to null so make sure that we do not mess with the cache.
-        $addonManagerCachePath = null;
-    }
+    public final function run(Args $args) {
+        parent::run($args);
 
-    /**
-     * @inheritdoc
-     */
-    protected function doRun(Args $args, AddonManager $addonManager) {
+        $this->initializeAddonManager($this->vanillaSrcDir);
+
         $addonsOutput = '';
         $warningsOutput = '';
-        foreach (array_keys($addonManager->getScanDirs()) as $addonType) {
+        foreach (array_keys($this->getAddonManager()->getScanDirs()) as $addonType) {
             ob_start();
-            $addons = $addonManager->scan($addonType);
+            $addons = $this->getAddonManager()->scan($addonType);
             $warningsOutput = ob_get_contents();
             ob_end_clean();
             ob_start();
