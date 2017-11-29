@@ -116,14 +116,14 @@ class BuildCmd extends NodeCommandBase {
         if (!array_deep_key_exists('build.process', $addonJson)) {
             if (array_deep_key_exists('build.processVersion', $addonJson)) {
                 $logger
-                    ->message('The configuration key `build.processVersion` has been renamed to `build.version`.'.\PHP_EOL)
-                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.\PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.\PHP_EOL.\PHP_EOL);
+                    ->message('The configuration key `build.processVersion` has been renamed to `build.version`.'.PHP_EOL)
+                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.PHP_EOL);
 
                 $addonJson['build']['process'] = $addonJson['build']['processVersion'];
             } elseif (array_key_exists('buildProcessVersion', $addonJson)) {
                 $logger
-                    ->message('The configuration key `buildProcessVersion` has been renamed to `build.version`.'.\PHP_EOL)
-                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.\PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.\PHP_EOL.\PHP_EOL);
+                    ->message('The configuration key `buildProcessVersion` has been renamed to `build.version`.'.PHP_EOL)
+                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.PHP_EOL);
 
                 $addonJson['build']['process'] = $addonJson['buildProcessVersion'];
             }
@@ -131,7 +131,7 @@ class BuildCmd extends NodeCommandBase {
 
         // Map the 1.0 process name to v1
         if ($addonJson['build']['process'] === '1.0') {
-            $logger->message("Warning: The build process version '1.0' has been renamed to 'v1'. Please update your build configuration.");
+            $logger->message("Warning: The build process version '1.0' has been renamed to 'v1'. Please update your build configuration.".PHP_EOL);
             $addonJson['build']['process'] = 'v1';
         }
 

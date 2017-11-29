@@ -23,8 +23,12 @@ const addonpath = process.cwd();
  * - buildOptions - The configuration options.
  * - rootDirectories - The directories to search through for src files.
  * - watch - Should this be in watch mode.
+ * - verbose - Display verbose output.
  */
 const options = JSON.parse(argv.options);
+
+// Set the verbose option globally.
+global.verbose = options.verbose;
 
 const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
@@ -35,19 +39,13 @@ parentDirectories.forEach(parent => {
 });
 print('');
 
-gulp.task("build:js", () => {
-    return buildJs(addonpath, options);
-});
+gulp.task("build:js", buildJs(addonpath, options));
 
-gulp.task("build:styles", () => {
-    return buildStyles(primaryDirectory, parentDirectories, options.buildOptions);
-});
+gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions));
 
-gulp.task("build:assets", () => {
-    return buildAssets(primaryDirectory, options.buildOptions);
-});
+gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
 
-gulp.task("build", ["build:js", "build:assets", "build:styles"]);
+gulp.task("build", ["build:assets", "build:styles", "build:js"]);
 
 gulp.task("watch", ["build"], () => {
     livereload.listen();
@@ -68,7 +66,7 @@ gulp.task("watch", ["build"], () => {
     gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
 
-    console.log("\n" + chalk.green('Watching for changes in src files...'));
+    print("\n" + chalk.green('Watching for changes in src files...'));
 });
 
 

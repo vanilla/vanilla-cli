@@ -13,6 +13,7 @@ module.exports = {
     spawnChildProcess,
     pluralize,
     print,
+    printVerbose,
     printError,
     sleep,
 };
@@ -88,6 +89,19 @@ function pluralize(word, count) {
  */
 function print(contents) {
     console.log(contents);
+}
+
+/**
+ * Log something to STDOUT only if the verbose option is set. Use this instead of console.log();
+ *
+ * @param {string} contents - What to print out.
+ */
+function printVerbose(contents) {
+    const isVerbose = global.verbose || false;
+
+    if (isVerbose) {
+        console.log(contents);
+    }
 }
 
 /**

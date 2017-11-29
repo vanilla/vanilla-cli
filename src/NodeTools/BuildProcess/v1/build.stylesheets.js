@@ -14,7 +14,7 @@ const autoprefixer = require("gulp-autoprefixer");
 const size = require("gulp-size");
 const modifyFile = require("gulp-modify-file");
 const chalk = require("chalk");
-const { print, printError } = require("../../utility");
+const { print, printVerbose, printError } = require("../../utility");
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
@@ -36,7 +36,7 @@ function swallowError(error) {
  *
  * @returns {Gulp.Src} A gulp src funtion
  */
-module.exports = (primaryDirectory, secondaryDirectories, options) => {
+module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
     const allSrcDirectories = [primaryDirectory, ...secondaryDirectories];
     const destination = path.resolve(primaryDirectory, "design");
 
@@ -88,6 +88,8 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => {
 
             resolvedFilePaths.forEach(resolvedFilePath => {
                 const relativeFilePath = path.relative(entryFilePath, resolvedFilePath);
+
+                printVerbose(`Inserting file ${chalk.yellow(relativeFilePath)} into parent entrypoint.`)
                 output += `@import "${resolvedFilePath}";\n`;
             });
             return output;
@@ -145,6 +147,7 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => {
             trueFilePath = `'${url}'`;
         } else if (url.match(nodeModuleRegex)) {
             trueFilePath = resolveFilePathInNodeModules(url.replace(regex, ""));
+            printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else {
             trueFilePath = url;
         }

@@ -17,7 +17,7 @@ const {print, printError} = require('../../utility');
 /**
  * Create the javascript build process
  */
-module.exports = (addonDirectory, options) => {
+module.exports = (addonDirectory, options) => (next) => {
     Object.values(options.buildOptions.js.entry).forEach(entry => {
         const filePath = path.join('./src/js', entry);
         print(chalk.yellow(`Using Entrypoint: ${filePath}`));
@@ -94,7 +94,7 @@ module.exports = (addonDirectory, options) => {
 
     const configToRun = options.watch ? webpackDevConfig : webpackProdConfig;
 
-    return gulp
+    gulp
         .src("")
         .pipe(
             webpackStream(configToRun, webpack, (err, stats) => {
@@ -103,6 +103,7 @@ module.exports = (addonDirectory, options) => {
                         colors: true
                     })
                 );
+                next();
             })
         )
         .pipe(gulp.dest(path.resolve(addonDirectory, "./js")));

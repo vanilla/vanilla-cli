@@ -13,7 +13,7 @@ const imagemin = require("gulp-imagemin");
 /**
  * Gulp build process for images.
  */
-module.exports = (addonDirectory, options) => {
+module.exports = (addonDirectory, options) => () => {
     const process =  gulp
         .src(path.resolve(addonDirectory, 'src/images/**/*'))
         .pipe(
