@@ -139,8 +139,8 @@ class BuildCmd extends NodeCommandBase {
         array_push($this->addonBuildConfigs, $buildConfig);
 
         // Recursively fetch any parents if they exist.
-        if (array_key_exists('parentThemeKey', $addonJson)) {
-            $parentThemeKey = $addonJson['parentThemeKey'];
+        if (array_key_exists('parent', $addonJson)) {
+            $parentThemeKey = $addonJson['parent'];
             $vanillaSrcDir = $this->vanillaSrcDir;
             $parentAddonDirectory = realpath($this->vanillaSrcDir.'/themes/'.$parentThemeKey);
 

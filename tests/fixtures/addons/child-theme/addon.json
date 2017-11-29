@@ -1,6 +1,6 @@
 {
     "key": "child-theme",
-    "parentThemeKey": "parent-theme",
+    "parent": "parent-theme",
     "build": {
         "process": "v1",
         "js": {
