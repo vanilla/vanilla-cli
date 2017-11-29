@@ -16,7 +16,12 @@ const chalk = require("chalk");
 const {print, printError} = require("../../utility");
 
 /**
- * Create the javascript build process
+ * Create the javascript build process.
+ *
+ * @param {string} addonDirectory - The directory to build from.
+ * @param {options} options - The build options.
+ *
+ * @return {function} A gulp execution function.
  */
 module.exports = (addonDirectory, options) => (next) => {
     let jsEntries = options.buildOptions.js.entry;

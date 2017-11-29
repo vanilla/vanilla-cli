@@ -27,14 +27,14 @@ function swallowError(error) {
 }
 
 /**
- * Create the stylesheet gulp task function;
+ * Create the stylesheet gulp task function.
  * @export
  *
- * @param {string} primaryDirectory The directory of the addon that initiated the build process
- * @param {string[]} secondaryDirectories Any parent directories to fetch source files from.
- * @param {Object} options Build options.
+ * @param {string} primaryDirectory - The directory of the addon that initiated the build process.
+ * @param {string[]} secondaryDirectories - Any parent directories to fetch source files from.
+ * @param {Object} options - Build options.
  *
- * @returns {Gulp.Src} A gulp src funtion
+ * @return {function} A gulp execution function.
  */
 module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
     const allSrcDirectories = [primaryDirectory, ...secondaryDirectories];
@@ -64,8 +64,8 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
     /**
      * Swap out all of the placeholders in parent theme with a file import.
      *
-     * @param {string} content The file content.
-     * @param {string} entryFilePath The path of the file.
+     * @param {string} content - The file content.
+     * @param {string} entryFilePath - The path of the file.
      *
      * @return {string} The new contets of a file.
      */
@@ -130,11 +130,11 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
     }
 
     /**
-     * Create a custom Sass importer to search node modules folder with ~ prefix
+     * Create a custom Sass importer to search node modules folder with ~ prefix.
      *
-     * @param {string} url The filepath
-     * @param {string} prev The previous filepath
-     * @param {function} done Completion callback
+     * @param {string} url - The filepath.
+     * @param {string} prev - The previous filepath.
+     * @param {function} done - Completion callback.
      */
     function importer(url, prev, done) {
         const nodeModuleRegex = /^~/;
@@ -160,7 +160,7 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
      *
      * Will attempt to lookup up the child, then check parents.
      *
-     * @param {string} requestPath - The requested file to lookup
+     * @param {string} requestPath - The requested file to lookup.
      *
      * @return {string} A resolved absolute file path.
      * @throws {Error} If the file couldn't be resolved anywhere.
@@ -180,7 +180,7 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
      *
      * Will attempt to lookup up the child, then check parents.
      *
-     * @param {string} requestPath - The requested file to lookup
+     * @param {string} requestPath - The requested file to lookup.
      *
      * @return {string} A resolved absolute file path.
      * @throws {Error} If the file couldn't be resolved anywhere.
@@ -204,7 +204,7 @@ module.exports = (primaryDirectory, secondaryDirectories, options) => () => {
      *
      * Checks the package.json for "style" and "main" keys to find an scss/css entrypoint.
      *
-     * @param {string} requestPath - The path to look up
+     * @param {string} requestPath - The path to look up.
      *
      * @returns {string} The resolved absolute file path.
      * @throws {Error} If no file can be located.

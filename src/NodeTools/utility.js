@@ -127,17 +127,3 @@ function sleep(milliseconds) {
         }, milliseconds)
     })
 }
-
-function createStreamFromString(fakeFileName, contents) {
-    var stream = require('stream').Readable({ objectMode: true })
-    stream._read = () => {
-      this.push(new gutil.File({
-        cwd: "",
-        base: "",
-        path: filename,
-        contents: new Buffer(string)
-      }))
-      this.push(null)
-    }
-    return stream
-}
