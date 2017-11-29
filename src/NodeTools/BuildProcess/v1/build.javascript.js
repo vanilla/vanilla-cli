@@ -11,11 +11,18 @@ const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
 const gulp = require("gulp");
+const chalk = require("chalk");
+const {print, printError} = require('../../utility');
 
 /**
  * Create the javascript build process
  */
 module.exports = (addonDirectory, options) => {
+    Object.values(options.buildOptions.js.entry).forEach(entry => {
+        const filePath = path.join('./src/js', entry);
+        print(chalk.yellow(`Using Entrypoint: ${filePath}`));
+    })
+
     const webpackBaseConfig = {
         entry: options.buildOptions.js.entry,
         module: {
@@ -91,7 +98,7 @@ module.exports = (addonDirectory, options) => {
         .src("")
         .pipe(
             webpackStream(configToRun, webpack, (err, stats) => {
-                console.log(
+                print(
                     stats.toString({
                         colors: true
                     })
