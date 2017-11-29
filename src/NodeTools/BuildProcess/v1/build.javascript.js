@@ -5,6 +5,7 @@
 
 // General purpose imports
 const path = require("path");
+const fs = require("fs");
 
 // Webpack specific imports
 const webpack = require("webpack");
@@ -12,19 +13,36 @@ const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
 const gulp = require("gulp");
 const chalk = require("chalk");
-const {print, printError} = require('../../utility');
+const {print, printError} = require("../../utility");
 
 /**
  * Create the javascript build process
  */
 module.exports = (addonDirectory, options) => (next) => {
-    Object.values(options.buildOptions.js.entry).forEach(entry => {
-        const filePath = path.join('./src/js', entry);
-        print(chalk.yellow(`Using Entrypoint: ${filePath}`));
+    let jsEntries = options.buildOptions.js.entry;
+
+    Object.keys(jsEntries).forEach(entryKey => {
+        const filePath = path.join("./src/js", jsEntries[entryKey]);
+
+        if (fs.existsSync(filePath)) {
+            print(chalk.yellow(`Using Entrypoint: ${filePath}`));
+        } else {
+            // Don't throw if the "default" entry point is not found.
+            if (/index.js/.test(jsEntries[entryKey])) {
+                delete jsEntries[entryKey];
+            } else {
+                print(chalk.red(`Entrypoint provided but not found: ${filePath}`));
+                throw new Error();
+            }
+        }
     })
 
+    if (Object.keys(jsEntries).length === 0) {
+        jsEntries = false;
+    }
+
     const webpackBaseConfig = {
-        entry: options.buildOptions.js.entry,
+        entry: jsEntries,
         module: {
             rules: [
                 {
@@ -94,7 +112,7 @@ module.exports = (addonDirectory, options) => (next) => {
 
     const configToRun = options.watch ? webpackDevConfig : webpackProdConfig;
 
-    gulp
+    return gulp
         .src("")
         .pipe(
             webpackStream(configToRun, webpack, (err, stats) => {
