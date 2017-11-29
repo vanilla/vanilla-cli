@@ -1,0 +1,6 @@
+{
+    "key": "parent-theme",
+    "build": {
+        "process": "v1"
+    }
+}

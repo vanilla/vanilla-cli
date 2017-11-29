@@ -16,15 +16,13 @@ const gulp = require("gulp");
  * Create the javascript build process
  */
 module.exports = (addonDirectory, options) => {
-    console.log("Attempting to resolve CLI deps in" + path.resolve(__dirname, "node_modules"));
-
     const webpackBaseConfig = {
-        entry: options.js.entry,
+        entry: options.buildOptions.js.entry,
         module: {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: [path.resolve(addonDirectory, "./src")],
+                    include: [path.resolve(addonDirectory, "./src/js")],
                     exclude: ["node_modules"],
                     use: [
                         {
@@ -39,7 +37,7 @@ module.exports = (addonDirectory, options) => {
             ]
         },
         resolve: {
-            modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src")],
+            modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src/js")],
             extensions: [".js", ".jsx"]
         },
         /**

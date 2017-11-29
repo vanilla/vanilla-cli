@@ -68,11 +68,11 @@ class Command {
         $potentialSrcDirectory = $args->getOpt('vanillasrc', getenv('VANILLACLI_VANILLA_SRC_DIR'));
 
         if (!$potentialSrcDirectory) {
-            CliUtil::error('Vanilla source directory is missing.');
+            CliUtil::fail('Vanilla source directory is missing.');
         }
 
         if (!is_dir($potentialSrcDirectory)) {
-            CliUtil::error('Vanilla source directory is not a valid directory.');
+            CliUtil::fail('Vanilla source directory is not a valid directory.');
         }
 
         $this->vanillaSrcDir = realpath($potentialSrcDirectory);

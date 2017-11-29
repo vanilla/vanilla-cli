@@ -9,25 +9,42 @@ const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 const chalk = require('chalk');
 
-const utility = require("../../utility");
+const {print} = require("../../utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
 
 const addonpath = process.cwd();
+
+/**
+ * @var Object The options passed from the PHP process.
+ *
+ * - buildOptions - The configuration options.
+ * - rootDirectories - The directories to search through for src files.
+ * - watch - Should this be in watch mode.
+ */
 const options = JSON.parse(argv.options);
+
+const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
+
+print(`Starting build process ${chalk.green('v1')} for addon at ${chalk.yellow(primaryDirectory)}.`);
+parentDirectories.forEach(parent => {
+    print(`Parent addon found at ${chalk.yellow(parent)}.`);
+});
+print('');
 
 gulp.task("build:js", () => {
     return buildJs(addonpath, options);
 });
 
 gulp.task("build:styles", () => {
-    return buildStyles(addonpath, options);
+    return buildStyles(primaryDirectory, parentDirectories, options.buildOptions);
 });
 
 gulp.task("build:assets", () => {
-    return buildAssets(addonpath, options);
+    return buildAssets(primaryDirectory, options.buildOptions);
 });
 
 gulp.task("build", ["build:js", "build:assets", "build:styles"]);

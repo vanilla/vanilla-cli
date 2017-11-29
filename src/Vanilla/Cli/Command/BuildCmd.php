@@ -9,30 +9,29 @@ namespace Vanilla\Cli\Command;
 
 use \Garden\Cli\Cli;
 use \Garden\Cli\Args;
+use \Garden\Cli\LogFormatter;
 use \Vanilla\Cli\CliUtil;
 use \Vanilla\Cli\AddonManagerTrait;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
+use function Vanilla\Cli\array_deep_key_exists;
 
 /**
  * Class BuildCmd.
  */
 class BuildCmd extends NodeCommandBase {
 
-    /** @var string */
-    protected $initialCWD;
-
     /** @var string  */
     protected $buildToolBaseDirectory;
 
     /** @var array The build configuration options.
      *
-     * - processVersion: 'legacy' | '1.0'
+     * - process: 'legacy' | '1.0'
      * - cssTool: 'scss' | 'less'
      * - js.entry: Object A mapping of chunkname -> entrypoint.
      */
-    private $buildConfig = [
-        'processVersion' => 'legacy',
+    private $defaultConfigurationOptions = [
+        'process' => 'legacy',
         'cssTool' => 'scss',
         'js' => [
             'entry' => [
@@ -41,7 +40,14 @@ class BuildCmd extends NodeCommandBase {
         ],
     ];
 
-    private $childConfigs = [];
+    /** @var array An array of addon configurations to build with. */
+    private $addonBuildConfigs = [];
+
+    /** @var array An array of realpaths to roots of addons being built. */
+    private $addonRootDirectories = [];
+
+    /** @var array An array of parent build configurations */
+    private $parentConfigs = [];
 
     /**
      * BuildCmd constructor.
@@ -69,16 +75,15 @@ class BuildCmd extends NodeCommandBase {
     public final function run(Args $args) {
         parent::run($args);
 
-        $this->getAddonJsonBuildOptions();
         $this->getBuildOptionsFromArgs($args);
-        $this->validateBuildOptions($args);
+        $this->getAddonJsonBuildOptions();
+        $this->validateBuildOptions();
 
-        $processOptions = array_merge(
-            $this->rootConfig,
-            [
-                'watch' => $args->getOpt('watch') ?: false,
-            ]
-        );
+        $processOptions = [
+            'buildOptions' => $this->addonBuildConfigs[0],
+            'rootDirectories' => $this->addonRootDirectories,
+            'watch' => $args->getOpt('watch') ?: false,
+        ];
 
         $this->spawnNodeProcessFromPackageMain(
             $this->getBuildProcessDirectory(),
@@ -91,24 +96,60 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJsonBuildOptions($addonJson) {
-
-        // Get the build key and map the old key name
-        if ($addonJson && array_key_exists('build', $addonJson)) {
-            $this->rootConfig = array_merge($this->rootConfig, $addonJson['build']);
-        } else if ($addonJson && array_key_exists('buildProcessVersion', $addonJson)){
-            $this->rootConfig['processVersion'] = $addonJson['buildProcessVersion'];
+    protected function getAddonJsonBuildOptions($rootDirectory = null) {
+        if (!$rootDirectory) {
+            $rootDirectory = getcwd();
         }
-    }
 
-    /**
-     * Map old build keys to new ones (for compatibility).
-     *
-     * @param array $addonJson
-     * @return void
-     */
-    protected function mapOldBuildKeys($addonJson) {
+        $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
+        $logger = new LogFormatter();
+        $logger = $logger->setDateFormat('');
 
+        // Add the addon root directory to the list.
+        array_push($this->addonRootDirectories, $rootDirectory);
+
+        if (!array_key_exists('build', $addonJson) && !array_key_exists('buildProcessVersion', $addonJson)) {
+            return;
+        }
+
+        // Get the build key and map the old key names.
+        if (!array_deep_key_exists('build.process', $addonJson)) {
+            if (array_deep_key_exists('build.processVersion', $addonJson)) {
+                $logger
+                    ->message('The configuration key `build.processVersion` has been renamed to `build.version`.'.\PHP_EOL)
+                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.\PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.\PHP_EOL.\PHP_EOL);
+
+                $addonJson['build']['process'] = $addonJson['build']['processVersion'];
+            } elseif (array_key_exists('buildProcessVersion', $addonJson)) {
+                $logger
+                    ->message('The configuration key `buildProcessVersion` has been renamed to `build.version`.'.\PHP_EOL)
+                    ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.\PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.\PHP_EOL.\PHP_EOL);
+
+                $addonJson['build']['process'] = $addonJson['buildProcessVersion'];
+            }
+        }
+
+        // Map the 1.0 process name to v1
+        if ($addonJson['build']['process'] === '1.0') {
+            $logger->message("Warning: The build process version '1.0' has been renamed to 'v1'. Please update your build configuration.");
+            $addonJson['build']['process'] = 'v1';
+        }
+
+        $buildConfig = array_merge($this->defaultConfigurationOptions, $addonJson['build']);
+        array_push($this->addonBuildConfigs, $buildConfig);
+
+        // Recursively fetch any parents if they exist.
+        if (array_key_exists('parentThemeKey', $addonJson)) {
+            $parentThemeKey = $addonJson['parentThemeKey'];
+            $vanillaSrcDir = $this->vanillaSrcDir;
+            $parentAddonDirectory = realpath($this->vanillaSrcDir.'/themes/'.$parentThemeKey);
+
+            if (!file_exists($parentAddonDirectory)) {
+                CliUtil::fail("The parent theme with the key `$parentThemeKey` could not be found in the vanilla installation at `$vanillaSrcDir`.");
+            }
+
+            $this->getAddonJsonBuildOptions($parentAddonDirectory);
+        }
     }
 
     /**
@@ -121,11 +162,11 @@ class BuildCmd extends NodeCommandBase {
         $cssToolArg = $args->getOpt('csstool');
 
         if ($processArg) {
-            $this->rootConfig['processVersion'] = $processArg;
+            $this->defaultConfigurationOptions['process'] = $processArg;
         }
 
         if ($cssToolArg) {
-            $this->rootConfig['cssTool'] = $cssToolArg;
+            $this->defaultConfigurationOptions['cssTool'] = $cssToolArg;
         }
     }
 
@@ -134,35 +175,39 @@ class BuildCmd extends NodeCommandBase {
      *
      * Currently checks
      * - that csstool is v1 only.
-     * - Maps `processVersion` 1.0 -> v1.
+     * - Maps `process` 1.0 -> v1.
      *
      * @param Args $args
      */
-    protected function validateBuildOptions(Args $args) {
-        $csstoolOpt = $args->getOpt('csstool') ?: false;
+    protected function validateBuildOptions() {
+        $requiredIdenticalKeys = [
+            'cssTool',
+            'process',
+        ];
 
-        if ($csstoolOpt) {
-            if ($this->rootConfig['processVersion'] === 'legacy') {
-                CliUtil::error('The CSSTool option is only available for the built in build process.');
+        foreach($requiredIdenticalKeys as $requiredIdenticalKey) {
+            $simplifiedArray = array_column($this->addonBuildConfigs, $requiredIdenticalKey);
+
+            if (count(array_unique($simplifiedArray)) !== 1) {
+                $passedValues = implode(", ", array_unique($simplifiedArray));
+
+                CliUtil::fail(
+                    "Different values were passed by parent and child addons for the option $requiredIdenticalKey.".PHP_EOL.
+                    "Expected identical values. Passed values:".PHP_EOL.
+                    $passedValues
+                );
             }
         }
 
-        // Map old values to new ones
-        if ($this->rootConfig['processVersion'] === '1.0') {
-            $this->rootConfig['processVersion'] = 'v1';
-            CliUtil::write("The build process version '1.0' has been renamed to 'v1'. Please update your build configuration");
+        $finalBuildConfig = $this->addonBuildConfigs[0];
+
+        if ($finalBuildConfig['cssTool'] === 'less' && $finalBuildConfig['process'] === 'legacy') {
+            CliUtil::fail('The CSSTool option `less` is not available for the legacy build process.');
         }
-    }
 
-    /**
-     * Get the oldest parent of the addon's config
-     *
-     *
-     *
-     * @return void
-     */
-    protected function getRootAddonConfiguration() {
-
+        if ($finalBuildConfig['cssTool'] === 'less' && count($this->addonBuildConfigs) > 1) {
+            CliUtil::fail('The CSSTool option `less` is not available with parent themes.');
+        }
     }
 
     /**
@@ -187,15 +232,14 @@ class BuildCmd extends NodeCommandBase {
      * @return string
      */
     protected function getBuildProcessDirectory() {
-        $processVersion = $this->rootConfig['processVersion'];
+        $processVersion = $this->addonBuildConfigs[0]['process'];
         $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
         if (!file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
-            CliUtil::error("Could not find build process version $processVersion"
+            CliUtil::fail("Could not find build process version $processVersion"
                 ."\n    Available build process versions are"
                 ."\n$buildVersions");
         }
-        CliUtil::write("\nStarting build process version $processVersion");
         return $path;
     }
 }

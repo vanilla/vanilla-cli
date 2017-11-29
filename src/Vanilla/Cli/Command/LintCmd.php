@@ -110,7 +110,7 @@ class LintCmd extends NodeCommandBase {
      * @return void
      */
     protected function getAddonJsonLintOptions() {
-        $addonJson = CliUtil::getAddonJsonForCWD();
+        $addonJson = CliUtil::getAddonJsonForDirectory(getcwd());
 
         if ($addonJson && array_key_exists('lint', $addonJson)) {
             $this->lintConfig = array_merge($this->lintConfig, $addonJson['lint']);
@@ -158,11 +158,11 @@ class LintCmd extends NodeCommandBase {
         $stylesArg = $args->getOpt('styles') ?: false;
 
         if ($fixArg && $watchArg) {
-            CliUtil::error('--fix and --watch cannot be used together.');
+            CliUtil::fail('--fix and --watch cannot be used together.');
         }
 
         if ($scriptsArg && $stylesArg) {
-            CliUtil::error('--styles and --scripts cannot be used together. Linting both styles and scripts at the same time is the default behaviour.');
+            CliUtil::fail('--styles and --scripts cannot be used together. Linting both styles and scripts at the same time is the default behaviour.');
         }
     }
 
