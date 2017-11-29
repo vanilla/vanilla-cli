@@ -2,9 +2,6 @@
     "key": "child-theme",
     "parent": "parent-theme",
     "build": {
-        "process": "v1",
-        "js": {
-            "entry": false
-        }
+        "process": "v1"
     }
 }
