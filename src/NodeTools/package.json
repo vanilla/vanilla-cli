@@ -6,10 +6,17 @@
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
     "dependencies": {
-        "chalk": "^1.1.3",
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.2",
+        "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "chalk": "^2.3.0",
         "chokidar": "^1.7.0",
         "gulp-modify-file": "^1.0.0",
-        "inquirer": "^3.3.0",
+        "inquirer": "^4.0.1",
+        "uglifyjs-webpack-plugin": "^1.1.2",
+        "webpack": "^3.9.1",
+        "webpack-merge": "^4.1.1",
         "yargs": "^10.0.3"
     }
 }
