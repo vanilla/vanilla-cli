@@ -9,7 +9,7 @@ const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 const chalk = require('chalk');
 
-const {print} = require("../../utility");
+const {print} = require("../../library/utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
@@ -41,7 +41,7 @@ print('');
 
 gulp.task("build:js", buildJs(addonpath, options));
 
-gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions));
+gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
 
 gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
 

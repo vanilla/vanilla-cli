@@ -8,7 +8,7 @@ const argv = require("yargs").argv;
 const chalk = require("chalk");
 const chokidar = require("chokidar");
 
-const { print, printError } = require("../utility");
+const { print, printError } = require("../library/utility");
 const lintScripts = require("./vanilla-lint-scripts");
 const lintStyles = require('./vanilla-lint-styles');
 const fixScripts = require("./vanilla-fix-scripts");

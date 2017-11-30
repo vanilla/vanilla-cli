@@ -8,7 +8,7 @@ const chalk = require("chalk");
 const path = require("path");
 const fs = require("fs");
 const { spawn, exec } = require("child_process");
-const utility = require("../../utility");
+const utility = require("../../library/utility");
 
 const options = JSON.parse(argv.options);
 

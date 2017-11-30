@@ -5,7 +5,7 @@
 
 const { CLIEngine } = require("eslint");
 const ESlintUtils = require("./eslint-util");
-const { print, printError } = require("../utility");
+const { print, printError } = require("../library/utility");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 

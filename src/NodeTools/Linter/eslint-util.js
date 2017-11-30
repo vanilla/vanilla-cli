@@ -5,7 +5,7 @@
 
 const chalk = require("chalk");
 const table = require("text-table");
-const { pluralize } = require("../utility");
+const { pluralize } = require("../library/utility");
 
 module.exports = {
     formatSummary,

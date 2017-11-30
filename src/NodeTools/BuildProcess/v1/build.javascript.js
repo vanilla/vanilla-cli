@@ -13,7 +13,7 @@ const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
 const gulp = require("gulp");
 const chalk = require("chalk");
-const {print, printError} = require("../../utility");
+const {print, printError} = require("../../library/utility");
 
 /**
  * Create the javascript build process.

@@ -4,7 +4,7 @@
  */
 
 const stylelint  = require("stylelint");
-const { print, sleep } = require("../utility");
+const { print, sleep } = require("../library/utility");
 
 module.exports = lintStyles;
 
