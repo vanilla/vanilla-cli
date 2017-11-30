@@ -10,6 +10,7 @@ const fs = require("fs");
 // Webpack specific imports
 const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const merge = require("webpack-merge");
 const gulp = require("gulp");
 const chalk = require("chalk");
@@ -58,7 +59,7 @@ module.exports = (addonDirectory, options) => () => {
                         {
                             loader: "babel-loader",
                             options: {
-                                presets: path.resolve(__dirname, "./node_modules/babel-preset-env"),
+                                presets: path.resolve(__dirname, "../../node_modules/babel-preset-env"),
                                 cacheDirectory: true
                             }
                         }
@@ -76,7 +77,7 @@ module.exports = (addonDirectory, options) => () => {
          * We are expecting this tool to be used in a different directory than itself.
          */
         resolveLoader: {
-            modules: [path.resolve(__dirname, "node_modules")]
+            modules: [path.resolve(__dirname, "node_modules"), path.resolve(__dirname, "../../node_modules")]
         },
         output: {
             filename: "[name].js"
@@ -108,7 +109,7 @@ module.exports = (addonDirectory, options) => () => {
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify("production")
             }),
-            new webpack.optimize.UglifyJsPlugin({
+            new UglifyJsPlugin({
                 sourceMap: true
             })
         ]
