@@ -1,0 +1,10 @@
+{
+    "key": "parent-theme",
+    "parent": "grandparent-theme",
+    "build": {
+        "process": "v1",
+        "js": {
+            "entry": false
+        }
+    }
+}

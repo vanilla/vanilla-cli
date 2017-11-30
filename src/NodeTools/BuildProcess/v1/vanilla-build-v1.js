@@ -9,7 +9,7 @@ const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 const chalk = require('chalk');
 
-const utility = require("../../utility");
+const {print} = require("../../utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
@@ -17,29 +17,35 @@ const buildAssets = require("./build.assets");
 
 const addonpath = process.cwd();
 
-const passedOptions = JSON.parse(argv.options);
+/**
+ * @var Object The options passed from the PHP process.
+ *
+ * - buildOptions - The configuration options.
+ * - rootDirectories - The directories to search through for src files.
+ * - watch - Should this be in watch mode.
+ * - verbose - Display verbose output.
+ */
+const options = JSON.parse(argv.options);
 
-const options = {
-    isVerboseMode: passedOptions.verbose || false,
-    isWatchMode: passedOptions.watch || false,
-    cssTool: passedOptions.cssTool || 'scss',
-}
+// Set the verbose option globally.
+global.verbose = options.verbose;
 
-gulp.task("build:js", () => {
-    return utility.getJsEntries(addonpath).then(jsfiles => {
-        return buildJs(addonpath, options, jsfiles);
-    });
+const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
+
+print(`Starting build process ${chalk.green('v1')} for addon at ${chalk.yellow(primaryDirectory)}.`);
+parentDirectories.forEach(parent => {
+    print(`Parent addon found at ${chalk.yellow(parent)}.`);
 });
+print('');
 
-gulp.task("build:styles", () => {
-    return buildStyles(addonpath, options);
-});
+gulp.task("build:js", buildJs(addonpath, options));
 
-gulp.task("build:assets", () => {
-    return buildAssets(addonpath, options);
-});
+gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions));
 
-gulp.task("build", ["build:js", "build:assets", "build:styles"]);
+gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
+
+gulp.task("build", ["build:assets", "build:styles", "build:js"]);
 
 gulp.task("watch", ["build"], () => {
     livereload.listen();
@@ -60,10 +66,10 @@ gulp.task("watch", ["build"], () => {
     gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
 
-    console.log("\n" + chalk.green('Watching for changes in src files...'));
+    print("\n" + chalk.green('Watching for changes in src files...'));
 });
 
 
-const taskToExecute = options.isWatchMode ? "watch" : "build";
+const taskToExecute = options.watch ? "watch" : "build";
 
 gulp.start(taskToExecute);

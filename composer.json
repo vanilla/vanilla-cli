@@ -22,6 +22,9 @@
         "vanilla/garden-cli": "~1.0"
     },
     "autoload": {
+        "files": [
+            "src/Vanilla/Cli/functions.general.php"
+        ],
         "psr-4": {
             "Vanilla\\Cli\\": "src/Vanilla/Cli"
         }

@@ -109,7 +109,7 @@ class NodeCommandBase extends Command {
         $scriptPath = realpath("$directory/$command");
 
         if (!$command || !$scriptPath ) {
-            CliUtil::error("Command not found in `main` of $directory/package.json.");
+            CliUtil::fail("Command not found in `main` of $directory/package.json.");
         }
 
         $this->spawnNodeProcessFromFile($scriptPath, $options);
@@ -128,7 +128,7 @@ class NodeCommandBase extends Command {
         $yarnExists = `which yarn`;
 
         if (empty($nodeExists) || empty($yarnExists)) {
-            CliUtil::error(
+            CliUtil::fail(
                 'Node and Yarn are not installed properly or are not visible on your path.'
                 ."\nCheck https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes for installation instructions."
             );
@@ -151,7 +151,7 @@ class NodeCommandBase extends Command {
 
         if (!$hasValidNodeVersion) {
             $minimum = self::MINIMUM_NODE_VERSION;
-            CliUtil::error(
+            CliUtil::fail(
                 "Node.js version out of date. Minimum required version is $minimum"
                 ."\nCheck https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes for installation instructions."
             );
@@ -176,7 +176,7 @@ class NodeCommandBase extends Command {
         $this->isVerbose && CliUtil::write(PHP_EOL."Checking dependencies for build process version $displayName");
 
         if (!file_exists($packageJsonPath)) {
-            CliUtil::error("Unable to install dependencies for node process at $directoryPath - No package.json exists");
+            CliUtil::fail("Unable to install dependencies for node process at $directoryPath - No package.json exists");
             return;
         }
 

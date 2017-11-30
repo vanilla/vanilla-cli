@@ -32,7 +32,7 @@ trait AddonManagerTrait {
         define('PATH_ROOT', $vanillaSrcDir);
 
         if (!\file_exists("$vanillaSrcDir/environment.php")) {
-            CliUtil::error('Vanilla version must be >= 2.4.201');
+            CliUtil::fail('Vanilla version must be >= 2.4.201');
         }
 
         require_once("$vanillaSrcDir/environment.php");

@@ -10,11 +10,10 @@ const chalk = require('chalk');
 const { spawn } = require("child_process");
 
 module.exports = {
-    getJsEntries,
-    getPackageJson,
     spawnChildProcess,
     pluralize,
     print,
+    printVerbose,
     printError,
     sleep,
 };
@@ -40,53 +39,6 @@ function getPackageJson(addonDirectory) {
             resolve(packageInfo);
         });
     });
-}
-
-/**
- * Get the index js file path if it exists
- *
- * @param {any} addonDirectory
- *
- * @async
- * @returns {string|boolean}
- */
-function getIndexJs(addonDirectory) {
-    const indexPath = path.resolve(addonDirectory, "./src/js/index.js");
-
-    return new Promise(resolve => {
-        fs.readFile(indexPath, "utf8", (err, data) => {
-            if (err) {
-                resolve(false);
-            } else {
-                resolve(indexPath);
-            }
-        });
-    });
-}
-
-/**
- * Get the javascript entry points from the package.json if they exist
- *
- * @param {string} addonDirectory
- *
- * @async
- * @returns {string[] | false}
- */
-async function getJsEntries(addonDirectory) {
-    const packageJson = await getPackageJson(addonDirectory);
-    const {entries} = packageJson;
-
-    if (entries) {
-        return entries;
-    }
-
-    const indexJs = await getIndexJs(addonDirectory);
-
-    if (indexJs) {
-        return indexJs;
-    }
-
-    return false;
 }
 
 const defaultSpawnOptions = {
@@ -137,6 +89,19 @@ function pluralize(word, count) {
  */
 function print(contents) {
     console.log(contents);
+}
+
+/**
+ * Log something to STDOUT only if the verbose option is set. Use this instead of console.log();
+ *
+ * @param {string} contents - What to print out.
+ */
+function printVerbose(contents) {
+    const isVerbose = global.verbose || false;
+
+    if (isVerbose) {
+        console.log(contents);
+    }
 }
 
 /**

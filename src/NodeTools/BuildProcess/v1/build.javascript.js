@@ -5,32 +5,54 @@
 
 // General purpose imports
 const path = require("path");
+const fs = require("fs");
 
 // Webpack specific imports
 const webpack = require("webpack");
 const webpackStream = require("webpack-stream");
 const merge = require("webpack-merge");
 const gulp = require("gulp");
+const chalk = require("chalk");
+const {print, printError} = require("../../utility");
 
 /**
- * Create the javascript build process
+ * Create the javascript build process.
+ *
+ * @param {string} addonDirectory - The directory to build from.
+ * @param {options} options - The build options.
+ *
+ * @return {function} A gulp execution function.
  */
-module.exports = (addonDirectory, options, entries) => {
-    console.log("Attempting to resolve CLI deps in" + path.resolve(__dirname, "node_modules"));
+module.exports = (addonDirectory, options) => () => {
+    let jsEntries = options.buildOptions.js.entry;
 
-    if (typeof entries === "string") {
-        entries = {
-            custom: entries
-        };
+    Object.keys(jsEntries).forEach(entryKey => {
+        const filePath = path.join("./src/js", jsEntries[entryKey]);
+
+        if (fs.existsSync(filePath)) {
+            print(chalk.yellow(`Using Entrypoint: ${filePath}`));
+        } else {
+            // Don't throw if the "default" entry point is not found.
+            if (/index.js/.test(jsEntries[entryKey])) {
+                delete jsEntries[entryKey];
+            } else {
+                print(chalk.red(`Entrypoint provided but not found: ${filePath}`));
+                throw new Error();
+            }
+        }
+    })
+
+    if (Object.keys(jsEntries).length === 0) {
+        jsEntries = false;
     }
 
     const webpackBaseConfig = {
-        entry: entries,
+        entry: jsEntries,
         module: {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: [path.resolve(addonDirectory, "./src")],
+                    include: [path.resolve(addonDirectory, "./src/js")],
                     exclude: ["node_modules"],
                     use: [
                         {
@@ -45,7 +67,7 @@ module.exports = (addonDirectory, options, entries) => {
             ]
         },
         resolve: {
-            modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src")],
+            modules: [path.resolve(addonDirectory, "node_modules"), path.resolve(addonDirectory, "./src/js")],
             extensions: [".js", ".jsx"]
         },
         /**
@@ -93,13 +115,13 @@ module.exports = (addonDirectory, options, entries) => {
         ]
     });
 
-    const configToRun = options.isWatchMode ? webpackDevConfig : webpackProdConfig;
+    const configToRun = options.watch ? webpackDevConfig : webpackProdConfig;
 
     return gulp
         .src("")
         .pipe(
             webpackStream(configToRun, webpack, (err, stats) => {
-                console.log(
+                print(
                     stats.toString({
                         colors: true
                     })
