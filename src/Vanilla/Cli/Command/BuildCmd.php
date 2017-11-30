@@ -11,10 +11,8 @@ use \Garden\Cli\Cli;
 use \Garden\Cli\Args;
 use \Garden\Cli\LogFormatter;
 use \Vanilla\Cli\CliUtil;
-use \Vanilla\Cli\AddonManagerTrait;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
-use function Vanilla\Cli\array_deep_key_exists;
 
 /**
  * Class BuildCmd.
@@ -113,8 +111,8 @@ class BuildCmd extends NodeCommandBase {
         }
 
         // Get the build key and map the old key names.
-        if (!array_deep_key_exists('build.process', $addonJson)) {
-            if (array_deep_key_exists('build.processVersion', $addonJson)) {
+        if (!\valr('build.process', $addonJson)) {
+            if (\valr('build.processVersion', $addonJson)) {
                 $logger
                     ->message('The configuration key `build.processVersion` has been renamed to `build.version`.'.PHP_EOL)
                     ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.PHP_EOL);
@@ -130,7 +128,7 @@ class BuildCmd extends NodeCommandBase {
         }
 
         // Map the 1.0 process name to v1
-        if ($addonJson['build']['process'] === '1.0') {
+        if (valr('build.process', $addonJson) === '1.0') {
             $logger->message("Warning: The build process version '1.0' has been renamed to 'v1'. Please update your build configuration.".PHP_EOL);
             $addonJson['build']['process'] = 'v1';
         }

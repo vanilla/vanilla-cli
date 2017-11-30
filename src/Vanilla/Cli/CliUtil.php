@@ -59,25 +59,3 @@ class CliUtil {
         }
     }
 }
-
-
-/**
- * Like array_key_exists but for nested values.
- *
- * @param string $key A key in dot notation.
- * @param mixed $collection The collection to check.
- *
- * @return bool
- */
-function array_deep_key_exists($key, $collection) {
-    $path = explode('.', $key);
-
-    for ($i = 0; $i < count($path); ++$i) {
-        $subKey = $path[$i];
-
-        if (!is_array($collection) || !isset($collection[$subKey])) {
-            return false;
-        }
-    }
-    return true;
-}

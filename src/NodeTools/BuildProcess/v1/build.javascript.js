@@ -23,7 +23,7 @@ const {print, printError} = require("../../utility");
  *
  * @return {function} A gulp execution function.
  */
-module.exports = (addonDirectory, options) => (next) => {
+module.exports = (addonDirectory, options) => () => {
     let jsEntries = options.buildOptions.js.entry;
 
     Object.keys(jsEntries).forEach(entryKey => {
@@ -126,7 +126,6 @@ module.exports = (addonDirectory, options) => (next) => {
                         colors: true
                     })
                 );
-                next();
             })
         )
         .pipe(gulp.dest(path.resolve(addonDirectory, "./js")));
