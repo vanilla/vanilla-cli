@@ -9,26 +9,16 @@ const chalk = require("chalk");
 
 const { print, printVerbose, printError } = require("./utility");
 
-/**
- * All custom Sass tooling in one class
- */
-module.exports = class SassTool {
+module.exports = {
+    createSassTool
+}
 
-    /**
-     * Constructor for the Sass Tool.
-     * @public
-     *
-     * @param {string[]} sourceDirectories - An array of the source directories to look in from child -> parent.
-     */
-    constructor(sourceDirectories) {
-        this.sourceDirectories = sourceDirectories;
+function createSassTool(sourceDirectories) {
 
-        this.importer = this.importer.bind(this);
-        this.swapPlaceholders = this.swapPlaceholders.bind(this);
-        this.resolveAllFilePathsFromMutlipleAddons = this.resolveAllFilePathsFromMutlipleAddons.bind(this);
-        this.resolveFilePathInNodeModules = this.resolveFilePathInNodeModules.bind(this);
-        this.resolveOneFilePathFromMutlipleAddons = this.resolveOneFilePathFromMutlipleAddons.bind(this);
-    }
+    return {
+        importer,
+        swapPlaceholders,
+    };
 
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix.
@@ -38,7 +28,7 @@ module.exports = class SassTool {
      * @param {string} prev - The previous filepath.
      * @param {function} done - Completion callback.
      */
-    importer(url, prev, done) {
+    function importer(url, prev, done) {
         const nodeModuleRegex = /^~/;
         const cssHttpImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
 
@@ -48,7 +38,7 @@ module.exports = class SassTool {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
             trueFilePath = `'${url}'`;
         } else if (url.match(nodeModuleRegex)) {
-            trueFilePath = this.resolveFilePathInNodeModules(url.replace(regex, ""));
+            trueFilePath = resolveFilePathInNodeModules(url.replace(regex, ""));
             printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else {
             trueFilePath = url;
@@ -69,7 +59,7 @@ module.exports = class SassTool {
      *
      * @return {string} The new contets of a file.
      */
-    swapPlaceholders(content, entryFilePath) {
+    function swapPlaceholders(content, entryFilePath) {
         const placeholderRegex = /\/\*\*\s*@vanilla-cli-placeholder:\s*([^\s]*)\s*\*\*\//g;
 
         const modifiedRelativeFilePath = path.relative(process.cwd(), entryFilePath);
@@ -77,7 +67,7 @@ module.exports = class SassTool {
         print(chalk.yellow(`Using Entrypoint: ${modifiedRelativeFilePath}`));
 
         const replacedText = content.replace(placeholderRegex, (match, captureGroup1) => {
-            const resolvedFilePaths = this.resolveAllFilePathsFromMutlipleAddons(`src/scss/${captureGroup1}`) || [];
+            const resolvedFilePaths = resolveAllFilePathsFromMutlipleAddons(`src/scss/${captureGroup1}`) || [];
 
             // Everything but variables should be oldest to youngest.
             if (!/variables/.test(captureGroup1)) {
@@ -110,8 +100,8 @@ module.exports = class SassTool {
      * @return {string} A resolved absolute file path.
      * @throws {Error} If the file couldn't be resolved anywhere.
      */
-    resolveOneFilePathFromMutlipleAddons(requestPath) {
-        for (const srcDirectory of this.sourceDirectories) {
+    function resolveOneFilePathFromMutlipleAddons(requestPath) {
+        for (const srcDirectory of sourceDirectories) {
             const lookupPath = path.join(srcDirectory, requestPath);
 
             if (fs.existsSync(lookupPath)) {
@@ -131,10 +121,10 @@ module.exports = class SassTool {
      * @return {string} A resolved absolute file path.
      * @throws {Error} If the file couldn't be resolved anywhere.
      */
-    resolveAllFilePathsFromMutlipleAddons(requestPath) {
+    function resolveAllFilePathsFromMutlipleAddons(requestPath) {
         const paths = [];
 
-        for (const srcDirectory of this.sourceDirectories) {
+        for (const srcDirectory of sourceDirectories) {
             const lookupPath = path.join(srcDirectory, requestPath);
 
             if (fs.existsSync(lookupPath)) {
@@ -156,10 +146,10 @@ module.exports = class SassTool {
      * @returns {string} The resolved absolute file path.
      * @throws {Error} If no file can be located.
      */
-    resolveFilePathInNodeModules(requestPath) {
+    function resolveFilePathInNodeModules(requestPath) {
         const moduleBasePath = path.join("node_modules", requestPath);
         const packageJsonPath = path.join(moduleBasePath, 'package.json');
-        const resolvedPath = this.resolveOneFilePathFromMutlipleAddons(moduleBasePath);
+        const resolvedPath = resolveOneFilePathFromMutlipleAddons(moduleBasePath);
 
         if (!resolvedPath) {
             throw new Error(`Failed css node_module lookup. Package ${jsonPath}} not found.`);

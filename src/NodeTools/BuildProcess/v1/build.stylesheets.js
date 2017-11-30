@@ -13,7 +13,7 @@ const autoprefixer = require("gulp-autoprefixer");
 const size = require("gulp-size");
 const modifyFile = require("gulp-modify-file");
 const { print, printVerbose, printError } = require("../../library/utility");
-const SassTool = require('../../library/SassTool');
+const { createSassTool } = require('../../library/SassTool');
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
@@ -38,7 +38,7 @@ function swallowError(error) {
 module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
     const allSrcDirectories = [primaryDirectory, ...secondaryDirectories];
     const destination = path.resolve(primaryDirectory, "design");
-    const sassTool = new SassTool(allSrcDirectories);
+    const sassTool = createSassTool(allSrcDirectories);
 
     return gulp
         .src(getSourceFiles())

@@ -15,6 +15,7 @@ const merge = require("webpack-merge");
 const gulp = require("gulp");
 const chalk = require("chalk");
 const {print, printError} = require("../../library/utility");
+const babelPreset = require('../../library/babel.preset');
 
 /**
  * Create the javascript build process.
@@ -59,8 +60,8 @@ module.exports = (addonDirectory, options) => () => {
                         {
                             loader: "babel-loader",
                             options: {
-                                presets: path.resolve(__dirname, "../../node_modules/babel-preset-env"),
-                                cacheDirectory: true
+                                ...babelPreset,
+                                cacheDirectory: true,
                             }
                         }
                     ]
