@@ -13,6 +13,7 @@
         "babel-preset-react": "^6.24.1",
         "chalk": "^2.3.0",
         "chokidar": "^1.7.0",
+        "cross-spawn": "^5.1.0",
         "gulp-modify-file": "^1.0.0",
         "inquirer": "^4.0.1",
         "uglifyjs-webpack-plugin": "^1.1.2",

@@ -26,16 +26,16 @@ class BuildCmd extends NodeCommandBase {
      *
      * - process: 'legacy' | '1.0'
      * - cssTool: 'scss' | 'less'
-     * - js.entry: Object A mapping of chunkname -> entrypoint.
+     * - entries: Object - A mapping of chunkname -> entrypoint.
+     * - exports: array - An array of files/modules to expose to dependant build processes.
      */
     private $defaultConfigurationOptions = [
         'process' => 'legacy',
         'cssTool' => 'scss',
-        'js' => [
-            'entry' => [
-                'custom' => 'index.js',
-            ],
+        'entries' => [
+            'custom' => 'index.js',
         ],
+        'exports' => [],
     ];
 
     /** @var array An array of addon configurations to build with. */

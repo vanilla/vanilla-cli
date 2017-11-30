@@ -9,13 +9,11 @@ const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 const chalk = require('chalk');
 
-const {print} = require("../../library/utility");
+const { print, sleep } = require("../../library/utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
-
-const addonpath = process.cwd();
 
 /**
  * @var Object The options passed from the PHP process.
@@ -39,7 +37,7 @@ parentDirectories.forEach(parent => {
 });
 print('');
 
-gulp.task("build:js", buildJs(addonpath, options));
+gulp.task("build:js", buildJs(primaryDirectory, options));
 
 gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
 
@@ -52,10 +50,10 @@ gulp.task("watch", ["build"], () => {
 
     gulp.watch(
         [
-            path.resolve(addonpath, "design/*.css"),
-            path.resolve(addonpath, "design/images/**/*"),
-            path.resolve(addonpath, "js/*.js"),
-            path.resolve(addonpath, "views/**/*"),
+            path.resolve(primaryDirectory, "design/*.css"),
+            path.resolve(primaryDirectory, "design/images/**/*"),
+            path.resolve(primaryDirectory, "js/*.js"),
+            path.resolve(primaryDirectory, "views/**/*"),
         ],
         file => {
             return livereload.changed(file.path);

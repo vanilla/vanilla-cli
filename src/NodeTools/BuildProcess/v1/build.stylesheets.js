@@ -13,7 +13,7 @@ const autoprefixer = require("gulp-autoprefixer");
 const size = require("gulp-size");
 const modifyFile = require("gulp-modify-file");
 const { print, printVerbose, printError } = require("../../library/utility");
-const { createSassTool } = require('../../library/SassTool');
+const { createSassTool } = require('../../library/sassTool');
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
