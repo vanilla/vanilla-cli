@@ -174,6 +174,7 @@ class BuildCmd extends NodeCommandBase {
      * Currently checks
      * - that csstool is v1 only.
      * - Maps `process` 1.0 -> v1.
+     * - Check if the addon has a less folder but no cssTool specified.
      *
      * @param Args $args
      */
@@ -198,13 +199,27 @@ class BuildCmd extends NodeCommandBase {
         }
 
         $finalBuildConfig = $this->addonBuildConfigs[0];
+        $finalAddonDirectory = $this->addonRootDirectories[0];
+        $isCssToolLess = $finalBuildConfig['cssTool'] === 'less';
+        $isCssToolScss = $finalBuildConfig['cssTool'] === 'scss';
+        $lessFolderExists = file_exists($finalAddonDirectory."src/less");
+        $scssFolderExists = file_exists($finalAddonDirectory."src/scss");
 
-        if ($finalBuildConfig['cssTool'] === 'less' && $finalBuildConfig['process'] === 'legacy') {
+        if ($isCssToolLess && $finalBuildConfig['process'] === 'legacy') {
             CliUtil::fail('The CSSTool option `less` is not available for the legacy build process.');
         }
 
-        if ($finalBuildConfig['cssTool'] === 'less' && count($this->addonBuildConfigs) > 1) {
+        if ($isCssToolLess && count($this->addonBuildConfigs) > 1) {
             CliUtil::fail('The CSSTool option `less` is not available with parent themes.');
+        }
+
+        if ($isCssToolScss && $lessFolderExists && !$scssFolderExists) {
+            CliUtil::fail(
+                'The CSSTool option "scss" was provided, but the "src/scss" folder could not be found.'.PHP_EOL.
+                'A "src/less" folder was found. If you would like to build less files either:'.PHP_EOL.
+                ' - Set the "build.cssTool" in your "addon.json" file.'.PHP_EOL.
+                ' - pass "-csstool="less" as an argument to the build command.'
+            );
         }
     }
 

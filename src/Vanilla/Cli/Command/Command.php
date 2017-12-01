@@ -68,11 +68,11 @@ class Command {
         $potentialSrcDirectory = $args->getOpt('vanillasrc', getenv('VANILLACLI_VANILLA_SRC_DIR'));
 
         if (!$potentialSrcDirectory) {
-            CliUtil::fail('Vanilla source directory is missing.');
+            CliUtil::fail('Vanilla source directory is missing.'.PHP_EOL.'Please provide a path to your vanilla installation with the "--vanillasrc" parameter or by setting the VANILLACLI_VANILLA_SRC_DIR environmental variable.');
         }
 
         if (!is_dir($potentialSrcDirectory)) {
-            CliUtil::fail('Vanilla source directory is not a valid directory.');
+            CliUtil::fail('The provided vanilla src directory could not be found. Verify that you are providing a valid directory.'.PHP_EOL."The provided directory was $potentialSrcDirectory");
         }
 
         $this->vanillaSrcDir = realpath($potentialSrcDirectory);
