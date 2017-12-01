@@ -84,7 +84,6 @@ module.exports = (addonDirectory, options) => () => {
     };
 
     const webpackDevConfig = merge(webpackBaseConfig, {
-        watch: true,
         cache: true,
         devtool: "eval-source-map",
         plugins: [
