@@ -54,7 +54,10 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
     return new Promise((resolve, reject) => {
         const task = spawn(command, args, options);
 
-        task.on("close", () => {
+        task.on("close", (code) => {
+            if (code !== 0) {
+                reject(new Error(`command "${command} exited with a non-zero status code."`))
+            }
             return resolve(true);
         });
 
@@ -106,6 +109,16 @@ function printVerbose(contents) {
  */
 function printError(error) {
     console.error(chalk.bold.red(error.toString()));
+}
+
+/**
+ * Log an error to STDERR. Colored red if ANSI codes are supported.
+ *
+ * @param {string|Error} error - The error or string to print out.
+ */
+function fail(error) {
+    console.error(chalk.bold.red(error.toString()));
+    process.exit(1);
 }
 
 /**

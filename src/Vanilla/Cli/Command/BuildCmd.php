@@ -102,6 +102,11 @@ class BuildCmd extends NodeCommandBase {
         }
 
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
+
+        if (!$addonJson) {
+            return;
+        }
+
         $logger = new LogFormatter();
         $logger = $logger->setDateFormat('');
 
@@ -189,7 +194,7 @@ class BuildCmd extends NodeCommandBase {
         foreach($requiredIdenticalKeys as $requiredIdenticalKey) {
             $simplifiedArray = array_column($this->addonBuildConfigs, $requiredIdenticalKey);
 
-            if (count(array_unique($simplifiedArray)) !== 1) {
+            if (count(array_unique($simplifiedArray)) > 1) {
                 $passedValues = implode(", ", array_unique($simplifiedArray));
 
                 CliUtil::fail(

@@ -1,0 +1,27 @@
+{
+    "name": "vanilla-cli",
+    "description": "The vanilla-cli tool.",
+    "repository": "git@github.com:vanilla/vanilla-cli.git",
+    "author": "Adam Charron <adam@charrondev.com>",
+    "license": "MIT",
+    "private": true,
+    "devDependencies": {
+        "del": "^3.0.0",
+        "jest": "^21.2.1"
+    },
+    "scripts": {
+        "test": "jest"
+    },
+    "jest": {
+        "testMatch": [
+            "**/tests/**/*.js?(x)"
+        ],
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/tests/fixtures/"
+        ]
+    },
+    "dependencies": {
+        "@types/jest": "^21.1.8"
+    }
+}
