@@ -6,7 +6,7 @@
 
 const path = require("path");
 const fs = require("fs");
-const chalk = require('chalk');
+const chalk = require('chalk').default;
 const { spawn } = require("child_process");
 
 module.exports = {
@@ -16,34 +16,29 @@ module.exports = {
     printVerbose,
     printError,
     sleep,
+    getJsonFileForDirectory
 };
-
-/**
- * Fetch and parse the package json file in the given directory
- *
- * @param {string} addonDirectory The directory to read from
- *
- * @async
- * @returns Object|boolean
- */
-function getPackageJson(addonDirectory) {
-    const packagePath = path.resolve(addonDirectory, "./package.json");
-
-    return new Promise(resolve => {
-        fs.readFile(packagePath, "utf8", (err, data) => {
-            if (err) {
-                return resolve(false);
-            }
-
-            const packageInfo = JSON.parse(data);
-            resolve(packageInfo);
-        });
-    });
-}
 
 const defaultSpawnOptions = {
     stdio: "inherit",
 };
+
+/**
+ * Get a json file from
+ *
+ * @param {string} directory - The directory to look in.
+ * @param {string} jsonName - the name of the json file wihtout .json
+ *
+ * @return {Object} The file contents as an object.
+ */
+function getJsonFileForDirectory(directory, jsonName) {
+    const jsonPath = path.resolve(directory, `${jsonName}.json`);
+    if (!fs.existsSync(jsonPath)) {
+        printError(`Unable to require JSON file ${chalk.yellow(jsonPath)}. Does not exist`);
+    }
+
+    return JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+}
 
 /**
  * Spawn a child build process. Wraps child_process.spawn.
@@ -110,7 +105,7 @@ function printVerbose(contents) {
  * @param {string|Error} error - The error or string to print out.
  */
 function printError(error) {
-    console.error(chalk.bold.red(error));
+    console.error(chalk.bold.red(error.toString()));
 }
 
 /**

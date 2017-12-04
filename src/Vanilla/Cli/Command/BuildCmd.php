@@ -80,7 +80,9 @@ class BuildCmd extends NodeCommandBase {
         $processOptions = [
             'buildOptions' => $this->addonBuildConfigs[0],
             'rootDirectories' => $this->addonRootDirectories,
+            'requiredDirectories' => $this->getRequiredAddonDirectories(),
             'watch' => $args->getOpt('watch') ?: false,
+            'vanillaDirectory' => $this->vanillaSrcDir,
         ];
 
         $this->spawnNodeProcessFromPackageMain(
@@ -221,6 +223,34 @@ class BuildCmd extends NodeCommandBase {
                 ' - pass "-csstool="less" as an argument to the build command.'
             );
         }
+    }
+
+    /**
+     * Get the directories of any required addons.
+     *
+     * @return array
+     */
+    protected function getRequiredAddonDirectories() {
+        $baseDirectory = $this->addonRootDirectories[0];
+        $addonJson = CliUtil::getAddonJsonForDirectory($baseDirectory);
+        $requirements = array_key_exists('require', $addonJson)
+            ? array_keys($addonJson['require'])
+            : [];
+
+        // Everything builds against core by default
+        $requiredDirectories = [$this->vanillaSrcDir.'/core'];
+
+        foreach($requirements as $requirement) {
+            $addonPath = $this->vanillaSrcDir.'/addons/'.$requirement;
+
+            if (file_exists) {
+                $requiredDirectories[] = $addonPath;
+            } else {
+                CliUtil::fail("Could not find required addon $requirement in directory $addonPath");
+            }
+        }
+
+        return $requiredDirectories;
     }
 
     /**

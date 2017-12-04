@@ -4,22 +4,33 @@
  */
 
 const path = require("path");
+const fs = require('fs');
 const webpack = require("webpack");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const merge = require("webpack-merge");
 const babelPreset = require("./babel.preset");
 
 module.exports = {
-    createBaseConfig
+    createBaseConfig,
+    createWebpackAliasesForDirectory,
 };
 
-function createBaseConfig(buildRoot, isDevMode) {
+/**
+ * Create the base configuration for webpack builds.
+ *
+ * Notably this is missing entry/output configs. Be sure to provide those.
+ *
+ * @param {string} buildRoot - The root path of the addon being built.
+ * @param {boolean} isDevMode - Which way to build.
+ *
+ */
+function createBaseConfig(buildRoot, isDevMode, shouldUglify = true) {
     const commonConfig = {
         module: {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: [path.resolve(buildRoot, "./src/js")],
+                    include: [path.join(buildRoot, "./src/js")],
                     exclude: ["node_modules"],
                     use: [
                         {
@@ -34,7 +45,7 @@ function createBaseConfig(buildRoot, isDevMode) {
             ]
         },
         resolve: {
-            modules: [path.resolve(buildRoot, "node_modules"), path.resolve(buildRoot, "./src/js")],
+            modules: [path.join(buildRoot, "src/js"), path.join(buildRoot, "node_modules")],
             extensions: [".js", ".jsx"]
         },
 
@@ -52,20 +63,15 @@ function createBaseConfig(buildRoot, isDevMode) {
     };
 
     const devConfig = {
-        watch: true,
         cache: true,
         devtool: "eval-source-map",
         plugins: [
-            // “If you are using the CLI, the webpack process will not exit with an error code by enabling this plugin.”
-            // https://github.com/webpack/docs/wiki/list-of-plugins#noerrorsplugin
+            // Prevent a bad build from crashing the process.
             new webpack.NoEmitOnErrorsPlugin(),
             // Some libraries have dev enviroment specific behaviour
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify("development")
             })
-            // new webpack.LoaderOptionsPlugin({
-            //     debug: true
-            // })
         ]
     };
 
@@ -75,12 +81,35 @@ function createBaseConfig(buildRoot, isDevMode) {
             // NODE_ENV should be production so that modules do not perform certain development checks
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify("production")
-            }),
-            new UglifyJsPlugin({
-                sourceMap: true
             })
         ]
     };
 
+    // @ts-ignore
     return merge(commonConfig, isDevMode ? devConfig : prodConfig);
+}
+
+/**
+ * Create a webpack alias object. One for each sub-folder name.
+ *
+ * Ex. /workspace/vanilla/applications => @applications/dashboard, @applications/vanilla
+ *
+ * @param {string} directory - And absolute file path to create aliases for.
+ */
+function createWebpackAliasesForDirectory(directory) {
+    const prefix = path.basename(directory);
+    const subDirectories = fs.readdirSync(directory);
+
+    console.log(prefix);
+
+    if (prefix === 'core') {
+        return {
+            "@core": directory,
+        };
+    }
+
+    return subDirectories.reduce((aliases, subDir) => {
+        aliases[`@${prefix}/${subDir}`] = path.join(directory, subDir);
+        return aliases;
+    }, {});
 }

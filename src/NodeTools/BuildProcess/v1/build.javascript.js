@@ -12,16 +12,15 @@ const webpack = require("webpack");
 const stream = require("webpack-stream");
 const merge = require("webpack-merge");
 const gulp = require("gulp");
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 const { print, printError } = require("../../library/utility");
 const { createBaseConfig } = require("../../library/webpack");
-const babelPreset = require("../../library/babel.preset");
 
 /**
  * Create the javascript build process.
  *
  * @param {string} addonDirectory - The directory to build from.
- * @param {options} options - The build options.
+ * @param {Object} options - The build options.
  *
  * @return {function} A gulp execution function.
  */
@@ -55,8 +54,16 @@ module.exports = (addonDirectory, options) => callback => {
         }
     };
 
+    if (options.watch) {
+        v1Config.plugins.push(
+            new UglifyJsPlugin({
+                sourceMap: true
+            })
+        );
+    }
+
     const baseConfig = createBaseConfig(addonDirectory, options.watch);
-    const finalConfig = merge(baseConfig, v1Config);
+    const finalConfig = merge(baseConfig, v1Config);)
 
     return gulp
         .src("")

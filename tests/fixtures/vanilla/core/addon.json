@@ -1,0 +1,14 @@
+{
+    "key": "core",
+    "build": {
+        "process": "core",
+        "entries": {
+            "core.bundle.js": "core.js",
+            "core-admin.bundle.js": "core-admin.js"
+        },
+        "exports": {
+            "core": ["Garden.js", "react"],
+            "core-admin": ["Garden.js", "react"]
+        }
+    }
+}

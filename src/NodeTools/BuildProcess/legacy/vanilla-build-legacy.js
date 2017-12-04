@@ -4,7 +4,7 @@
  */
 
 const argv = require("yargs").argv;
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 const path = require("path");
 const fs = require("fs");
 const { spawn, exec } = require("child_process");
@@ -137,10 +137,10 @@ async function checkGlobalNodeDependancyInstalled(packageName) {
 /**
  * Conditionally run an npm task if it exists
  *
- * @returns {boolean} Whether or not the task existed
+ * @returns {Promise<boolean>} Whether or not the task existed
  */
 async function runNpmTaskIfExists() {
-    const packageJson = await utility.getPackageJson(workingDirectory);
+    const packageJson = utility.getJsonFileForDirectory(workingDirectory, 'package');
 
     if (!packageJson) {
         isVerbose &&
@@ -190,7 +190,7 @@ async function runNpmTaskIfExists() {
 /**
  * Conditionally run a gulp task if it exists.
  *
- * @returns {undefined}
+ * @returns {Promise<boolean>}
  */
 async function runGulpTaskIfExists() {
     const gulpFilePath = path.resolve(workingDirectory, "gulpfile.js");

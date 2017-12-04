@@ -1,6 +1,9 @@
 {
     "compilerOptions": {
-        "checkJs": true
+        "checkJs": true,
+        "lib": [
+            "es2017"
+        ]
     },
     "exclude": [
         "node_modules"

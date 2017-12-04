@@ -35,7 +35,12 @@ print(`Starting build process ${chalk.green('v1')} for addon at ${chalk.yellow(p
 parentDirectories.forEach(parent => {
     print(`Parent addon found at ${chalk.yellow(parent)}.`);
 });
-print('');
+
+const devModeWarning = chalk.bold.yellow(`
+WARNING The process is starting in watch/dev mode. Be sure to run a production build before commiting your changes by running this command with the '--watch' option.
+`);
+
+print(options.watch ? devModeWarning : '');
 
 gulp.task("build:js", buildJs(primaryDirectory, options));
 

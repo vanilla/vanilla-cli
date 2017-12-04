@@ -14,11 +14,16 @@
         "chalk": "^2.3.0",
         "chokidar": "^1.7.0",
         "cross-spawn": "^5.1.0",
+        "glob": "^7.1.2",
         "gulp-modify-file": "^1.0.0",
         "inquirer": "^4.0.1",
+        "pattern-replace-loader": "^1.0.4",
         "uglifyjs-webpack-plugin": "^1.1.2",
         "webpack": "^3.9.1",
         "webpack-merge": "^4.1.1",
         "yargs": "^10.0.3"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.53"
     }
 }

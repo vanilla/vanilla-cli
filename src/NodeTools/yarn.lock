@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/node@^8.0.53":
+  version "8.0.53"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.53.tgz#396b35af826fa66aad472c8cb7b8d5e277f4e6d8"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -2814,6 +2818,12 @@ path-type@^2.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-2.0.0.tgz#f012ccb8415b7096fc2daa1054c3d72389594c73"
   dependencies:
     pify "^2.0.0"
+
+pattern-replace-loader@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/pattern-replace-loader/-/pattern-replace-loader-1.0.4.tgz#b25a2fe39a0f31e12d1e4f7847b93560d0e1fb2f"
+  dependencies:
+    loader-utils "^1.0.2"
 
 pbkdf2@^3.0.3:
   version "3.0.14"
