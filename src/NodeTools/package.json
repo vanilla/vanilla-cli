@@ -19,11 +19,11 @@
         "inquirer": "^4.0.1",
         "pattern-replace-loader": "^1.0.4",
         "uglifyjs-webpack-plugin": "^1.1.2",
-        "webpack": "^3.9.1",
+        "webpack": "^3.10.0",
         "webpack-merge": "^4.1.1",
         "yargs": "^10.0.3"
     },
     "devDependencies": {
-        "@types/node": "^8.0.53"
+        "@types/node": "^8.0.54"
     }
 }

@@ -2,9 +2,15 @@
 # yarn lockfile v1
 
 
-"@types/node@^8.0.53":
-  version "8.0.53"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.53.tgz#396b35af826fa66aad472c8cb7b8d5e277f4e6d8"
+"@types/events@*":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/events/-/events-1.1.0.tgz#93b1be91f63c184450385272c47b6496fd028e02"
+
+"@types/node@^8.0.54":
+  version "8.0.54"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.54.tgz#3fd9357db4af388b79e03845340259440edffde6"
+  dependencies:
+    "@types/events" "*"
 
 abbrev@1:
   version "1.1.1"
@@ -3670,9 +3676,9 @@ webpack-sources@^1.0.1:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
 
-webpack@^3.9.1:
-  version "3.9.1"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.9.1.tgz#9a60aa544ed5d4d454c069e3f521aa007e02643c"
+webpack@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.10.0.tgz#5291b875078cf2abf42bdd23afe3f8f96c17d725"
   dependencies:
     acorn "^5.0.0"
     acorn-dynamic-import "^2.0.0"

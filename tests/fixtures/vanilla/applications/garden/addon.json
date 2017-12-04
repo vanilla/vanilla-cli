@@ -3,7 +3,7 @@
     "build": {
         "process": "core",
         "entries": {
-            "myplugin.bundle.js": "index.js"
+            "garden.bundle.js": "index.js"
         }
     }
 }

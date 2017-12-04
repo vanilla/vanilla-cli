@@ -17,7 +17,8 @@ const {
     printError,
     printVerbose,
     spawnChildProcess,
-    getJsonFileForDirectory
+    getJsonFileForDirectory,
+    sleep,
 } = require("../../library/utility");
 
 /**
@@ -59,7 +60,7 @@ console.log("Verifying node_module installation.");
 installNodeModules()
     .then(() => print(chalk.green("Node modules verified.")))
     .catch(handleNodeModuleError)
-    .then(runWebPack)
+    .then(runAllValidWebpackConfigs)
     .catch(printError);
 
 async function installNodeModules() {
@@ -116,15 +117,22 @@ function isValidEntryPoint(entry) {
     return false;
 }
 
-async function runWebPack() {
-    const baseConfig = createBaseConfig(primaryDirectory, options.watch, false);
-    const { entries, exports } = options.buildOptions;
+/**
+ * Create export configuration for webpack.
+ *
+ * This configuration is builds all files defined in `addonJson.build.exports`.
+ * It never runs in watch mode. If a file has both entries and exports the
+ * exports must be run first.
+ */
+async function createExportsConfig() {
+    const baseConfig = createBaseConfig(primaryDirectory, false, false);
+    const { exports } = options.buildOptions;
 
-    /**
-     * Configuration options to generate DLL bundles.
-     * Use the "exports" defined in the addon.json as entries.
-     */
-    const exportConfig = merge(baseConfig, {
+    if (!isValidEntryPoint(exports)) {
+        return;
+    }
+
+    return merge(baseConfig, {
         entry: exports,
         output: {
             path: path.resolve(primaryDirectory, "js"),
@@ -139,10 +147,26 @@ async function runWebPack() {
             })
         ]
     });
+}
+
+/**
+ * Create entries configuration for webpack.
+ *
+ * This configuration is builds all files defined in `addonJson.build.entries`.
+ * If a file has both entries and exports the exports must be run first.
+ *
+ * @return {Promise<?Object>} - A webpack config or undefined if their were no entries.
+ */
+async function createEntriesConfig() {
+    const baseConfig = createBaseConfig(primaryDirectory, options.watch, false);
+    const { entries } = options.buildOptions;
+
+    if (!isValidEntryPoint(entries)) {
+        return;
+    }
 
     const dllPlugins = [];
     let aliases = {};
-    console.log(options.requiredDirectories);
 
     for (let directory of options.requiredDirectories) {
         const manifestPaths = await getManifestPathsForDirectory(directory);
@@ -151,7 +175,6 @@ async function runWebPack() {
             const plugin = new webpack.DllReferencePlugin({
                 context: vanillaDirectory,
                 manifest: require(manifest)
-                // scope: getNamespaceFromManifestFile(manifest)
             });
 
             dllPlugins.push(plugin);
@@ -168,11 +191,7 @@ async function runWebPack() {
 
     printVerbose("Using aliases:\n" + JSON.stringify(aliases));
 
-    /**
-     * Configuration options to build against DLL bundles.
-     * Use the "entries" defined in the addon.json as entries.
-     */
-    const entriesConfig = merge(baseConfig, {
+    return merge(baseConfig, {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
@@ -183,37 +202,47 @@ async function runWebPack() {
         },
         plugins: dllPlugins
     });
+}
 
-    // // Replace the @something/modules/moduleName with @something/../../node_modules/moduleName
-    // // @ts-ignore
-    // entriesConfig.module.rules[0].use.unshift({
-    //     loader: 'pattern-replace-loader',
-    //     query: {
-    //         search: /(@.*\/)(modules\/)(.*)/gm,
-    //         replace: "$1../../node_modules/$3",
-    //     }
-    // });
+/**
+ * Run a single webpack config.
+ *
+ * @param {Object} config - A valid webpack config.
+ */
+function runSingleWebpackConfig(config) {
+    return new Promise((resolve, reject) => {
+        const compiler = webpack(config);
+        compiler.run((err, stats) => {
+            if (err) {
+                reject("The build encountered an error:" + err);
+            }
 
-    const configsToRun = [];
-
-    if (isValidEntryPoint(entries)) {
-        configsToRun.push(entriesConfig);
-    }
-
-    if (isValidEntryPoint(exports)) {
-        configsToRun.push(exportConfig);
-    }
-
-    webpack(configsToRun, (err, stats) => {
-        if (err) {
-            printError("The build encountered an error:" + err);
-        }
-
-        print(
-            stats.toString({
-                chunks: false, // Makes the build much quieter
-                colors: true // Shows colors in the console
-            })
-        );
+            print(
+                stats.toString({
+                    chunks: false, // Makes the build much quieter
+                    colors: true // Shows colors in the console
+                })
+            );
+            resolve();
+        });
     });
+}
+
+/**
+ * Create and run the the webpack configuration
+ */
+async function runAllValidWebpackConfigs() {
+    const exportsConfig = await createExportsConfig();
+
+    if (exportsConfig) {
+        await runSingleWebpackConfig(exportsConfig);
+    }
+
+    // The entries config MUST be created after the first process has completed
+    // or it will not be able to build against it.
+    const entriesConfig = await createEntriesConfig();
+
+    if (entriesConfig) {
+        await runSingleWebpackConfig(entriesConfig);
+    }
 }

@@ -73,8 +73,9 @@ class BuildCmd extends NodeCommandBase {
     public final function run(Args $args) {
         parent::run($args);
 
-        $this->getBuildOptionsFromArgs($args);
-        $this->getAddonJsonBuildOptions();
+        $this->setBuildOptionsFromArgs($args);
+        $this->setAddonJsonBuildOptions();
+        $this->setDefaultBuildOptions();
         $this->validateBuildOptions();
 
         $processOptions = [
@@ -96,7 +97,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJsonBuildOptions($rootDirectory = null) {
+    protected function setAddonJsonBuildOptions($rootDirectory = null) {
         if (!$rootDirectory) {
             $rootDirectory = getcwd();
         }
@@ -153,7 +154,7 @@ class BuildCmd extends NodeCommandBase {
                 CliUtil::fail("The parent theme with the key `$parentThemeKey` could not be found in the vanilla installation at `$vanillaSrcDir`.");
             }
 
-            $this->getAddonJsonBuildOptions($parentAddonDirectory);
+            $this->setAddonJsonBuildOptions($parentAddonDirectory);
         }
     }
 
@@ -162,7 +163,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @param Args $args The CLI arguments.
      */
-    protected function getBuildOptionsFromArgs(Args $args) {
+    protected function setBuildOptionsFromArgs(Args $args) {
         $processArg = $args->getOpt('process') ?: false;
         $cssToolArg = $args->getOpt('csstool');
 
@@ -172,6 +173,18 @@ class BuildCmd extends NodeCommandBase {
 
         if ($cssToolArg) {
             $this->defaultConfigurationOptions['cssTool'] = $cssToolArg;
+        }
+    }
+
+    /**
+     * Set the default build options if no options have been passed.
+     *
+     * @return void
+     */
+    protected function setDefaultBuildOptions() {
+        if (count($this->addonBuildConfigs) === 0) {
+            array_push($this->addonBuildConfigs, $this->defaultConfigurationOptions);
+            array_push($this->addonRootDirectories, getcwd());
         }
     }
 
@@ -238,6 +251,11 @@ class BuildCmd extends NodeCommandBase {
     protected function getRequiredAddonDirectories() {
         $baseDirectory = $this->addonRootDirectories[0];
         $addonJson = CliUtil::getAddonJsonForDirectory($baseDirectory);
+
+        if (!$addonJson) {
+            return [];
+        }
+
         $requirements = array_key_exists('require', $addonJson)
             ? array_keys($addonJson['require'])
             : [];
