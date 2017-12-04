@@ -12,8 +12,9 @@ const baseOptions = ["build", "--process", "core"];
 
 function clearBuiltFiles() {
     del([
-        path.join(__dirname, "./fixtures/vanilla/core/js/*.js"),
-        path.join(__dirname, "./fixtures/vanilla/core/js/*.map")
+        path.join(__dirname, "**/js/*.bundle.*"),
+        path.join(__dirname, "**/js/lib.*.*"),
+        path.join(__dirname, "**/manifests/**"),
     ]);
 }
 

@@ -18,3 +18,4 @@ vanilla.lock.json
 tests/**/design
 tests/**/js/*.bundle.*
 tests/**/js/lib.*.*
+tests/**/manifests/**
