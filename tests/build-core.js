@@ -26,12 +26,11 @@ function clearBuiltFiles() {
         path.join(__dirname, "**/js/lib.*.*"),
         path.join(__dirname, "**/manifests/**")
     ]);
-
-    process.chdir(orignalCWD);
 }
 
 afterAll(() => {
     clearBuiltFiles();
+    process.chdir(orignalCWD);
 });
 
 const buildOptions = [...baseOptions, "--vanillasrc", path.resolve(__dirname, "./fixtures/vanilla/")];

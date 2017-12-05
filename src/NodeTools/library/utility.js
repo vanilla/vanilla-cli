@@ -95,6 +95,7 @@ function print(contents) {
  * @param {string} contents - What to print out.
  */
 function printVerbose(contents) {
+    // @ts-ignore
     const isVerbose = global.verbose || false;
 
     if (isVerbose) {
