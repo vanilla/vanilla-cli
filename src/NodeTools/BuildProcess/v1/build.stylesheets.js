@@ -80,7 +80,7 @@ module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
     /**
      * Get the proper stylesheet tool. Currently supports less & sass.
      *
-     * @return {Gulp.Plugin} A gulp plugin.
+     * @return {any} A gulp plugin.
      */
     function getStyleSheetBuilder() {
         if (cssTool === "less") {

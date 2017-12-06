@@ -104,4 +104,8 @@ describe("Build 'vanilla/applications/vanilla'", () => {
         const outputContents = fs.readFileSync(path.join(gardenAddonDirectory, "js/garden.bundle.js"), "utf8");
         expect(outputContents).not.toContain("@license React");
     });
+
+    test("the admin build only builds on top of the admin lib", () => {
+
+    });
 })
