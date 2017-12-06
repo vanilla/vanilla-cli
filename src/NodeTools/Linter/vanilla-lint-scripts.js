@@ -21,8 +21,11 @@ module.exports = lintScripts;
  */
 async function lintScripts(files, eslintOptions) {
     const eslint = new CLIEngine(eslintOptions);
+    const filesWithoutStyles = files.filter(fileName => {
+        return !/.scss$/.test(fileName)
+    });
 
-    const report = eslint.executeOnFiles(files);
+    const report = eslint.executeOnFiles(filesWithoutStyles);
     const formatter = eslint.getFormatter("stylish");
 
     print("\nJavascript Lint Results:");
