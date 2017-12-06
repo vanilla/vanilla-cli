@@ -83,7 +83,7 @@ startProcess()
  *
  * @async
  *
- * @returns {void}
+ * @returns {Promise<void>}
  */
 async function startProcess() {
     if (options.shouldLintStyles) {

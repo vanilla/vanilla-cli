@@ -22,7 +22,12 @@ module.exports = fixScripts;
  */
 async function fixScripts(files, eslintOptions) {
     const cli = new CLIEngine(eslintOptions);
-    const report = cli.executeOnFiles(files);
+
+    const filesWithoutStyles = files.filter(fileName => {
+        return !/.scss$/.test(fileName)
+    });
+
+    const report = cli.executeOnFiles(filesWithoutStyles);
 
     if (report && (report.errorCount > 0 || report.warningCount > 0)) {
 
