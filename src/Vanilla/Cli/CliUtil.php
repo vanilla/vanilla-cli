@@ -56,6 +56,8 @@ class CliUtil {
             }
 
             return $addonJson;
+        } else {
+            CliUtil::fail("No addon.json file was found. Make sure that you are in an addon's directory");
         }
     }
 }

@@ -62,7 +62,9 @@ gulp.task("watch", ["build"], () => {
         }
     );
 
-    gulp.watch(path.resolve(addonpath, "src/**/*.scss"), ["build:styles"]);
+    const { cssTool } = options.buildOptions;
+
+    gulp.watch(path.resolve(addonpath, `src/**/*.${cssTool}`), ["build:styles"]);
     gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
     gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
 
