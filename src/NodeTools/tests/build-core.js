@@ -8,10 +8,10 @@ const del = require("del");
 const glob = require("glob-promise");
 const fs = require("fs");
 
-const { spawnChildProcess, getJsonFileForDirectory } = require("../src/NodeTools/library/utility");
+const { spawnChildProcess, getJsonFileForDirectory } = require("../library/utility");
 
 // Fixtures
-const vanillaExecutablePath = path.resolve(__dirname, "../bin/vanilla");
+const vanillaExecutablePath = path.resolve(__dirname, "../../../bin/vanilla");
 const coreAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/core");
 const coreAddonJson = getJsonFileForDirectory(coreAddonDirectory, "addon");
 const gardenAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/applications/garden");

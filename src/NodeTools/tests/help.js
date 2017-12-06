@@ -4,9 +4,9 @@
  */
 
 const path = require("path");
-const { spawnChildProcess } = require('../src/NodeTools/library/utility');
+const { spawnChildProcess } = require('../library/utility');
 
-const vanillaExecutablePath = path.resolve(__dirname, "../bin/vanilla");
+const vanillaExecutablePath = path.resolve(__dirname, "../../../bin/vanilla");
 
 it("runs and exits cleanly", () => {
     expect.assertions(1);

@@ -24,6 +24,26 @@
         "yargs": "^10.0.3"
     },
     "devDependencies": {
-        "@types/node": "^8.0.54"
+        "@types/jest": "^21.1.8",
+        "@types/node": "^8.0.55",
+        "del": "^3.0.0",
+        "glob": "^7.1.2",
+        "glob-promise": "^3.3.0",
+        "jest": "^21.2.1"
+    },
+    "scripts": {
+        "test": "jest"
+    },
+    "jest": {
+        "testMatch": [
+            "**/tests/**/*.js?(x)"
+        ],
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/tests/fixtures/"
+        ],
+        "watchPathIgnorePatterns": [
+            "/tests/fixtures/"
+        ]
     }
 }
