@@ -6,6 +6,7 @@
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
     "dependencies": {
+        "autoprefixer": "^7.2.1",
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -17,7 +18,9 @@
         "glob": "^7.1.2",
         "gulp-modify-file": "^1.0.0",
         "inquirer": "^4.0.1",
+        "node-sass": "^4.7.2",
         "pattern-replace-loader": "^1.0.4",
+        "postcss": "^6.0.14",
         "uglifyjs-webpack-plugin": "^1.1.2",
         "webpack": "^3.10.0",
         "webpack-merge": "^4.1.1",

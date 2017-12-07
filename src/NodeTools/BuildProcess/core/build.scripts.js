@@ -70,11 +70,6 @@ function getManifestPathsForDirectory(directory) {
     });
 }
 
-function getNamespaceFromManifestFile(filePath) {
-    const fileName = path.basename(filePath).replace(".export-manifest.json", "");
-    return "@" + fileName;
-}
-
 /**
  * Create export configuration for webpack.
  *
