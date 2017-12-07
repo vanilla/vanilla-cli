@@ -14,7 +14,7 @@ const imagemin = require("gulp-imagemin");
  * Gulp build process for images.
  *
  * @param {string} addonDirectory - The directory to build from.
- * @param {options} options - The build options.
+ * @param {Object} options - The build options.
  *
  * @return {function} A gulp execution function.
  */

@@ -20,15 +20,8 @@ const {
  */
 module.exports = async function runBuild(options) {
     const { vanillaDirectory } = options;
-    let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+    let primaryDirectory = resolvePrimaryDirectory(options);
     const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
-
-    // Validate Build Directory
-    if (!primaryDirectory.includes(vanillaDirectory)) {
-        printError("Unable to automatically locate your addon inside your Vanilla Installation.");
-        printError("Try running the tool in its symlinked location in your Vanilla installation.");
-        process.exit(1);
-    }
 
     print(`Starting build process ${chalk.green("v2")} for addon at ${chalk.yellow(primaryDirectory)}.`);
     parentDirectories.forEach(parent => {
@@ -48,6 +41,48 @@ module.exports = async function runBuild(options) {
 
     if (entriesConfig) {
         await runSingleWebpackConfig(entriesConfig);
+    }
+};
+
+/**
+ * Attempt to resolve the primary addon directory inside of the Vanilla directory.
+ *
+ * This is because we need a path inside of Vanilla, but some shells like fish automatically
+ * resolve symlinks. Many addons are symlinked into a vanilla for installation.
+ *
+ * @param {BuildOptions} options - The passed options
+ *
+ * @returns {string} The primary directory
+ */
+function resolvePrimaryDirectory(options) {
+    const { buildOptions, rootDirectories, vanillaDirectory } = options;
+    let givenDirectory = options.rootDirectories.slice(0, 1)[0];
+
+    if (givenDirectory.includes(vanillaDirectory)) {
+        return givenDirectory;
+    }
+
+    const addonKey = path.basename(givenDirectory);
+    const addonPath = path.join(vanillaDirectory, "addons", addonKey);
+    const themePath = path.join(vanillaDirectory, "themes", addonKey);
+    const applicationPath = path.join(vanillaDirectory, "applications", addonKey);
+
+    if (fs.existsSync(applicationPath)) {
+        return applicationPath;
+    } else if (fs.existsSync(addonPath)) {
+        return addonPath;
+    } else if (fs.existsSync(themePath)) {
+        return themePath;
+    } else {
+        printError("Unable to automatically locate your addon inside your Vanilla Installation.");
+        printError("Make sure your addon is symlinked into you the passed provided vanilla installation.");
+        print(chalk.yellowBright(vanillaDirectory));
+        printError(
+            `You change this by passing a different '--vanillasrc' parameter or by setting the ${chalk.white(
+                "VANILLACLI_VANILLA_SRC_DIR"
+            )} in your environment.`
+        );
+        process.exit(1);
     }
 }
 
@@ -132,14 +167,14 @@ function isValidEntryPoint(entry) {
  * @return {Promise<?Object>} - A webpack config or undefined if their were no entries.
  */
 async function createEntriesConfig(primaryDirectory, options) {
-    const baseConfig = createBaseConfig(primaryDirectory, options.watch, false);
+    const baseConfig = createBaseConfig(primaryDirectory, options.watch);
     const { entries } = options.buildOptions;
 
     if (!isValidEntryPoint(entries)) {
         return;
     }
 
-    const dllPlugins = [];
+    const plugins = [];
     let aliases = {};
 
     for (let directory of options.requiredDirectories) {
@@ -151,7 +186,7 @@ async function createEntriesConfig(primaryDirectory, options) {
                 manifest: require(manifest)
             });
 
-            dllPlugins.push(plugin);
+            plugins.push(plugin);
         });
 
         // Put together the aliases
@@ -165,6 +200,7 @@ async function createEntriesConfig(primaryDirectory, options) {
 
     printVerbose("Using aliases:\n" + JSON.stringify(aliases));
 
+    // @ts-ignore
     return merge(baseConfig, {
         entry: entries,
         output: {
@@ -174,7 +210,7 @@ async function createEntriesConfig(primaryDirectory, options) {
         resolve: {
             alias: aliases
         },
-        plugins: dllPlugins
+        plugins
     });
 }
 

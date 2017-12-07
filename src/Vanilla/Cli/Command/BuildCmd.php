@@ -61,9 +61,7 @@ class BuildCmd extends NodeCommandBase {
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
-            $this->buildToolBaseDirectory,
-            $this->buildToolBaseDirectory.'/BuildProcess/v1/',
-            $this->buildToolBaseDirectory.'/BuildProcess/legacy/',
+            $this->buildToolBaseDirectory
         ];
     }
 

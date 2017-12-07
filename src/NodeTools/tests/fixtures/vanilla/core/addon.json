@@ -3,12 +3,12 @@
     "build": {
         "process": "core",
         "entries": {
-            "core.bundle.js": "core.js",
-            "core-admin.bundle.js": "core-admin.js"
+            "core.client.js": "core.js",
+            "core.admin.js": "core-admin.js"
         },
         "exports": {
-            "core": ["Garden.js", "react"],
-            "core-admin": ["Garden.js", "react"]
+            "core.client": ["Garden.js", "react"],
+            "core.admin": ["Garden.js", "react"]
         }
     }
 }

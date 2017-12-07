@@ -4,15 +4,14 @@
  */
 
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const webpack = require("webpack");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const merge = require("webpack-merge");
 const babelPreset = require("./babel.preset");
 
 module.exports = {
     createBaseConfig,
-    createWebpackAliasesForDirectory,
+    createWebpackAliasesForDirectory
 };
 
 /**
@@ -24,7 +23,7 @@ module.exports = {
  * @param {boolean} isDevMode - Which way to build.
  *
  */
-function createBaseConfig(buildRoot, isDevMode, shouldUglify = true) {
+function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
     const commonConfig = {
         module: {
             rules: [
@@ -85,6 +84,14 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglify = true) {
         ]
     };
 
+    if (shouldUglifyProd) {
+        prodConfig.plugins.push(
+            new webpack.optimize.UglifyJsPlugin({
+                sourceMap: true
+            })
+        );
+    }
+
     // @ts-ignore
     return merge(commonConfig, isDevMode ? devConfig : prodConfig);
 }
@@ -102,9 +109,9 @@ function createWebpackAliasesForDirectory(directory) {
 
     console.log(prefix);
 
-    if (prefix === 'core') {
+    if (prefix === "core") {
         return {
-            "@core": directory,
+            "@core": directory
         };
     }
 

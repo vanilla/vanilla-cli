@@ -1,0 +1,9 @@
+{
+    "key": "dashboard",
+    "build": {
+        "process": "core",
+        "entries": {
+            "dashboard.client.js": "index.js"
+        }
+    }
+}

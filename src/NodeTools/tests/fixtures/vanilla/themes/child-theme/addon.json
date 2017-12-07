@@ -1,0 +1,7 @@
+{
+    "key": "child-theme",
+    "parent": "parent-theme",
+    "build": {
+        "process": "core"
+    }
+}

@@ -16,6 +16,5 @@ Thumbs.db
 vanillabuild.json
 vanilla.lock.json
 tests/**/design
-tests/**/js/*.bundle.*
-tests/**/js/lib.*.*
-tests/**/manifests/**
+tests/**/js
+tests/**/manifests

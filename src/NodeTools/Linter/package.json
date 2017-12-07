@@ -5,15 +5,5 @@
     "main": "vanilla-lint.js",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam.c@vanillaforums.com>",
-    "license": "MIT",
-    "dependencies": {
-        "eslint": "^4.12.1",
-        "eslint-filtered-fix": "^0.1.1",
-        "eslint-friendly-formatter": "^3.0.0",
-        "eslint-nibble": "^4.2.1",
-        "eslint-stats": "^1.0.0",
-        "stylelint": "^8.3.1",
-        "stylelint-config-recommended-scss": "^2.0.0",
-        "stylelint-scss": "^2.1.0"
-    }
+    "license": "MIT"
 }

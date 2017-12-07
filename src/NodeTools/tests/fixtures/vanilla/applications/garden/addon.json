@@ -1,9 +1,0 @@
-{
-    "key": "garden",
-    "build": {
-        "process": "core",
-        "entries": {
-            "garden.bundle.js": "index.js"
-        }
-    }
-}

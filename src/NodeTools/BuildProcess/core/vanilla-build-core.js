@@ -7,12 +7,9 @@ const argv = require("yargs").argv;
 const chalk = require("chalk").default;
 const webpack = require("webpack");
 
-const runBuild = require("./build.scripts");
-const {
-    printError,
-    printVerbose,
-    spawnChildProcess,
-} = require("../../library/utility");
+const buildScripts = require("./build.scripts");
+const buildStyles = require("./build.styles");
+const { print, printError, printVerbose, spawnChildProcess } = require("../../library/utility");
 
 /**
  * @var Object The options passed from the PHP process.
@@ -23,14 +20,18 @@ const options = JSON.parse(argv.options);
 // @ts-ignore
 global.verbose = options.verbose;
 
+const devModeWarning = chalk.bold.yellow(`WARNING The process is starting in watch/dev mode. Be sure to run a production build before commiting your changes by running this command with the '--watch' option.\n`);
+
+options.watch && print(devModeWarning);
+
 const originalDir = process.cwd();
 
 // Make sure dependancies are all installed
-printVerbose("Verifying node_module installation.");
+print("Verifying node_module installation.");
 installNodeModules()
-    .then(() => printVerbose(chalk.green("Node modules verified.")))
+    .then(() => print(chalk.green("✓") + " Node modules verified."))
     .catch(handleNodeModuleError)
-    .then(() => runBuild(options))
+    .then(() => Promise.all([buildScripts(options), buildStyles(options)]))
     .catch(printError);
 
 async function installNodeModules() {

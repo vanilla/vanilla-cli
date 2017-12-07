@@ -24,7 +24,7 @@ const { createBaseConfig } = require("../../library/webpack");
  *
  * @return {function} A gulp execution function.
  */
-module.exports = (addonDirectory, options) => callback => {
+module.exports = (addonDirectory, options) => () => {
     let jsEntries = options.buildOptions.entries;
 
     Object.keys(jsEntries).forEach(entryKey => {
@@ -54,16 +54,8 @@ module.exports = (addonDirectory, options) => callback => {
         }
     };
 
-    if (options.watch) {
-        v1Config.plugins.push(
-            new UglifyJsPlugin({
-                sourceMap: true
-            })
-        );
-    }
-
     const baseConfig = createBaseConfig(addonDirectory, options.watch);
-    const finalConfig = merge(baseConfig, v1Config);)
+    const finalConfig = merge(baseConfig, v1Config);
 
     return gulp
         .src("")
