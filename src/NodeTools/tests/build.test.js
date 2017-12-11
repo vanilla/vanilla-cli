@@ -4,7 +4,7 @@
  */
 
 const path = require("path");
-const del = require("del");
+const remove = require("remove");
 const glob = require("glob-promise");
 const fs = require("fs");
 
@@ -20,22 +20,17 @@ const baseOptions = ["build", "--process", "core"];
 
 const orignalCWD = process.cwd();
 
-function clearBuiltFiles() {
-    console.log("clearing files")
-    return
-}
-
-afterAll(() => {
-    process.chdir(orignalCWD);
-    return del([
-        "**/dashboard/js/**",
-        "**/core/js/**",
-        "**/dashboard/manifests/**",
-        "**/core/manifests/**",
-    ]);
-});
-
 const buildOptions = [...baseOptions, "--vanillasrc", path.resolve(__dirname, "./fixtures/vanilla/")];
+
+afterAll((done) => {
+    return remove([
+        path.resolve(__dirname, "fixtures/vanilla/applications/dashboard/js"),
+        path.resolve(__dirname, "fixtures/vanilla/core/js"),
+        path.resolve(__dirname, "fixtures/vanilla/core/manifests"),
+    ], () => {
+        done();
+    })
+});
 
 describe("Build 'vanilla/core'", () => {
     beforeAll(() => {
