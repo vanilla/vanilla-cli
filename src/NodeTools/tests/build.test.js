@@ -22,19 +22,18 @@ const orignalCWD = process.cwd();
 
 function clearBuiltFiles() {
     console.log("clearing files")
-    return del([
-        path.join(__dirname, "./fixtures/**/js/*.js"),
-        path.join(__dirname, "./fixtures/**/manifests/*.json")
-    ]);
+    return
 }
 
-// afterAll(() => {
-    // return clearBuiltFiles()
-//         .then((files) => {
-//             console.log("files cleared: " + files);
-//             process.chdir(orignalCWD);
-//         });
-// });
+afterAll(() => {
+    process.chdir(orignalCWD);
+    return del([
+        "**/dashboard/js/**",
+        "**/core/js/**",
+        "**/dashboard/manifests/**",
+        "**/core/manifests/**",
+    ]);
+});
 
 const buildOptions = [...baseOptions, "--vanillasrc", path.resolve(__dirname, "./fixtures/vanilla/")];
 
@@ -42,7 +41,7 @@ describe("Build 'vanilla/core'", () => {
     beforeAll(() => {
         process.chdir(coreAddonDirectory);
         return spawnChildProcess(vanillaExecutablePath, buildOptions, {});
-    })
+    }, 10000)
 
     it("generates lib bundles for all 'exports' in addon.json", () => {
         expect(fs.existsSync(path.join("js/lib.core.admin.js"))).toBe(true);
@@ -78,7 +77,7 @@ describe("Build 'vanilla/applications/vanilla'", () => {
     beforeAll(() => {
         process.chdir(dashboardAddonDirectory);
         return spawnChildProcess(vanillaExecutablePath, buildOptions, {});
-    })
+    }, 10000)
 
     it("Does not generate any 'lib' bundles", () => {
         return expect(glob(path.join(dashboardAddonDirectory, "js/lib.*"))).resolves.toHaveLength(0);
