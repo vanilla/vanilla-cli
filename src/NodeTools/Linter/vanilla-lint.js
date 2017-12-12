@@ -5,7 +5,7 @@
 
 const path = require("path");
 const argv = require("yargs").argv;
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 const chokidar = require("chokidar");
 
 const { print, printError } = require("../library/utility");

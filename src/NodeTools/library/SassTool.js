@@ -5,7 +5,7 @@
 
 const path = require("path");
 const fs = require("fs");
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 
 const { print, printVerbose, printError } = require("./utility");
 

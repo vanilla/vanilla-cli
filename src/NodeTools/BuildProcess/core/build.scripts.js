@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license MIT
+ */
+
 const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk").default;
@@ -18,12 +23,11 @@ const {
 // EXPORTS
 module.exports = {
     run,
-    resolvePrimaryDirectory,
     getManifestPathsForDirectory,
     createExportsConfig,
     isValidEntryPoint,
     createEntriesConfig,
-    runSingleWebpackConfig,
+    runSingleWebpackConfig
 };
 
 /**
@@ -55,58 +59,18 @@ async function run(options) {
     if (entriesConfig) {
         await runSingleWebpackConfig(entriesConfig);
     }
-};
-
-/**
- * Attempt to resolve the primary addon directory inside of the Vanilla directory.
- *
- * This is because we need a path inside of Vanilla, but some shells like fish automatically
- * resolve symlinks. Many addons are symlinked into a vanilla for installation.
- *
- * @param {BuildOptions} options - The passed options
- *
- * @returns {string} The primary directory
- */
-function resolvePrimaryDirectory(options) {
-    const { buildOptions, rootDirectories, vanillaDirectory } = options;
-    let givenDirectory = options.rootDirectories.slice(0, 1)[0];
-
-    if (givenDirectory.includes(vanillaDirectory)) {
-        return givenDirectory;
-    }
-
-    const addonKey = path.basename(givenDirectory);
-    const addonPath = path.join(vanillaDirectory, "addons", addonKey);
-    const themePath = path.join(vanillaDirectory, "themes", addonKey);
-    const applicationPath = path.join(vanillaDirectory, "applications", addonKey);
-
-    if (fs.existsSync(applicationPath)) {
-        return applicationPath;
-    } else if (fs.existsSync(addonPath)) {
-        return addonPath;
-    } else if (fs.existsSync(themePath)) {
-        return themePath;
-    } else {
-        printError("Unable to automatically locate your addon inside your Vanilla Installation.");
-        printError("Make sure your addon is symlinked into you the passed provided vanilla installation.");
-        print(chalk.yellowBright(vanillaDirectory));
-        printError(
-            `You change this by passing a different '--vanillasrc' parameter or by setting the ${chalk.white(
-                "VANILLACLI_VANILLA_SRC_DIR"
-            )} in your environment.`
-        );
-        process.exit(1);
-    }
 }
 
 /**
  * Get the contents of all manifest files in a directory.
  *
  * @param {string} directory - The directory search through.
+ *
+ * @return {Promise<string[]>}
  */
 function getManifestPathsForDirectory(directory) {
     return new Promise(fulfill => {
-        glob(path.join(directory, "**/*.export-manifest.json"), (err, filePaths) => {
+        glob(path.join(directory, "**/*-manifest.json"), (err, filePaths) => {
             if (err) {
                 printError(`There was an error searching for manifest files.
 
@@ -121,12 +85,14 @@ function getManifestPathsForDirectory(directory) {
 /**
  * Create export configuration for webpack.
  *
- * @param {string} primaryDirectory - The main addon directory.
- * @param {BuildOptions} options - The options passed from the PHP process.
- *
  * This configuration is builds all files defined in `addonJson.build.exports`.
  * It never runs in watch mode. If a file has both entries and exports the
  * exports must be run first.
+ *
+ * @param {string} primaryDirectory - The main addon directory.
+ * @param {BuildOptions} options - The options passed from the PHP process.
+ *
+ * @return {Promise<Object>} - A webpack config
  */
 async function createExportsConfig(primaryDirectory, options) {
     const baseConfig = createBaseConfig(primaryDirectory, false, false);
@@ -140,14 +106,14 @@ async function createExportsConfig(primaryDirectory, options) {
     const config = merge(baseConfig, {
         entry: exports,
         output: {
-            path: path.resolve(primaryDirectory, "js"),
-            filename: "lib.[name].js",
+            path: path.join(primaryDirectory, "js"),
+            filename: `lib-${options.addonKey}-[name].js`,
             library: "lib_[hash]"
         },
         plugins: [
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
-                path: path.join(primaryDirectory, "manifests/[name].export-manifest.json"),
+                path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
                 name: "lib_[hash]"
             })
         ]
@@ -163,7 +129,7 @@ async function createExportsConfig(primaryDirectory, options) {
  * @param {any} entry
  */
 function isValidEntryPoint(entry) {
-    if (entry instanceof Array && entry.length > 0) {
+    if (entry instanceof Array && entry.length > 0 && entry[0]) {
         return true;
     }
     if (entry instanceof Object && Object.keys(entry).length > 0) {
@@ -222,7 +188,7 @@ async function createEntriesConfig(primaryDirectory, options) {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: "[name]"
+            filename: `${options.addonKey}-[name].js`
         },
         resolve: {
             alias: aliases

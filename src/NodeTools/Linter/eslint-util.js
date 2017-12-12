@@ -3,7 +3,7 @@
  * @license MIT
  */
 
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 const table = require("text-table");
 const { pluralize } = require("../library/utility");
 

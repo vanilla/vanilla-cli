@@ -1,3 +1,8 @@
+/**
+ * @copyright 2009-2017 Vanilla Forums Inc.
+ * @license MIT
+ */
+
 const path = require("path");
 const gulp = require("gulp");
 const livereload = require("gulp-livereload");

@@ -9,6 +9,7 @@ interface BuildOptions {
         entries?: StringToStringObject | string[];
         exports?: StringToStringObject | string[];
     };
+    addonKey?: string;
     vanillaDirectory: string;
     rootDirectories?: string[];
     requiredDirectories?: string[];
