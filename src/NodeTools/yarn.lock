@@ -359,10 +359,6 @@ async@1.5.2, async@^1.4.0:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
 
-async@=0.2.9:
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/async/-/async-0.2.9.tgz#df63060fbf3d33286a76aaf6d55a2986d9ff8619"
-
 async@^2.1.2, async@^2.1.4:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.0.tgz#61a29abb6fcc026fea77e56d1c6ec53a795951f4"
@@ -2974,10 +2970,6 @@ fast-deep-equal@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-1.0.0.tgz#96256a3bc975595eb36d82e9929d060d893439ff"
 
-fast-extend@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/fast-extend/-/fast-extend-0.0.2.tgz#f5ec42cf40b9460f521a6387dfb52deeed671dbd"
-
 fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
@@ -3230,10 +3222,6 @@ fs-extra@3.0.1:
     graceful-fs "^4.1.2"
     jsonfile "^3.0.0"
     universalify "^0.1.0"
-
-fs-monkey@^0.2.1:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/fs-monkey/-/fs-monkey-0.2.2.tgz#1c046adafeb715012d90f2ca3e951c70398d6138"
 
 fs-write-stream-atomic@^1.0.8:
   version "1.0.10"
@@ -5555,13 +5543,6 @@ mem@^1.1.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-memfs@^2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/memfs/-/memfs-2.6.0.tgz#0cadc0dda2b847fb441563ab4d35c4db294ef178"
-  dependencies:
-    fast-extend "0.0.2"
-    fs-monkey "^0.2.1"
-
 memoizee@0.4.X:
   version "0.4.11"
   resolved "https://registry.yarnpkg.com/memoizee/-/memoizee-0.4.11.tgz#bde9817663c9e40fdb2a4ea1c367296087ae8c8f"
@@ -5740,14 +5721,6 @@ mkdirp@0.3.0:
 mock-fs@^4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.4.2.tgz#09dec5313f97095a450be6aa2ad8ab6738d63d6b"
-
-mountfs@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/mountfs/-/mountfs-0.5.0.tgz#77aa4e99b0ad964c7b5add917f87678297854961"
-  dependencies:
-    async "=0.2.9"
-    passerror "0.0.2"
-    underscore "=1.5.2"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -6339,10 +6312,6 @@ parseuri@0.0.5:
 parseurl@~1.3.0, parseurl@~1.3.1:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.2.tgz#fc289d4ed8993119460c156253262cdc8de65bf3"
-
-passerror@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/passerror/-/passerror-0.0.2.tgz#c43090627b78d39ece96dbc7541f73f73efd9f4a"
 
 path-browserify@0.0.0:
   version "0.0.0"
@@ -8507,10 +8476,6 @@ unc-path-regex@^0.1.0:
 underscore@1.7.x:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
-
-underscore@=1.5.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.5.2.tgz#1335c5e4f5e6d33bbb4b006ba8c86a00f556de08"
 
 unherit@^1.0.4:
   version "1.1.0"

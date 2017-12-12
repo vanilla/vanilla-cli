@@ -155,7 +155,14 @@ async function createEntriesConfig(primaryDirectory, options) {
     const plugins = [];
     let aliases = {};
 
-    for (let directory of options.requiredDirectories) {
+    const filteredDirectories = options.requiredDirectories.filter(directory => {
+        const addonJson = getJsonFileForDirectory(directory, "addon");
+        if (addonJson && addonJson.build && addonJson.build.process === "core") {
+            return directory;
+        }
+    })
+
+    for (let directory of filteredDirectories) {
         const manifestPaths = await getManifestPathsForDirectory(directory);
 
         manifestPaths.forEach(manifest => {

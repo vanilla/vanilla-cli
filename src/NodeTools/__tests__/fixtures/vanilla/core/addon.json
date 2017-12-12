@@ -1,7 +1,6 @@
 {
     "key": "core",
     "build": {
-        "process": "core",
-
+        "process": "core"
     }
 }

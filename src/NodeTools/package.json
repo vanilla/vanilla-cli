@@ -40,9 +40,6 @@
         "gulp-sourcemaps": "^2.6.0",
         "imagemin-pngquant": "^5.0.1",
         "inquirer": "^4.0.1",
-        "memfs": "^2.6.0",
-        "mock-fs": "^4.4.2",
-        "mountfs": "^0.5.0",
         "node-sass": "^4.7.2",
         "pattern-replace-loader": "^1.0.4",
         "postcss": "^6.0.14",
@@ -64,6 +61,7 @@
         "glob": "^7.1.2",
         "glob-promise": "^3.3.0",
         "jest": "^21.2.1",
+        "mock-fs": "^4.4.2",
         "remove": "^0.1.5"
     },
     "scripts": {
