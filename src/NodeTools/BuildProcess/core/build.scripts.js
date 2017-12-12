@@ -59,20 +59,16 @@ async function run(options) {
  *
  * @param {string} directory - The directory search through.
  *
- * @return {Promise<string[]>}
+ * @return {string[]}
  */
 function getManifestPathsForDirectory(directory) {
-    return new Promise(fulfill => {
-        glob(path.join(directory, "**/*-manifest.json"), (err, filePaths) => {
-            if (err) {
-                printError(`There was an error searching for manifest files.
+    try {
+        return glob.sync(path.join(directory, "**/*-manifest.json"));
+    } catch (err) {
+        printError(`There was an error searching for manifest files.
 
-                ${err}`);
-            }
-
-            fulfill(filePaths);
-        });
-    });
+        ${err}`);
+    }
 }
 
 /**
@@ -103,7 +99,11 @@ async function createExportsConfig(primaryDirectory, options) {
             filename: `lib-${options.addonKey}-[name].js`,
             library: "lib_[hash]"
         },
+        resolve: {
+            alias: getAliasesForRequirements(options)
+        },
         plugins: [
+            ...getDllPluginsForRequirements(options),
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
                 path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
@@ -152,39 +152,6 @@ async function createEntriesConfig(primaryDirectory, options) {
         return;
     }
 
-    const plugins = [];
-    let aliases = {};
-
-    const filteredDirectories = options.requiredDirectories.filter(directory => {
-        const addonJson = getJsonFileForDirectory(directory, "addon");
-        if (addonJson && addonJson.build && addonJson.build.process === "core") {
-            return directory;
-        }
-    })
-
-    for (let directory of filteredDirectories) {
-        const manifestPaths = await getManifestPathsForDirectory(directory);
-
-        manifestPaths.forEach(manifest => {
-            const plugin = new webpack.DllReferencePlugin({
-                context: options.vanillaDirectory,
-                manifest: require(manifest)
-            });
-
-            plugins.push(plugin);
-        });
-
-        // Put together the aliases
-        const partialAliases = createWebpackAliasesForDirectory(directory);
-
-        aliases = {
-            ...aliases,
-            ...partialAliases
-        };
-    }
-
-    printVerbose("Using aliases:\n" + JSON.stringify(aliases));
-
     // @ts-ignore
     return merge(baseConfig, {
         entry: entries,
@@ -193,10 +160,66 @@ async function createEntriesConfig(primaryDirectory, options) {
             filename: `${options.addonKey}-[name].js`
         },
         resolve: {
-            alias: aliases
+            alias: getAliasesForRequirements(options)
         },
-        plugins
+        plugins: getDllPluginsForRequirements(options)
     });
+}
+
+/**
+ * Determine if the addon uses the core build process.
+ *
+ * @param {string} directory
+ */
+function addonUsesCoreBuildProcess(directory) {
+    const addonJson = getJsonFileForDirectory(directory, "addon");
+    if (addonJson && addonJson.build && addonJson.build.process === "core") {
+        return directory;
+    }
+}
+
+/**
+ * Generate aliases for any required addons.
+ *
+ * @param {BuildOptions} options
+ */
+function getAliasesForRequirements(options) {
+    const result = options.requiredDirectories
+        .filter(addonUsesCoreBuildProcess)
+        .reduce((aliases, directory) => {
+            const partialAliases = createWebpackAliasesForDirectory(directory);
+
+            return {
+                ...aliases,
+                ...partialAliases
+            };
+        }, {});
+
+    printVerbose("Using aliases:\n" + JSON.stringify(result));
+    return result;
+}
+
+/**
+ * Generate DLL Plugins for any required addons.
+ *
+ * @param {BuildOptions} options
+ */
+function getDllPluginsForRequirements(options) {
+    return options.requiredDirectories
+        .filter(addonUsesCoreBuildProcess)
+        .map(getManifestPathsForDirectory)
+        .reduce((result, manifests) => {
+            return [
+                ...result,
+                ...manifests,
+            ]
+        }, [])
+        .map(manifest => {
+            return new webpack.DllReferencePlugin({
+                context: options.vanillaDirectory,
+                manifest: require(manifest)
+            });
+        });
 }
 
 /**

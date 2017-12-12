@@ -158,13 +158,11 @@ describe("function unit tests", () => {
         });
 
         it("finds only the 3 valid manifests", () => {
-            expect.assertions(4);
-            return buildScripts.getManifestPathsForDirectory("/test").then(files => {
-                expect(files).toContain(file1);
-                expect(files).toContain(file2);
-                expect(files).toContain(nestedFile);
-                expect(files).not.toContain(invalidFile);
-            });
+            const manifestPaths = buildScripts.getManifestPathsForDirectory("/test");
+            expect(manifestPaths).toContain(file1);
+            expect(manifestPaths).toContain(file2);
+            expect(manifestPaths).toContain(nestedFile);
+            expect(manifestPaths).not.toContain(invalidFile);
         });
     });
 
