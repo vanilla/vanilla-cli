@@ -3,11 +3,12 @@
  * @license MIT
  */
 
-const gulp = require('gulp');
-const path = require('path');
-const sourcemaps = require('gulp-sourcemaps');
-const size = require('gulp-size');
-const cache = require('gulp-cache');
+const gulp = require("gulp");
+const fs = require("fs");
+const path = require("path");
+const sourcemaps = require("gulp-sourcemaps");
+const size = require("gulp-size");
+const cache = require("gulp-cache");
 const imagemin = require("gulp-imagemin");
 
 /**
@@ -19,8 +20,12 @@ const imagemin = require("gulp-imagemin");
  * @return {function} A gulp execution function.
  */
 module.exports = (addonDirectory, options) => () => {
-    const process =  gulp
-        .src(path.resolve(addonDirectory, 'src/images/**/*'))
+    if (!fs.existsSync(path.join(addonDirectory, "src/images"))) {
+        return;
+    };
+
+    const process = gulp
+        .src(path.join(addonDirectory, "src/images/**/*"))
         .pipe(
             cache(
                 imagemin({
@@ -30,11 +35,11 @@ module.exports = (addonDirectory, options) => () => {
                 })
             )
         )
-        .pipe(gulp.dest(path.resolve(addonDirectory, 'design/images')));
+        .pipe(gulp.dest(path.join(addonDirectory, "design/images")));
 
     if (options.verbose) {
         process.pipe(size({ showFiles: true }));
     }
 
     return process;
-}
+};

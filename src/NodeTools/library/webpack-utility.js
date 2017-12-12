@@ -8,6 +8,7 @@ const fs = require("fs");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
 const babelPreset = require("./babel-preset");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
     createBaseConfig,
@@ -86,7 +87,8 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
 
     if (shouldUglifyProd) {
         prodConfig.plugins.push(
-            new webpack.optimize.UglifyJsPlugin({
+            // @ts-ignore
+            new UglifyJsPlugin({
                 sourceMap: true
             })
         );

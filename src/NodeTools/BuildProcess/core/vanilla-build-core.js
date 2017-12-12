@@ -62,6 +62,14 @@ async function installNodeModules(options) {
  * @param {BuildOptions} options
  */
 async function run(options) {
-    console.log(JSON.stringify(options));
+    let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+    const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
+
+    print(`Starting build process ${chalk.green("core")} for addon at ${chalk.yellow(primaryDirectory)}.`);
+    parentDirectories.forEach(parent => {
+        print(`Parent addon found at ${chalk.yellow(parent)}.`);
+    });
+    print("");
+
     return Promise.all([buildScripts.run(options), buildStyles(options)]);
 }

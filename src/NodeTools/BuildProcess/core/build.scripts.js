@@ -38,13 +38,6 @@ module.exports = {
 async function run(options) {
     const { vanillaDirectory } = options;
     let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
-    const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
-
-    print(`Starting build process ${chalk.green("v2")} for addon at ${chalk.yellow(primaryDirectory)}.`);
-    parentDirectories.forEach(parent => {
-        print(`Parent addon found at ${chalk.yellow(parent)}.`);
-    });
-    print("");
 
     const exportsConfig = await createExportsConfig(primaryDirectory, options);
 
