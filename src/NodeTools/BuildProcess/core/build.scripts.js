@@ -10,7 +10,7 @@ const glob = require("glob");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
 
-const { createBaseConfig, createWebpackAliasesForDirectory } = require("../../library/webpack");
+const { createBaseConfig, createWebpackAliasesForDirectory } = require("../../library/webpack-utility");
 const {
     print,
     printError,
@@ -127,9 +127,11 @@ async function createExportsConfig(primaryDirectory, options) {
  * Validate an entry point.
  *
  * @param {any} entry
+ *
+ * @returns {boolean}
  */
 function isValidEntryPoint(entry) {
-    if (entry instanceof Array && entry.length > 0 && entry[0]) {
+    if (entry instanceof Array && entry.length > 0) {
         return true;
     }
     if (entry instanceof Object && Object.keys(entry).length > 0) {
@@ -201,6 +203,8 @@ async function createEntriesConfig(primaryDirectory, options) {
  * Run a single webpack config.
  *
  * @param {Object} config - A valid webpack config.
+ *
+ * @returns {Promise<void>}
  */
 function runSingleWebpackConfig(config) {
     return new Promise((resolve, reject) => {

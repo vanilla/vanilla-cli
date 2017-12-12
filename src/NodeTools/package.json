@@ -40,7 +40,9 @@
         "gulp-sourcemaps": "^2.6.0",
         "imagemin-pngquant": "^5.0.1",
         "inquirer": "^4.0.1",
+        "memfs": "^2.6.0",
         "mock-fs": "^4.4.2",
+        "mountfs": "^0.5.0",
         "node-sass": "^4.7.2",
         "pattern-replace-loader": "^1.0.4",
         "postcss": "^6.0.14",
@@ -72,10 +74,10 @@
         ],
         "testPathIgnorePatterns": [
             "/node_modules/",
-            "/tests/fixtures/"
+            "/__tests__/fixtures/"
         ],
         "watchPathIgnorePatterns": [
-            "/tests/fixtures/"
+            "/__tests__/fixtures/"
         ]
     }
 }

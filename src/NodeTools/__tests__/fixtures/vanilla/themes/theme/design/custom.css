@@ -2,10 +2,7 @@
   content: ""; }
 
 .test {
-  content: "CHILD_VARIABLE";
+  content: "DEFAULT_VARIABLE";
   content: "NOT_OVERRIDABLE_VARIBALE"; }
-
-.child-partial-selector {
-  content: ""; }
 
 /*# sourceMappingURL=custom.css.map */

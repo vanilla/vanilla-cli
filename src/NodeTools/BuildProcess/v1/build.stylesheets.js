@@ -4,6 +4,7 @@
  */
 
 const gulp = require("gulp");
+const util = require("gulp-util");
 const path = require("path");
 
 const plumber = require("gulp-plumber");
@@ -13,7 +14,7 @@ const autoprefixer = require("gulp-autoprefixer");
 const size = require("gulp-size");
 const modifyFile = require("gulp-modify-file");
 const { print, printVerbose, printError } = require("../../library/utility");
-const { createSassTool } = require('../../library/sassTool');
+const { createSassTool } = require('../../library/sass-utility');
 
 /**
  * Swallow the error and print it prevent gulp watch tasks from erroring out.
@@ -40,7 +41,9 @@ module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
     const destination = path.resolve(primaryDirectory, "design");
     const sassTool = createSassTool(allSrcDirectories);
 
-    return gulp
+    const minifier = process.env.NODE_ENV !== "test" ? cssnano : util.noop;
+
+    const compiler = gulp
         .src(getSourceFiles())
         .pipe(
             plumber({
@@ -55,11 +58,16 @@ module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
                 browsers: ["ie > 9", "last 6 iOS versions", "last 4 versions"]
             })
         )
-        .pipe(cssnano())
+        .pipe(minifier())
         .pipe(sourcemaps.write("."))
         .on("error", swallowError)
-        .pipe(gulp.dest(destination))
-        .pipe(size({ showFiles: true }));
+        .pipe(gulp.dest(destination));
+
+    if (process.env.NODE_ENV !== "test") {
+        compiler.pipe(size({ showFiles: true }));
+    }
+
+    return compiler;
 
     /**
      * Get the entrypoint CSS files. This is always in the "oldest" parent.

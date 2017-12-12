@@ -18,7 +18,7 @@ const { print } = require("../../library/utility");
  */
 module.exports = function buildStyles(options) {
     const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
-    const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
+    const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length) || [];
 
     gulp.task("build", makeV1StylesheetBuilder(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
 

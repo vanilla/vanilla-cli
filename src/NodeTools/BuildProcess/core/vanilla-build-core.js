@@ -62,5 +62,6 @@ async function installNodeModules(options) {
  * @param {BuildOptions} options
  */
 async function run(options) {
+    console.log(JSON.stringify(options));
     return Promise.all([buildScripts.run(options), buildStyles(options)]);
 }

@@ -178,11 +178,21 @@ describe("function unit tests", () => {
             expect(buildScripts.isValidEntryPoint(input)).toBe(true);
         })
 
-        it("Accepts an object of string => string", () => {
-            const input = {
-                "string": [""]
-            };
+        it("Accepts an array of strings", () => {
+            const input = ["string"];
             expect(buildScripts.isValidEntryPoint(input)).toBe(true);
+        })
+
+        it("Accepts an array of strings", () => {
+            const input = ["string"];
+            expect(buildScripts.isValidEntryPoint(input)).toBe(true);
+        })
+
+        it("Rejects empty objects and arrays", () => {
+            const emptyObject = {};
+            const emptyArray = [];
+            expect(buildScripts.isValidEntryPoint(emptyObject)).toBe(false);
+            expect(buildScripts.isValidEntryPoint(emptyArray)).toBe(false);
         })
     })
 });

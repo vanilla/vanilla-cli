@@ -38,7 +38,7 @@ function createSassTool(sourceDirectories) {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
             trueFilePath = `'${url}'`;
         } else if (url.match(nodeModuleRegex)) {
-            trueFilePath = resolveFilePathInNodeModules(url.replace(regex, ""));
+            trueFilePath = resolveFilePathInNodeModules(url.replace(nodeModuleRegex, ""));
             printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else {
             trueFilePath = url;
@@ -118,7 +118,7 @@ function createSassTool(sourceDirectories) {
      * @private
      * @param {string} requestPath - The requested file to lookup.
      *
-     * @return {string} A resolved absolute file path.
+     * @return {string[]} A resolved absolute file path.
      * @throws {Error} If the file couldn't be resolved anywhere.
      */
     function resolveAllFilePathsFromMutlipleAddons(requestPath) {
@@ -152,7 +152,7 @@ function createSassTool(sourceDirectories) {
         const resolvedPath = resolveOneFilePathFromMutlipleAddons(moduleBasePath);
 
         if (!resolvedPath) {
-            throw new Error(`Failed css node_module lookup. Package ${jsonPath}} not found.`);
+            throw new Error(`Failed css node_module lookup. Package ${moduleBasePath}} not found.`);
         }
 
         const json = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));

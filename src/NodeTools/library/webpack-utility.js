@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
-const babelPreset = require("./babel.preset");
+const babelPreset = require("./babel-preset");
 
 module.exports = {
     createBaseConfig,

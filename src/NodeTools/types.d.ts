@@ -16,3 +16,11 @@ interface BuildOptions {
     watch: boolean;
     verbose: boolean;
 }
+
+declare module "fs" {
+    export function mount(path: string, fs: any);
+    export function unmount(path: string);
+}
+declare module "mountfs" {
+    export function patchInPlace();
+}

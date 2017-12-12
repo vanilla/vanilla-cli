@@ -14,7 +14,7 @@ const merge = require("webpack-merge");
 const gulp = require("gulp");
 const chalk = require("chalk").default;
 const { print, printError } = require("../../library/utility");
-const { createBaseConfig } = require("../../library/webpack");
+const { createBaseConfig } = require("../../library/webpack-utility");
 
 /**
  * Create the javascript build process.

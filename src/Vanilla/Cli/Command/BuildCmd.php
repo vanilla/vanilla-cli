@@ -82,6 +82,7 @@ class BuildCmd extends NodeCommandBase {
             'requiredDirectories' => $this->getRequiredAddonDirectories(),
             'watch' => $args->getOpt('watch') ?: false,
             'vanillaDirectory' => $this->vanillaSrcDir,
+            'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
         ];
 
         $this->spawnNodeProcessFromPackageMain(
@@ -100,7 +101,7 @@ class BuildCmd extends NodeCommandBase {
             $rootDirectory = getcwd();
         }
 
-        $rootDirectory = $this->resolveAddonLocationInVanilla($rootDirectory);
+        $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
 
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
 
@@ -296,8 +297,8 @@ class BuildCmd extends NodeCommandBase {
         ];
 
         foreach($possiblePaths as $path) {
-            if (\file_exists($addonPath)) {
-                return $addonPath;
+            if (\file_exists($path)) {
+                return $path;
             }
         }
 
