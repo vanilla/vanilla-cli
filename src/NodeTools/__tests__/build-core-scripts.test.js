@@ -70,6 +70,11 @@ describe("Integration tests", () => {
             expect(fs.existsSync(path.join(coreAddonDirectory, "js/lib-core-app.js.map"))).toBe(true);
         });
 
+        it("generates manifest files for all `exports` in addon.json", () => {
+            expect(fs.existsSync(path.join(coreAddonDirectory, "manifests/admin-manifest.json"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "manifests/app-manifest.json"))).toBe(true);
+        })
+
         test("The core lib bundle contains the string from the react stub", () => {
             // Final bundles should not contain react in them.
             const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/lib-core-admin.js"), "utf8");
