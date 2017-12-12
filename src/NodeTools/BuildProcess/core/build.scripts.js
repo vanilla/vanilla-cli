@@ -15,12 +15,25 @@ const {
     sleep
 } = require("../../library/utility");
 
+// EXPORTS
+module.exports = {
+    run,
+    resolvePrimaryDirectory,
+    getManifestPathsForDirectory,
+    createExportsConfig,
+    isValidEntryPoint,
+    createEntriesConfig,
+    runSingleWebpackConfig,
+};
+
 /**
- * @param {BuildOptions} options - The options passed from the PHP process.
+ * Run the javascript build process.
+ *
+ * @param {BuildOptions} options
  */
-module.exports = async function runBuild(options) {
+async function run(options) {
     const { vanillaDirectory } = options;
-    let primaryDirectory = resolvePrimaryDirectory(options);
+    let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
     const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
 
     print(`Starting build process ${chalk.green("v2")} for addon at ${chalk.yellow(primaryDirectory)}.`);
@@ -123,21 +136,25 @@ async function createExportsConfig(primaryDirectory, options) {
         return;
     }
 
-    return merge(baseConfig, {
+    // The hashes here need to have quotes, or they won't be able to be uglified
+    const config = merge(baseConfig, {
         entry: exports,
         output: {
             path: path.resolve(primaryDirectory, "js"),
             filename: "lib.[name].js",
-            library: "[hash]"
+            library: "lib_[hash]"
         },
         plugins: [
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
                 path: path.join(primaryDirectory, "manifests/[name].export-manifest.json"),
-                name: "[hash]"
+                name: "lib_[hash]"
             })
         ]
     });
+
+    // console.log(require('util').inspect(config, false, null));
+    return config;
 }
 
 /**

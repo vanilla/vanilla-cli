@@ -2,13 +2,6 @@
     "key": "core",
     "build": {
         "process": "core",
-        "entries": {
-            "core.client.js": "core.js",
-            "core.admin.js": "core-admin.js"
-        },
-        "exports": {
-            "core.client": ["Garden.js", "react"],
-            "core.admin": ["Garden.js", "react"]
-        }
+
     }
 }

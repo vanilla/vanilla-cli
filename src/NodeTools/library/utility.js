@@ -86,7 +86,9 @@ function pluralize(word, count) {
  * @param {string} contents - What to print out.
  */
 function print(contents) {
-    console.log(contents);
+    if (process.env.NODE_ENV !== "test") {
+        console.log(contents);
+    }
 }
 
 /**
@@ -99,7 +101,7 @@ function printVerbose(contents) {
     const isVerbose = global.verbose || false;
 
     if (isVerbose) {
-        console.log(contents);
+        print(contents);
     }
 }
 

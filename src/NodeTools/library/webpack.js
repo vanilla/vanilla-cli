@@ -107,8 +107,6 @@ function createWebpackAliasesForDirectory(directory) {
     const prefix = path.basename(directory);
     const subDirectories = fs.readdirSync(directory);
 
-    console.log(prefix);
-
     if (prefix === "core") {
         return {
             "@core": directory

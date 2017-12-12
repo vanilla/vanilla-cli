@@ -100,6 +100,8 @@ class BuildCmd extends NodeCommandBase {
             $rootDirectory = getcwd();
         }
 
+        $rootDirectory = $this->resolveAddonLocationInVanilla($rootDirectory);
+
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
 
         if (!$addonJson) {
@@ -148,7 +150,7 @@ class BuildCmd extends NodeCommandBase {
             $vanillaSrcDir = $this->vanillaSrcDir;
             $parentAddonDirectory = realpath($this->vanillaSrcDir.'/themes/'.$parentThemeKey);
 
-            if (!file_exists($parentAddonDirectory)) {
+            if (!\file_exists($parentAddonDirectory)) {
                 CliUtil::fail("The parent theme with the key `$parentThemeKey` could not be found in the vanilla installation at `$vanillaSrcDir`.");
             }
 
@@ -220,8 +222,8 @@ class BuildCmd extends NodeCommandBase {
         $finalAddonDirectory = $this->addonRootDirectories[0];
         $isCssToolLess = $finalBuildConfig['cssTool'] === 'less';
         $isCssToolScss = $finalBuildConfig['cssTool'] === 'scss';
-        $lessFolderExists = file_exists($finalAddonDirectory."src/less");
-        $scssFolderExists = file_exists($finalAddonDirectory."src/scss");
+        $lessFolderExists = \file_exists($finalAddonDirectory."src/less");
+        $scssFolderExists = \file_exists($finalAddonDirectory."src/scss");
 
         if ($isCssToolLess && $finalBuildConfig['process'] === 'legacy') {
             CliUtil::fail('The CSSTool option `less` is not available for the legacy build process.');
@@ -242,11 +244,17 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
-     * Get the directories of any required addons.
+     * Get the directories of any required addons. Only gets run on core build process.
      *
      * @return array
      */
     protected function getRequiredAddonDirectories() {
+        $processVersion = $this->addonBuildConfigs[0]['process'];
+
+        if ($processVersion !== 'core') {
+            return;
+        }
+
         $baseDirectory = $this->addonRootDirectories[0];
         $addonJson = CliUtil::getAddonJsonForDirectory($baseDirectory);
 
@@ -262,16 +270,38 @@ class BuildCmd extends NodeCommandBase {
         $requiredDirectories = [$this->vanillaSrcDir.'/core'];
 
         foreach($requirements as $requirement) {
-            $addonPath = $this->vanillaSrcDir.'/addons/'.$requirement;
-
-            if (file_exists) {
-                $requiredDirectories[] = $addonPath;
-            } else {
-                CliUtil::fail("Could not find required addon $requirement in directory $addonPath");
-            }
+            $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
         }
 
         return $requiredDirectories;
+    }
+
+    /**
+     * Resolve the file path of an addon inside of vanilla.
+     *
+     * This is because we need a path inside of Vanilla, but some shells like fish automatically
+     * resolve symlinks. Many addons are symlinked into a vanilla for installation.
+     *
+     * @param string $addonKey The key of the addon to lookup.
+     *
+     * @return string The resolved addonPath.
+     * @throws Exception If an addon cannot be resolved.
+     */
+    function resolveAddonLocationInVanilla($addonKey) {
+        $possiblePaths = [
+            $this->vanillaSrcDir.'/addons/'.$addonKey,
+            $this->vanillaSrcDir.'/applications/'.$addonKey,
+            $this->vanillaSrcDir.'/plugins/'.$addonKey,
+            $this->vanillaSrcDir.'/themes/'.$addonKey,
+        ];
+
+        foreach($possiblePaths as $path) {
+            if (\file_exists($addonPath)) {
+                return $addonPath;
+            }
+        }
+
+        CliUtil::fail("Could not find required addon $addonKey in your vanilla source directory ".$this->vanillaSrcDir);
     }
 
     /**
@@ -298,7 +328,7 @@ class BuildCmd extends NodeCommandBase {
     protected function getBuildProcessDirectory() {
         $processVersion = $this->addonBuildConfigs[0]['process'];
         $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
-        if (!file_exists($path)) {
+        if (!\file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::fail("Could not find build process version $processVersion"
                 ."\n    Available build process versions are"
