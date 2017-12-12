@@ -34,6 +34,10 @@ if (isVerbose) {
  * @throws {Error} Some kind of build error.
  */
 async function run() {
+    let primaryDirectory = options.rootDirectories[0];
+
+    utility.print(`Starting build process ${chalk.green("legacy")} for addon at ${chalk.yellow(primaryDirectory)}.`);
+
     createLegacyBuildShim();
     const npmTaskExists = await runNpmTaskIfExists();
 
