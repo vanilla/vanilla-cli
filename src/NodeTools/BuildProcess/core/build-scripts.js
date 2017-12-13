@@ -97,7 +97,7 @@ async function createExportsConfig(primaryDirectory, options) {
         output: {
             path: path.join(primaryDirectory, "js"),
             filename: `lib-${options.addonKey}-[name].js`,
-            library: "lib_[hash]"
+            library: "lib_[name]"
         },
         resolve: {
             alias: getAliasesForRequirements(options)
@@ -107,7 +107,7 @@ async function createExportsConfig(primaryDirectory, options) {
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
                 path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
-                name: "lib_[hash]"
+                name: "lib_[name]"
             })
         ]
     });
@@ -212,11 +212,12 @@ function getAliasesForRequirements(options) {
                 if (!result[key] && allowedKeys.includes(addonKey)) {
                     result[key] = path.join(vanillaDirectory, topDirectory, addonKey);
                 }
-            })
+            });
         }
-    })
+    });
 
-    printVerbose("Using aliases:\n" + JSON.stringify(result));
+    const outputString = Object.keys(result).join(chalk.white(", "));
+    printVerbose(`Using aliases: ${chalk.yellow(outputString)}`);
     return result;
 }
 

@@ -77,6 +77,7 @@ The NodeTools tests are run using [jest](https://facebook.github.io/jest/).
 
 ```bash
 $ cd src/NodeTools
+$ yarn install
 
 $ yarn test
 # Or 
