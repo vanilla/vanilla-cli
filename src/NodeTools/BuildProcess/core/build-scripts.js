@@ -186,18 +186,34 @@ function addonUsesCoreBuildProcess(directory) {
 /**
  * Generate aliases for any required addons.
  *
+ * Aliases will always be generated for core, applications/vanilla, and applications/dashboard
+ *
  * @param {BuildOptions} options
  */
 function getAliasesForRequirements(options) {
-    const { vanillaDirectory } = options;
-    const subdirs = fs.readdirSync(vanillaDirectory);
+    const { vanillaDirectory, requiredDirectories } = options;
+
+    const allowedKeys = requiredDirectories.map(dir => {
+        return path.basename(dir);
+    })
+
+    allowedKeys.push("vanilla", "dashboard", "core");
+
     const result = {
-        '@vanilla': path.resolve(vanillaDirectory, 'applications/vanilla/src/js'),
-        '@dashboard': path.resolve(vanillaDirectory, 'applications/dashboard/src/js'),
         '@core': path.resolve(vanillaDirectory, 'core/src/js'),
     };
-    subdirs.forEach(dir => {
-        result[`@${dir}`] = path.resolve(vanillaDirectory, dir, 'src/js');
+    ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
+        const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
+
+        if(fs.existsSync(fullTopDirectory)) {
+            const subdirs = fs.readdirSync(fullTopDirectory);
+            subdirs.forEach(addonKey => {
+                const key = `@${addonKey}`;
+                if (!result[key] && allowedKeys.includes(addonKey)) {
+                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey);
+                }
+            })
+        }
     })
 
     printVerbose("Using aliases:\n" + JSON.stringify(result));
