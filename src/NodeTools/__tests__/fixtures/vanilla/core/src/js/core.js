@@ -1,3 +1,3 @@
-import {Garden} from './Garden';
+import { Garden } from "./Garden";
 
 Garden.log();

@@ -1,4 +1,4 @@
-import React from "@core/node_modules/react";
-import Garden from "@core/src/js/Garden";
+import * as React from "react";
+import { Garden } from "@core/garden";
 
 Garden.log();

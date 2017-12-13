@@ -7,8 +7,8 @@ const argv = require("yargs").argv;
 const chalk = require("chalk").default;
 const webpack = require("webpack");
 
-const buildScripts = require("./build.scripts");
-const buildStyles = require("./build.styles");
+const buildScripts = require("./build-scripts");
+const buildStyles = require("./build-styles");
 const { print, printError, spawnChildProcess } = require("../../library/utility");
 
 const options = getOptions();

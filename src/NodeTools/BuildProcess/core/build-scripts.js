@@ -112,7 +112,12 @@ async function createExportsConfig(primaryDirectory, options) {
         ]
     });
 
-    // console.log(require('util').inspect(config, false, null));
+    config.resolve.modules.unshift(
+        path.resolve(options.vanillaDirectory, "core/node_modules"),
+        path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
+        path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
+    )
+
     return config;
 }
 
@@ -184,16 +189,16 @@ function addonUsesCoreBuildProcess(directory) {
  * @param {BuildOptions} options
  */
 function getAliasesForRequirements(options) {
-    const result = options.requiredDirectories
-        .filter(addonUsesCoreBuildProcess)
-        .reduce((aliases, directory) => {
-            const partialAliases = createWebpackAliasesForDirectory(directory);
-
-            return {
-                ...aliases,
-                ...partialAliases
-            };
-        }, {});
+    const { vanillaDirectory } = options;
+    const subdirs = fs.readdirSync(vanillaDirectory);
+    const result = {
+        '@vanilla': path.resolve(vanillaDirectory, 'applications/vanilla/src/js'),
+        '@dashboard': path.resolve(vanillaDirectory, 'applications/dashboard/src/js'),
+        '@core': path.resolve(vanillaDirectory, 'core/src/js'),
+    };
+    subdirs.forEach(dir => {
+        result[`@${dir}`] = path.resolve(vanillaDirectory, dir, 'src/js');
+    })
 
     printVerbose("Using aliases:\n" + JSON.stringify(result));
     return result;

@@ -9,7 +9,7 @@ const glob = require("glob-promise");
 const fs = require("fs");
 const mock = require("mock-fs");
 
-const buildScripts = require("../BuildProcess/core/build.scripts");
+const buildScripts = require("../BuildProcess/core/build-scripts");
 
 // Fixtures
 const coreAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/core");

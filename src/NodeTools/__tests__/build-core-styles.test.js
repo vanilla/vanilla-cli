@@ -3,7 +3,7 @@ const remove = require("remove");
 const fs = require("fs");
 const mock = require("mock-fs");
 
-const buildStyles = require("../BuildProcess/core/build.styles");
+const buildStyles = require("../BuildProcess/core/build-styles");
 
 const themeDirectory = path.resolve(__dirname, "./fixtures/vanilla/themes/theme");
 const childThemeDirectory = path.resolve(__dirname, "./fixtures/vanilla/themes/child-theme");
