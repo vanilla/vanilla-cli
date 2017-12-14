@@ -12,7 +12,7 @@ const mock = require("mock-fs");
 const buildScripts = require("../BuildProcess/core/build-scripts");
 
 // Fixtures
-const coreAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/core");
+const coreAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla");
 const dashboardAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/applications/dashboard");
 
 /**

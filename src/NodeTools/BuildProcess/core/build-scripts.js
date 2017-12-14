@@ -17,7 +17,8 @@ const {
     printVerbose,
     spawnChildProcess,
     getJsonFileForDirectory,
-    sleep
+    sleep,
+    camelize
 } = require("../../library/utility");
 
 // EXPORTS
@@ -92,12 +93,13 @@ async function createExportsConfig(primaryDirectory, options) {
     }
 
     // The hashes here need to have quotes, or they won't be able to be uglified
+    const libraryName = `lib_${camelize(options.addonKey)}_[name]`;
     const config = merge(baseConfig, {
         entry: exports,
         output: {
             path: path.join(primaryDirectory, "js"),
             filename: `lib-${options.addonKey}-[name].js`,
-            library: "lib_[name]"
+            library: libraryName
         },
         resolve: {
             alias: getAliasesForRequirements(options)
@@ -107,13 +109,13 @@ async function createExportsConfig(primaryDirectory, options) {
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
                 path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
-                name: "lib_[name]"
+                name: libraryName
             })
         ]
     });
 
     config.resolve.modules.unshift(
-        path.resolve(options.vanillaDirectory, "core/node_modules"),
+        path.resolve(options.vanillaDirectory, "node_modules"),
         path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
         path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
     )
@@ -200,7 +202,7 @@ function getAliasesForRequirements(options) {
     allowedKeys.push("vanilla", "dashboard", "core");
 
     const result = {
-        '@core': path.resolve(vanillaDirectory, 'core/src/js'),
+        '@core': path.resolve(vanillaDirectory, 'src/js'),
     };
     ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
         const fullTopDirectory = path.join(vanillaDirectory, topDirectory);

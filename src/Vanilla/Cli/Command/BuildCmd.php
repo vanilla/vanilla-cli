@@ -268,7 +268,7 @@ class BuildCmd extends NodeCommandBase {
             : [];
 
         // Everything builds against core by default
-        $requiredDirectories = [$this->vanillaSrcDir.'/core'];
+        $requiredDirectories = [$this->vanillaSrcDir];
 
         foreach($requirements as $requirement) {
             $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
