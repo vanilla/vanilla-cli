@@ -26,16 +26,16 @@ class BuildCmd extends NodeCommandBase {
      *
      * - process: 'legacy' | '1.0'
      * - cssTool: 'scss' | 'less'
-     * - js.entry: Object A mapping of chunkname -> entrypoint.
+     * - entries: Object - A mapping of chunkname -> entrypoint.
+     * - exports: array - An array of files/modules to expose to dependant build processes.
      */
     private $defaultConfigurationOptions = [
         'process' => 'legacy',
         'cssTool' => 'scss',
-        'js' => [
-            'entry' => [
-                'custom' => 'index.js',
-            ],
+        'entries' => [
+            'custom' => 'index.js',
         ],
+        'exports' => [],
     ];
 
     /** @var array An array of addon configurations to build with. */
@@ -61,9 +61,7 @@ class BuildCmd extends NodeCommandBase {
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
-            $this->buildToolBaseDirectory,
-            $this->buildToolBaseDirectory.'/BuildProcess/v1/',
-            $this->buildToolBaseDirectory.'/BuildProcess/legacy/',
+            $this->buildToolBaseDirectory
         ];
     }
 
@@ -73,14 +71,18 @@ class BuildCmd extends NodeCommandBase {
     public final function run(Args $args) {
         parent::run($args);
 
-        $this->getBuildOptionsFromArgs($args);
-        $this->getAddonJsonBuildOptions();
+        $this->setBuildOptionsFromArgs($args);
+        $this->setAddonJsonBuildOptions();
+        $this->setDefaultBuildOptions();
         $this->validateBuildOptions();
 
         $processOptions = [
             'buildOptions' => $this->addonBuildConfigs[0],
             'rootDirectories' => $this->addonRootDirectories,
+            'requiredDirectories' => $this->getRequiredAddonDirectories(),
             'watch' => $args->getOpt('watch') ?: false,
+            'vanillaDirectory' => $this->vanillaSrcDir,
+            'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
         ];
 
         $this->spawnNodeProcessFromPackageMain(
@@ -94,12 +96,19 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return void
      */
-    protected function getAddonJsonBuildOptions($rootDirectory = null) {
+    protected function setAddonJsonBuildOptions($rootDirectory = null) {
         if (!$rootDirectory) {
             $rootDirectory = getcwd();
         }
 
+        $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
+
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
+
+        if (!$addonJson) {
+            return;
+        }
+
         $logger = new LogFormatter();
         $logger = $logger->setDateFormat('');
 
@@ -142,11 +151,11 @@ class BuildCmd extends NodeCommandBase {
             $vanillaSrcDir = $this->vanillaSrcDir;
             $parentAddonDirectory = realpath($this->vanillaSrcDir.'/themes/'.$parentThemeKey);
 
-            if (!file_exists($parentAddonDirectory)) {
+            if (!\file_exists($parentAddonDirectory)) {
                 CliUtil::fail("The parent theme with the key `$parentThemeKey` could not be found in the vanilla installation at `$vanillaSrcDir`.");
             }
 
-            $this->getAddonJsonBuildOptions($parentAddonDirectory);
+            $this->setAddonJsonBuildOptions($parentAddonDirectory);
         }
     }
 
@@ -155,7 +164,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @param Args $args The CLI arguments.
      */
-    protected function getBuildOptionsFromArgs(Args $args) {
+    protected function setBuildOptionsFromArgs(Args $args) {
         $processArg = $args->getOpt('process') ?: false;
         $cssToolArg = $args->getOpt('csstool');
 
@@ -165,6 +174,18 @@ class BuildCmd extends NodeCommandBase {
 
         if ($cssToolArg) {
             $this->defaultConfigurationOptions['cssTool'] = $cssToolArg;
+        }
+    }
+
+    /**
+     * Set the default build options if no options have been passed.
+     *
+     * @return void
+     */
+    protected function setDefaultBuildOptions() {
+        if (count($this->addonBuildConfigs) === 0) {
+            array_push($this->addonBuildConfigs, $this->defaultConfigurationOptions);
+            array_push($this->addonRootDirectories, getcwd());
         }
     }
 
@@ -187,7 +208,7 @@ class BuildCmd extends NodeCommandBase {
         foreach($requiredIdenticalKeys as $requiredIdenticalKey) {
             $simplifiedArray = array_column($this->addonBuildConfigs, $requiredIdenticalKey);
 
-            if (count(array_unique($simplifiedArray)) !== 1) {
+            if (count(array_unique($simplifiedArray)) > 1) {
                 $passedValues = implode(", ", array_unique($simplifiedArray));
 
                 CliUtil::fail(
@@ -202,8 +223,8 @@ class BuildCmd extends NodeCommandBase {
         $finalAddonDirectory = $this->addonRootDirectories[0];
         $isCssToolLess = $finalBuildConfig['cssTool'] === 'less';
         $isCssToolScss = $finalBuildConfig['cssTool'] === 'scss';
-        $lessFolderExists = file_exists($finalAddonDirectory."src/less");
-        $scssFolderExists = file_exists($finalAddonDirectory."src/scss");
+        $lessFolderExists = \file_exists($finalAddonDirectory."src/less");
+        $scssFolderExists = \file_exists($finalAddonDirectory."src/scss");
 
         if ($isCssToolLess && $finalBuildConfig['process'] === 'legacy') {
             CliUtil::fail('The CSSTool option `less` is not available for the legacy build process.');
@@ -221,6 +242,67 @@ class BuildCmd extends NodeCommandBase {
                 ' - pass "-csstool="less" as an argument to the build command.'
             );
         }
+    }
+
+    /**
+     * Get the directories of any required addons. Only gets run on core build process.
+     *
+     * @return array
+     */
+    protected function getRequiredAddonDirectories() {
+        $processVersion = $this->addonBuildConfigs[0]['process'];
+
+        if ($processVersion !== 'core') {
+            return;
+        }
+
+        $baseDirectory = $this->addonRootDirectories[0];
+        $addonJson = CliUtil::getAddonJsonForDirectory($baseDirectory);
+
+        if (!$addonJson) {
+            return [];
+        }
+
+        $requirements = array_key_exists('require', $addonJson)
+            ? array_keys($addonJson['require'])
+            : [];
+
+        // Everything builds against core by default
+        $requiredDirectories = [$this->vanillaSrcDir.'/core'];
+
+        foreach($requirements as $requirement) {
+            $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
+        }
+
+        return $requiredDirectories;
+    }
+
+    /**
+     * Resolve the file path of an addon inside of vanilla.
+     *
+     * This is because we need a path inside of Vanilla, but some shells like fish automatically
+     * resolve symlinks. Many addons are symlinked into a vanilla for installation.
+     *
+     * @param string $addonKey The key of the addon to lookup.
+     *
+     * @return string The resolved addonPath.
+     * @throws Exception If an addon cannot be resolved.
+     */
+    function resolveAddonLocationInVanilla($addonKey) {
+        $possiblePaths = [
+            $this->vanillaSrcDir.'/addons/'.$addonKey,
+            $this->vanillaSrcDir.'/applications/'.$addonKey,
+            $this->vanillaSrcDir.'/plugins/'.$addonKey,
+            $this->vanillaSrcDir.'/themes/'.$addonKey,
+        ];
+
+        foreach($possiblePaths as $path) {
+            if (\file_exists($path)) {
+                return $path;
+            }
+        }
+
+        CliUtil::fail("Could not find required addon $addonKey in your vanilla source directory ".$this->vanillaSrcDir);
     }
 
     /**
@@ -247,7 +329,7 @@ class BuildCmd extends NodeCommandBase {
     protected function getBuildProcessDirectory() {
         $processVersion = $this->addonBuildConfigs[0]['process'];
         $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
-        if (!file_exists($path)) {
+        if (!\file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::fail("Could not find build process version $processVersion"
                 ."\n    Available build process versions are"

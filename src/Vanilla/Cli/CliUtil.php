@@ -38,7 +38,7 @@ class CliUtil {
             ->setDateFormat('')
             ->error($msg);
 
-        throw new Exception();
+        exit(1);
     }
 
     /**

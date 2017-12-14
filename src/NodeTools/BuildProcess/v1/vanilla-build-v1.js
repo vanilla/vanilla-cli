@@ -7,15 +7,13 @@ const path = require("path");
 const gulp = require("gulp");
 const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
-const chalk = require('chalk');
+const chalk = require("chalk").default;
 
-const {print} = require("../../utility");
+const { print, sleep } = require("../../library/utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
 const buildAssets = require("./build.assets");
-
-const addonpath = process.cwd();
 
 /**
  * @var Object The options passed from the PHP process.
@@ -28,20 +26,26 @@ const addonpath = process.cwd();
 const options = JSON.parse(argv.options);
 
 // Set the verbose option globally.
+// @ts-ignore
 global.verbose = options.verbose;
 
 const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
 
-print(`Starting build process ${chalk.green('v1')} for addon at ${chalk.yellow(primaryDirectory)}.`);
+print(`Starting build process ${chalk.green("v1")} for addon at ${chalk.yellow(primaryDirectory)}.`);
 parentDirectories.forEach(parent => {
     print(`Parent addon found at ${chalk.yellow(parent)}.`);
 });
-print('');
 
-gulp.task("build:js", buildJs(addonpath, options));
+const devModeWarning = chalk.bold.yellow(`
+WARNING The process is starting in watch/dev mode. Be sure to run a production build before commiting your changes by running this command with the '--watch' option.
+`);
 
-gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions));
+print(options.watch ? devModeWarning : "");
+
+gulp.task("build:js", buildJs(primaryDirectory, options));
+
+gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
 
 gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
 
@@ -50,27 +54,26 @@ gulp.task("build", ["build:assets", "build:styles", "build:js"]);
 gulp.task("watch", ["build"], () => {
     livereload.listen();
 
+    const onReload = file => livereload.changed(file.path);
+
     gulp.watch(
         [
-            path.resolve(addonpath, "design/*.css"),
-            path.resolve(addonpath, "design/images/**/*"),
-            path.resolve(addonpath, "js/*.js"),
-            path.resolve(addonpath, "views/**/*"),
+            path.resolve(primaryDirectory, "design/*.css"),
+            path.resolve(primaryDirectory, "design/images/**/*"),
+            path.resolve(primaryDirectory, "js/*.js"),
+            path.resolve(primaryDirectory, "views/**/*")
         ],
-        file => {
-            return livereload.changed(file.path);
-        }
+        onReload
     );
 
     const { cssTool } = options.buildOptions;
 
-    gulp.watch(path.resolve(addonpath, `src/**/*.${cssTool}`), ["build:styles"]);
-    gulp.watch(path.resolve(addonpath, "src/**/*.js"), ["build:js"]);
-    gulp.watch(path.resolve(addonpath, "design/images/**/*"), ["build:assets"]);
+    gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
+    gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
+    gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
 
-    print("\n" + chalk.green('Watching for changes in src files...'));
+    print("\n" + chalk.green("Watching for changes in src files..."));
 });
-
 
 const taskToExecute = options.watch ? "watch" : "build";
 

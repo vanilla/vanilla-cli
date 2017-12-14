@@ -1,0 +1,7 @@
+{
+    "key": "theme",
+    "build": {
+        "process": "core",
+        "entries": {}
+    }
+}

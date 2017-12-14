@@ -17,8 +17,8 @@ use \Exception;
  */
 class NodeCommandBase extends Command {
 
-    /** @var string We require node 8 because it is the latest LTS with support for async/await */
-    const MINIMUM_NODE_VERSION = '8.0.0';
+    /** @var string We require node 8.3 because it is the latest LTS with support for async/await + Object rest/spread */
+    const MINIMUM_NODE_VERSION = '8.3.0';
 
     /** @var array */
     protected $dependencyDirectories = [];

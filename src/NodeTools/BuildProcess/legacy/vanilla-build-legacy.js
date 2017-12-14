@@ -4,11 +4,11 @@
  */
 
 const argv = require("yargs").argv;
-const chalk = require("chalk");
+const chalk = require("chalk").default;
 const path = require("path");
 const fs = require("fs");
 const { spawn, exec } = require("child_process");
-const utility = require("../../utility");
+const utility = require("../../library/utility");
 
 const options = JSON.parse(argv.options);
 
@@ -34,6 +34,10 @@ if (isVerbose) {
  * @throws {Error} Some kind of build error.
  */
 async function run() {
+    let primaryDirectory = options.rootDirectories[0];
+
+    utility.print(`Starting build process ${chalk.green("legacy")} for addon at ${chalk.yellow(primaryDirectory)}.`);
+
     createLegacyBuildShim();
     const npmTaskExists = await runNpmTaskIfExists();
 
@@ -137,10 +141,10 @@ async function checkGlobalNodeDependancyInstalled(packageName) {
 /**
  * Conditionally run an npm task if it exists
  *
- * @returns {boolean} Whether or not the task existed
+ * @returns {Promise<boolean>} Whether or not the task existed
  */
 async function runNpmTaskIfExists() {
-    const packageJson = await utility.getPackageJson(workingDirectory);
+    const packageJson = utility.getJsonFileForDirectory(workingDirectory, 'package');
 
     if (!packageJson) {
         isVerbose &&
@@ -190,7 +194,7 @@ async function runNpmTaskIfExists() {
 /**
  * Conditionally run a gulp task if it exists.
  *
- * @returns {undefined}
+ * @returns {Promise<boolean>}
  */
 async function runGulpTaskIfExists() {
     const gulpFilePath = path.resolve(workingDirectory, "gulpfile.js");

@@ -16,6 +16,7 @@ See the [wiki](https://github.com/vanilla/vanilla-cli/wiki) for documentation ab
 * [Usage](#usage)
 * [Debugging](#debugging)
 * [Documentation](#documentation)
+* [Tests](#tests)
 * [License](#license)
 
 ## Installation
@@ -66,6 +67,21 @@ try {
 } catch (Exception $e) {
     ...
 }
+```
+
+## Tests
+
+Some of the node.js build processes have unit and integration tests. Be sure that these pass before making pull requests. To run the tests:
+
+The NodeTools tests are run using [jest](https://facebook.github.io/jest/).
+
+```bash
+$ cd src/NodeTools
+$ yarn install
+
+$ yarn test
+# Or 
+$ yarn test --watch
 ```
 
 ## Debugging

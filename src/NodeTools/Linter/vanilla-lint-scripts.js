@@ -5,7 +5,7 @@
 
 const { CLIEngine } = require("eslint");
 
-const { print, sleep } = require("../utility");
+const { print, sleep } = require("../library/utility");
 const ESLintUtil = require("./eslint-util");
 
 module.exports = lintScripts;
