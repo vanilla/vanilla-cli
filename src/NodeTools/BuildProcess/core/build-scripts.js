@@ -64,7 +64,7 @@ async function run(options) {
  */
 function getManifestPathsForDirectory(directory) {
     try {
-        return glob.sync(path.join(directory, "**/*-manifest.json"));
+        return glob.sync(path.join(directory, "manifests/**/*-manifest.json"));
     } catch (err) {
         printError(`There was an error searching for manifest files.
 
@@ -92,20 +92,28 @@ async function createExportsConfig(primaryDirectory, options) {
         return;
     }
 
+    // Remove this addon's libraries so it doesn't build it's own exports against it's own exports
+    const self = options.rootDirectories[0];
+    let directories = options.requiredDirectories;
+    if (options.requiredDirectories.includes(self)) {
+        const index = options.requiredDirectories.indexOf(self);
+        directories.splice(index, 1);
+    }
+
     // The hashes here need to have quotes, or they won't be able to be uglified
     const libraryName = `lib_${camelize(options.addonKey)}_[name]`;
     const config = merge(baseConfig, {
         entry: exports,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: `lib-${options.addonKey}-[name].js`,
+            filename: `[name]/lib-${options.addonKey}-[name].js`,
             library: libraryName
         },
         resolve: {
             alias: getAliasesForRequirements(options)
         },
         plugins: [
-            ...getDllPluginsForRequirements(options),
+            ...getDllPLuginsForAddonDirectories(directories, options),
             new webpack.DllPlugin({
                 context: options.vanillaDirectory,
                 path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
@@ -154,6 +162,10 @@ function isValidEntryPoint(entry) {
 async function createEntriesConfig(primaryDirectory, options) {
     const baseConfig = createBaseConfig(primaryDirectory, options.watch);
     const { entries } = options.buildOptions;
+    const directories = [
+        ...options.requiredDirectories,
+        ...options.rootDirectories,
+    ];
 
     if (!isValidEntryPoint(entries)) {
         return;
@@ -164,12 +176,12 @@ async function createEntriesConfig(primaryDirectory, options) {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: `${options.addonKey}-[name].js`
+            filename: `[name]/${options.addonKey}-[name].js`
         },
         resolve: {
             alias: getAliasesForRequirements(options)
         },
-        plugins: getDllPluginsForRequirements(options)
+        plugins: getDllPLuginsForAddonDirectories(directories, options)
     });
 }
 
@@ -224,12 +236,13 @@ function getAliasesForRequirements(options) {
 }
 
 /**
- * Generate DLL Plugins for any required addons.
+ * Generate DLL Plugins for any required addons and it self.
  *
+ * @param {string[]} directories - The directories to generate DLL plugins for.
  * @param {BuildOptions} options
  */
-function getDllPluginsForRequirements(options) {
-    return options.requiredDirectories
+function getDllPLuginsForAddonDirectories(directories, options) {
+    return directories
         .filter(addonUsesCoreBuildProcess)
         .map(getManifestPathsForDirectory)
         .reduce((result, manifests) => {

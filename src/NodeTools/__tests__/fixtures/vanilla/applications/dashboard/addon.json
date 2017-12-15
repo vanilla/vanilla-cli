@@ -1,0 +1,6 @@
+{
+    "key": "dashboard",
+    "build": {
+        "process": "core"
+    }
+}
