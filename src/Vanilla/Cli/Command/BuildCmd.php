@@ -290,6 +290,7 @@ class BuildCmd extends NodeCommandBase {
      */
     function resolveAddonLocationInVanilla($addonKey) {
         $possiblePaths = [
+            $this->vanillaSrcDir,
             $this->vanillaSrcDir.'/addons/'.$addonKey,
             $this->vanillaSrcDir.'/applications/'.$addonKey,
             $this->vanillaSrcDir.'/plugins/'.$addonKey,

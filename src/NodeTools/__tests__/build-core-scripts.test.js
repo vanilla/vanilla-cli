@@ -32,12 +32,12 @@ function buildCoreWithOptions() {
     const options = { ...baseOptions };
     options.addonKey = "core";
     options.buildOptions.entries = {
-        app: "core.js",
-        admin: "core-admin.js"
+        app: "./src/js/core.js",
+        admin: "./src/js/core-admin.js"
     };
     options.buildOptions.exports = {
-        app: ["Garden.js", "react"],
-        admin: ["Garden.js", "react"]
+        app: ["./src/js/garden.js", "react"],
+        admin: ["./src/js/garden.js", "react"]
     };
     options.rootDirectories = [coreAddonDirectory];
     options.requiredDirectories = [coreAddonDirectory];
@@ -110,16 +110,16 @@ describe("Integration tests", () => {
         const outputFilename = "app/dashboard-app.js";
 
         beforeAll(() => {
-                const options = { ...baseOptions };
-                options.addonKey = "dashboard";
-                options.buildOptions.entries = {
-                    app: "index.js"
-                };
-                options.buildOptions.exports = {};
-                options.rootDirectories = [dashboardAddonDirectory];
-                options.requiredDirectories = [coreAddonDirectory];
+            const options = { ...baseOptions };
+            options.addonKey = "dashboard";
+            options.buildOptions.entries = {
+                app: "./src/js/index.js"
+            };
+            options.buildOptions.exports = {};
+            options.rootDirectories = [dashboardAddonDirectory];
+            options.requiredDirectories = [coreAddonDirectory];
 
-                return buildScripts.run(options);
+            return buildScripts.run(options);
         });
 
         it("Does not generate any 'lib' bundles", () => {
@@ -138,7 +138,13 @@ describe("Integration tests", () => {
             // Final bundles should not contain react in them.
             const outputContents = fs.readFileSync(path.join(dashboardAddonDirectory, `js/${outputFilename}`), "utf8");
             expect(outputContents).not.toContain("REACT_STRING");
+            expect(outputContents).not.toContain("GARDEN_TEST");
         });
+
+        it("finds all of the modules required from the core library", () => {
+            const outputContents = fs.readFileSync(path.join(dashboardAddonDirectory, `js/${outputFilename}`), "utf8");
+            expect(outputContents).not.toContain("MODULE_NOT_FOUND");
+        })
     });
 });
 

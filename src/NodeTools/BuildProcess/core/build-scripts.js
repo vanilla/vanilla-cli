@@ -43,7 +43,7 @@ async function run(options) {
     const exportsConfig = await createExportsConfig(primaryDirectory, options);
 
     if (exportsConfig) {
-        await runSingleWebpackConfig(exportsConfig);
+        await runSingleWebpackConfig(exportsConfig, options.watch);
     }
 
     // The entries config MUST be created after the first process has completed
@@ -51,7 +51,7 @@ async function run(options) {
     const entriesConfig = await createEntriesConfig(primaryDirectory, options);
 
     if (entriesConfig) {
-        await runSingleWebpackConfig(entriesConfig);
+        await runSingleWebpackConfig(entriesConfig, options.watch);
     }
 }
 
@@ -85,7 +85,7 @@ function getManifestPathsForDirectory(directory) {
  * @return {Promise<Object>} - A webpack config
  */
 async function createExportsConfig(primaryDirectory, options) {
-    const baseConfig = createBaseConfig(primaryDirectory, false, false);
+    const baseConfig = createBaseConfig(primaryDirectory, options.watch);
     const { exports } = options.buildOptions;
 
     if (!isValidEntryPoint(exports)) {
@@ -126,7 +126,7 @@ async function createExportsConfig(primaryDirectory, options) {
         path.resolve(options.vanillaDirectory, "node_modules"),
         path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
         path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
-    )
+    );
 
     return config;
 }
@@ -172,7 +172,7 @@ async function createEntriesConfig(primaryDirectory, options) {
     }
 
     // @ts-ignore
-    return merge(baseConfig, {
+    const config = merge(baseConfig, {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
@@ -183,6 +183,15 @@ async function createEntriesConfig(primaryDirectory, options) {
         },
         plugins: getDllPLuginsForAddonDirectories(directories, options)
     });
+
+    config.resolve.modules.unshift(
+        path.resolve(options.vanillaDirectory, "node_modules"),
+        path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
+        path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
+    );
+
+    // console.log(require("util").inspect(config, true, 6));
+    return config;
 }
 
 /**
@@ -263,13 +272,17 @@ function getDllPLuginsForAddonDirectories(directories, options) {
  * Run a single webpack config.
  *
  * @param {Object} config - A valid webpack config.
+ * @param {boolean} watch - Whether or not to run in watch mode.
  *
  * @returns {Promise<void>}
  */
-function runSingleWebpackConfig(config) {
+function runSingleWebpackConfig(config, watch = false) {
     return new Promise((resolve, reject) => {
         const compiler = webpack(config);
-        compiler.run((err, stats) => {
+
+        const executionFunction = watch ? compiler.watch.bind(compiler, {}) : compiler.run.bind(compiler);
+
+        executionFunction((err, stats) => {
             if (err) {
                 reject("The build encountered an error:" + err);
             }

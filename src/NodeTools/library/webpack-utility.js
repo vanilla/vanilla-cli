@@ -12,7 +12,6 @@ const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
     createBaseConfig,
-    createWebpackAliasesForDirectory
 };
 
 /**
@@ -22,10 +21,10 @@ module.exports = {
  *
  * @param {string} buildRoot - The root path of the addon being built.
  * @param {boolean} isDevMode - Which way to build.
- *
  */
 function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
     const commonConfig = {
+        context: buildRoot,
         module: {
             rules: [
                 {
@@ -45,7 +44,7 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
             ]
         },
         resolve: {
-            modules: [path.join(buildRoot, "src/js"), path.join(buildRoot, "node_modules")],
+            modules: [path.join(buildRoot, "node_modules")],
             extensions: [".js", ".jsx"]
         },
 
@@ -96,27 +95,4 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
 
     // @ts-ignore
     return merge(commonConfig, isDevMode ? devConfig : prodConfig);
-}
-
-/**
- * Create a webpack alias object. One for each sub-folder name.
- *
- * Ex. /workspace/vanilla/applications => @applications/dashboard, @applications/vanilla
- *
- * @param {string} directory - And absolute file path to create aliases for.
- */
-function createWebpackAliasesForDirectory(directory) {
-    const prefix = path.basename(directory);
-    const subDirectories = fs.readdirSync(directory);
-
-    if (prefix === "core") {
-        return {
-            "@core": directory
-        };
-    }
-
-    return subDirectories.reduce((aliases, subDir) => {
-        aliases[`@${prefix}/${subDir}`] = path.join(directory, subDir);
-        return aliases;
-    }, {});
 }
