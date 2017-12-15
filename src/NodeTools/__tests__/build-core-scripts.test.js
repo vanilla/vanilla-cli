@@ -110,7 +110,7 @@ describe("Integration tests", () => {
         const outputFilename = "app/dashboard-app.js";
 
         beforeAll(() => {
-            const options = { ...baseOptions };
+            const options = {...baseOptions };
             options.addonKey = "dashboard";
             options.buildOptions.entries = {
                 app: "./src/js/index.js"

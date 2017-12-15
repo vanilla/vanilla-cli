@@ -5,7 +5,10 @@
 
 const argv = require("yargs").argv;
 const chalk = require("chalk").default;
+const path = require("path");
 const webpack = require("webpack");
+const gulp = require("gulp");
+const livereload = require("gulp-livereload");
 
 const buildScripts = require("./build-scripts");
 const buildStyles = require("./build-styles");
@@ -57,6 +60,32 @@ async function installNodeModules(options) {
 }
 
 /**
+ * Start the livereload server to listen for changes.
+ *
+ * @param {string} directory - The directory to listen for file changes in.
+ */
+function startLiveReload(directory) {
+    gulp.task("watch", () => {
+        livereload.listen();
+
+        const onReload = file => livereload.changed(file.path);
+
+        gulp.watch([
+            path.resolve(directory, "design/*.css"),
+            path.resolve(directory, "js/*.js")
+        ],
+            onReload
+        );
+
+        gulp.watch(path.resolve(directory, "src/**/*.scss"), () => {
+            return buildStyles(options);
+        });
+    });
+
+    gulp.start("watch");
+}
+
+/**
  * Run the build process.
  *
  * @param {BuildOptions} options
@@ -71,5 +100,16 @@ async function run(options) {
     });
     print("");
 
-    return Promise.all([buildScripts.run(options), buildStyles(options)]);
+    const promises = [buildScripts.run(options), buildStyles(options)];
+
+    if (options.watch) {
+        promises.push(startLiveReload(primaryDirectory));
+    }
+
+    return Promise.all(promises)
+        .then(() => {
+            if (options.watch) {
+                startLiveReload(primaryDirectory);
+            }
+        });
 }

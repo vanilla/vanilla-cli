@@ -37,7 +37,6 @@ module.exports = {
  * @param {BuildOptions} options
  */
 async function run(options) {
-    const { vanillaDirectory } = options;
     let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 
     const exportsConfig = await createExportsConfig(primaryDirectory, options);
@@ -293,6 +292,7 @@ function runSingleWebpackConfig(config, watch = false) {
                     colors: true // Shows colors in the console
                 })
             );
+
             resolve();
         });
     });

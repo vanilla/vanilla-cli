@@ -5,10 +5,8 @@
 
 const path = require("path");
 const gulp = require("gulp");
-const livereload = require("gulp-livereload");
 const chalk = require("chalk").default;
 const makeV1StylesheetBuilder = require("../../BuildProcess/v1/build.stylesheets");
-
 const { print } = require("../../library/utility");
 
 /**
@@ -22,23 +20,6 @@ module.exports = function buildStyles(options) {
 
     gulp.task("build", makeV1StylesheetBuilder(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
 
-    gulp.task("watch", ["build"], () => {
-        livereload.listen();
-
-        const onReload = file => livereload.changed(file.path);
-
-        gulp.watch(path.resolve(primaryDirectory, "design/*.css"),
-            onReload
-        );
-
-        const { cssTool } = options.buildOptions;
-
-        gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build"]);
-
-        print("\n" + chalk.green('Watching for changes in stylesheets...'));
-    });
-
-    const taskToExecute = options.watch ? "watch" : "build";
-    gulp.start(taskToExecute);
+    gulp.start("build");
 }
 
