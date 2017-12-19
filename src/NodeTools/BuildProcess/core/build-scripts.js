@@ -172,6 +172,8 @@ async function createEntriesConfig(primaryDirectory, options) {
         return;
     }
 
+    const libraryName = `${camelize(options.addonKey)}_[name]`;
+
     // @ts-ignore
     const config = merge(baseConfig, {
         entry: entries,
@@ -180,6 +182,7 @@ async function createEntriesConfig(primaryDirectory, options) {
             filename: `[name]/${options.addonKey}-[name].js`,
             publicPath: getChunkPublicPath(options),
             chunkFilename: `chunk/[name].js`,
+            library: libraryName // Needed to allow multiple webpack builds in one page.
         },
         resolve: {
             alias: getAliasesForRequirements(options)
@@ -253,7 +256,7 @@ function getAliasesForRequirements(options) {
     allowedKeys.push("vanilla", "dashboard", "core");
 
     const result = {
-        '@core': path.resolve(vanillaDirectory, 'src/js'),
+        '@core': path.resolve(vanillaDirectory, 'src/scripts'),
     };
     ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
         const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
@@ -263,7 +266,7 @@ function getAliasesForRequirements(options) {
             subdirs.forEach(addonKey => {
                 const key = `@${addonKey}`;
                 if (!result[key] && allowedKeys.includes(addonKey)) {
-                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey);
+                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey, 'src/scripts');
                 }
             });
         }

@@ -61,6 +61,7 @@
         "@types/jest": "^21.1.8",
         "@types/node": "^8.0.55",
         "@types/node-sass": "^3.10.32",
+        "cross-env": "^5.1.1",
         "del": "^3.0.0",
         "glob-promise": "^3.3.0",
         "jest": "^21.2.1",
@@ -68,7 +69,8 @@
         "remove": "^0.1.5"
     },
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "test:dirty": "cross-env NO_CLEANUP=true jest"
     },
     "jest": {
         "testMatch": [

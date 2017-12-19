@@ -9,6 +9,8 @@ const glob = require("glob-promise");
 const fs = require("fs");
 const mock = require("mock-fs");
 
+const skipCleanup = process.env.NO_CLEANUP || false;
+
 const buildScripts = require("../BuildProcess/core/build-scripts");
 
 // Fixtures
@@ -32,12 +34,12 @@ function buildCoreWithOptions() {
     const options = { ...baseOptions };
     options.addonKey = "core";
     options.buildOptions.entries = {
-        app: "./src/js/core.js",
-        admin: "./src/js/core-admin.js"
+        app: "./src/scripts/core.js",
+        admin: "./src/scripts/core-admin.js"
     };
     options.buildOptions.exports = {
-        app: ["./src/js/garden.js", "react"],
-        admin: ["./src/js/garden.js", "react"]
+        app: ["./src/scripts/garden.js", "react"],
+        admin: ["./src/scripts/garden.js", "react"]
     };
     options.rootDirectories = [coreAddonDirectory];
     options.requiredDirectories = [coreAddonDirectory];
@@ -47,6 +49,8 @@ function buildCoreWithOptions() {
 
 describe("Integration tests", () => {
     afterAll(done => {
+        if (skipCleanup) return;
+
         return remove(
             [
                 path.resolve(dashboardAddonDirectory, "js"),
@@ -113,7 +117,7 @@ describe("Integration tests", () => {
             const options = {...baseOptions };
             options.addonKey = "dashboard";
             options.buildOptions.entries = {
-                app: "./src/js/index.js"
+                app: "./src/scripts/index.js"
             };
             options.buildOptions.exports = {};
             options.rootDirectories = [dashboardAddonDirectory];
