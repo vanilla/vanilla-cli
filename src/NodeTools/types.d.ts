@@ -24,3 +24,8 @@ declare module "fs" {
 declare module "mountfs" {
     export function patchInPlace();
 }
+
+declare module "gulp-livereload" {
+    export function listen();
+    export function changed(file);
+}

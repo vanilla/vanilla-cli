@@ -17,7 +17,7 @@ const imagemin = require("gulp-imagemin");
  * @param {string} addonDirectory - The directory to build from.
  * @param {Object} options - The build options.
  *
- * @return {function} A gulp execution function.
+ * @return {any} A gulp execution function.
  */
 module.exports = (addonDirectory, options) => () => {
     if (!fs.existsSync(path.join(addonDirectory, "src/images"))) {

@@ -106,6 +106,7 @@ module.exports = (options) => () => {
             return less();
         } else {
             const sass = require("gulp-sass");
+            // @ts-ignore
             return sass({ importer: sassTool.importer });
         }
     }
