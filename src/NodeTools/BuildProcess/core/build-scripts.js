@@ -177,7 +177,7 @@ async function createEntriesConfig(primaryDirectory, options) {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: `${options.addonKey}-[name].js`,
+            filename: `[name]/${options.addonKey}-[name].js`,
             publicPath: getChunkPublicPath(options),
             chunkFilename: `chunk/[name].js`,
         },

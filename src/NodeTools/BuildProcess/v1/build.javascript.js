@@ -20,31 +20,33 @@ const { createBaseConfig } = require("../../library/webpack-utility");
  * Create the javascript build process.
  *
  * @param {string} addonDirectory - The directory to build from.
- * @param {Object} options - The build options.
+ * @param {BuildOptions} options - The build options.
  *
- * @return {function} A gulp execution function.
+ * @return {any} A gulp execution function.
  */
 module.exports = (addonDirectory, options) => () => {
     let jsEntries = options.buildOptions.entries;
 
     Object.keys(jsEntries).forEach(entryKey => {
-        const filePath = path.join("./src/js", jsEntries[entryKey]);
+        const filePath = path.join(options.rootDirectories[0], 'src/js/index.js')
+        const prettyPath = filePath.replace(options.vanillaDirectory, '')
 
         if (fs.existsSync(filePath)) {
-            print(chalk.yellow(`Using Entrypoint: ${filePath}`));
+            print(chalk.yellow(`Using Entrypoint: ${prettyPath}`));
+            jsEntries[entryKey] = filePath;
         } else {
             // Don't throw if the "default" entry point is not found.
-            if (/index.js/.test(jsEntries[entryKey])) {
+            if (/src\/js\/index\.js/.test(filePath)) {
                 delete jsEntries[entryKey];
             } else {
-                print(chalk.red(`Entrypoint provided but not found: ${filePath}`));
+                print(chalk.red(`Entrypoint provided but not found: ${prettyPath}`));
                 throw new Error();
             }
         }
     });
 
     if (Object.keys(jsEntries).length === 0) {
-        jsEntries = false;
+        jsEntries = {};
     }
 
     const v1Config = {

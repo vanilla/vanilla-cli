@@ -33,7 +33,7 @@ class BuildCmd extends NodeCommandBase {
         'process' => 'legacy',
         'cssTool' => 'scss',
         'entries' => [
-            'custom' => 'index.js',
+            'custom' => './index.js',
         ],
         'exports' => [],
     ];

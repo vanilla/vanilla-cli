@@ -45,7 +45,7 @@ print(options.watch ? devModeWarning : "");
 
 gulp.task("build:js", buildJs(primaryDirectory, options));
 
-gulp.task("build:styles", buildStyles(primaryDirectory, parentDirectories, options.buildOptions.cssTool));
+gulp.task("build:styles", buildStyles(options));
 
 gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
 

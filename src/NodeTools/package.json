@@ -26,6 +26,7 @@
         "eslint-stats": "^1.0.0",
         "express": "^4.16.2",
         "glob": "^7.1.2",
+        "globby": "^7.1.1",
         "gulp": "^3.9.1",
         "gulp-autoprefixer": "^4.0.0",
         "gulp-cache": "^1.0.1",
