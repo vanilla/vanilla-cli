@@ -16,5 +16,6 @@ module.exports = {
     ],
     plugins: [
         resolveBabel('plugin-transform-object-rest-spread'),
+        resolveBabel('plugin-syntax-dynamic-import'),
     ]
 }

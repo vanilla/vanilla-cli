@@ -289,8 +289,11 @@ class BuildCmd extends NodeCommandBase {
      * @throws Exception If an addon cannot be resolved.
      */
     function resolveAddonLocationInVanilla($addonKey) {
+        if ($addonKey === basename($this->vanillaSrcDir)) {
+            return $this->vanillaSrcDir;
+        }
+
         $possiblePaths = [
-            $this->vanillaSrcDir,
             $this->vanillaSrcDir.'/addons/'.$addonKey,
             $this->vanillaSrcDir.'/applications/'.$addonKey,
             $this->vanillaSrcDir.'/plugins/'.$addonKey,

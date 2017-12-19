@@ -106,6 +106,8 @@ async function createExportsConfig(primaryDirectory, options) {
         output: {
             path: path.join(primaryDirectory, "js"),
             filename: `[name]/lib-${options.addonKey}-[name].js`,
+            chunkFilename: `chunk/[name].js`,
+            publicPath: getChunkPublicPath(options),
             library: libraryName
         },
         resolve: {
@@ -175,7 +177,9 @@ async function createEntriesConfig(primaryDirectory, options) {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: `[name]/${options.addonKey}-[name].js`
+            filename: `[name]/${options.addonKey}-[name].js`,
+            publicPath: getChunkPublicPath(options),
+            chunkFilename: `chunk/[name]-[chunkhash:8].js`,
         },
         resolve: {
             alias: getAliasesForRequirements(options)
@@ -202,6 +206,35 @@ function addonUsesCoreBuildProcess(directory) {
     const addonJson = getJsonFileForDirectory(directory, "addon");
     if (addonJson && addonJson.build && addonJson.build.process === "core") {
         return directory;
+    }
+}
+
+/**
+ * Get the base path for the requiring dynamic chunks.
+ *
+ * @param {BuildOptions} options
+ */
+function getChunkPublicPath(options) {
+    const { addonKey } = options;
+    let basePath = (addonKey === "core") ? "" : `themes/${addonKey}/`;
+
+    const path = getPathFromVanillaRoot(options) + `js/`
+    console.log(path)
+    return path;
+}
+
+/**
+ * Get the base path for the requiring dynamic chunks.
+ *
+ * @param {BuildOptions} options
+ */
+function getPathFromVanillaRoot(options) {
+    const { addonKey, rootDirectories, vanillaDirectory } = options;
+    const root = rootDirectories[0].replace(vanillaDirectory, '/').replace("//", "/");
+    if (root.endsWith("/")) {
+        return root;
+    } else {
+        return root + "/";
     }
 }
 
