@@ -197,18 +197,20 @@ class NodeCommandBase extends Command {
         $hasHadPackageUpdate = version_compare($packageVersion, $installedVersion, '>');
 
         if ($hasHadNodeUpdate) {
-            CliUtil::write(
-                "\nThis tool's dependencies were installed with Node.js version {$vanillaLockJson['nodeVersion']}"
+            $reason = "\nThis tool's dependencies were installed with Node.js version {$vanillaLockJson['nodeVersion']}"
                 ."\n    Current Node.js version is {$currentNodeVersion}"
-                ."\nNode process $displayName's dependencies will need to be reinstalled"
-            );
+                ."\nNode process $displayName's dependencies will need to be reinstalled";
+
             $this->deleteDependenciesForDirectory($directoryPath);
+            $this->installDependenciesForDirectory($directoryPath, $reason);
         }
 
         if ($hasHadPackageUpdate) {
-            $reason = "Installing dependencies for node process $displayName"
-                ."\n    Installed Version - $installedVersion"
-                ."\n    Current Version - $packageVersion";
+            $reason = "\nNode process $displayName's dependencies were installed for package version $installedVersion"
+                ."\n    Current package version is $packageVersion"
+                ."\nNode process $displayName's dependencies will need to be reinstalled";
+
+            $this->deleteDependenciesForDirectory($directoryPath);
             $this->installDependenciesForDirectory($directoryPath, $reason);
             return;
         }
@@ -258,7 +260,7 @@ class NodeCommandBase extends Command {
         $vanillaLockJsonPath = "$directoryPath/vanilla.lock.json";
         $folderName = basename($directoryPath);
 
-        CliUtil::write("Deleting dependencies for build process version $folderName");
+        $this->isVerbose && CliUtil::write("Deleting dependencies for build process $folderName");
 
         $dir = realpath("$directoryPath/node_modules");
         if (PHP_OS === 'Windows') {
@@ -272,7 +274,7 @@ class NodeCommandBase extends Command {
         if (file_exists($vanillaLockJsonPath)) {
             unlink($vanillaLockJsonPath);
         }
-        CliUtil::write("Dependencies deleted for build process version $folderName");
+        CliUtil::write("Dependencies deleted for build process $folderName");
     }
 
     /**

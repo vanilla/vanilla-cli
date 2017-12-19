@@ -177,9 +177,9 @@ async function createEntriesConfig(primaryDirectory, options) {
         entry: entries,
         output: {
             path: path.join(primaryDirectory, "js"),
-            filename: `[name]/${options.addonKey}-[name].js`,
+            filename: `${options.addonKey}-[name].js`,
             publicPath: getChunkPublicPath(options),
-            chunkFilename: `chunk/[name]-[chunkhash:8].js`,
+            chunkFilename: `chunk/[name].js`,
         },
         resolve: {
             alias: getAliasesForRequirements(options)
@@ -193,7 +193,6 @@ async function createEntriesConfig(primaryDirectory, options) {
         path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
     );
 
-    // console.log(require("util").inspect(config, true, 6));
     return config;
 }
 
@@ -219,7 +218,6 @@ function getChunkPublicPath(options) {
     let basePath = (addonKey === "core") ? "" : `themes/${addonKey}/`;
 
     const path = getPathFromVanillaRoot(options) + `js/`
-    console.log(path)
     return path;
 }
 
