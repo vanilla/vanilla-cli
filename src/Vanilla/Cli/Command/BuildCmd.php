@@ -271,8 +271,13 @@ class BuildCmd extends NodeCommandBase {
             ? array_keys($addonJson['require'])
             : [];
 
-        // Everything builds against core by default
-        $requiredDirectories = [$this->vanillaSrcDir];
+        $requiredDirectories = [];
+
+        if (\file_exists($this->vanillaSrcDir.'/addon.json')) {
+            $requiredDirectories[] = $this->vanillaSrcDir;
+        } else {
+            CliUtil::warn("WARNING: No core javascript base was found. Special resolving module resolution like @core, @vanilla, and @dashboard will not work.");
+        }
 
         foreach($requirements as $requirement) {
             $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
