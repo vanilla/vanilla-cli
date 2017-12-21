@@ -21,7 +21,7 @@ const baseOptions = {
 
 describe.only("Integration Tests", () => {
     afterAll(done => {
-        return remove(
+        remove(
             [
                 path.resolve(themeDirectory, "design"),
                 path.resolve(childThemeDirectory, "design"),
