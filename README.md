@@ -8,47 +8,21 @@ Current functionalities include:
 - Generating cache files for addons
 - Converting addons' info arrays to json
 
-See the [wiki](https://github.com/vanilla/vanilla-cli/wiki) for documentation about the different commands.
+See the [vanilla-cli docs](https://docs.vanillaforums.com/developer/vanilla-cli) for documentation about the different commands.
 
 ## Table of Contents
 
 * [Installation](#installation)
-* [Usage](#usage)
-* [Debugging](#debugging)
+* [Basic Usage](#usage)
 * [Documentation](#documentation)
 * [Tests](#tests)
-* [License](#license)
+* [Debugging](#debugging)
 
 ## Installation
 
-### Prerequisites
-The CLI requires PHP `5.6.0` or greater installed to run. It also requires [composer](https://getcomposer.org/).
+See our [Installation Docs](https://docs.vanillaforums.com/developer/vanilla-cli/installation/) and our [Quickstart Guide](https://docs.vanillaforums.com/developer/vanilla-cli/build-quickstart/).r
 
-Some commands, currently `build`, requires a minimum Node.js version of `8.0.0` and the package manager `yarn` to be installed. Installation instructions are located [in the wik](https://github.com/vanilla/vanilla-cli/wiki/Node.js-Processes).
-
-### Setup
-
-#### Installation with Composer
-
-1. Run `composer global require 'vanilla/vanilla-cli'`.
-2. If your composer bin directory is on your path, you can now run the tool with `vanilla`. Try `vanilla --help` to get started.
-
-#### Manual Installation
-
-1. Clone this repo to the installation directory 
-```bash
-cd INSTALLATION_FOLDER
-git clone git@github.com:vanilla/vanilla-cli.git
-```
-2. Install the PHP dependancies in the directory where you clone this project.
-```bash
-cd vanilla-cli
-composer install
-```
-3. Run the tool `./bin/vanilla --help`
-4. (Optional) Symlink the tool somewhere on your path. `ln -s ./bin/vanilla SOME_BIN_DIRECTORY`
-
-## Usage
+## Basic Usage
 
 - From the command line:
 ```bash
@@ -68,6 +42,19 @@ try {
     ...
 }
 ```
+
+## Documentation
+
+More detailed usage documentation can be found at our official [vanilla-cli docs](https://docs.vanillaforums.com/developer/vanilla-cli/#usage).
+
+- [Getting Started](https://docs.vanillaforums.com/developer/vanilla-cli/#getting-started)
+- [Build Tools](https://docs.vanillaforums.com/developer/vanilla-cli/#build-tools)
+- [Addon Utilities](https://docs.vanillaforums.com/developer/vanilla-cli/#addon-utilities)
+- [Build Tool Quickstart Guide](https://docs.vanillaforums.com/developer/vanilla-cli/build-quickstart)
+- [Build Process - Core](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-core)
+- [Build Process - 1.0](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-v1)
+- [Build Process - Legacy](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-legacy)
+- [How Bundling Works](https://docs.vanillaforums.com/developer/vanilla-cli/bundling-process)
 
 ## Tests
 
@@ -103,7 +90,3 @@ Just export `XDEBUG_CONFIG` from your shell, set up your IDE to listen for XDebu
 export XDEBUG_CONFIG="idekey=PHPSTORM"
 vanilla some-command --some-argument
 ```
-
-## Documentation
-
-Documentation can be found at this repo's [wiki](https://github.com/vanilla/vanilla-cli/wiki).
