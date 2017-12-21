@@ -1,7 +1,7 @@
 const path = require("path");
-const remove = require("remove");
+const del = require("del");
 const fs = require("fs");
-const mock = require("mock-fs");
+const { sleep } = require("../library/utility");
 
 const buildStyles = require("../BuildProcess/core/build-styles");
 
@@ -20,19 +20,18 @@ const baseOptions = {
 };
 
 describe.only("Integration Tests", () => {
-    afterAll(done => {
-        remove(
+    afterAll(() => {
+        const ouput = path.join(themeDirectory, "design");
+
+        del.sync(
             [
-                path.resolve(themeDirectory, "design"),
-                path.resolve(childThemeDirectory, "design"),
-            ],
-            () => {
-                done();
-            }
+                path.join(themeDirectory, "design/**"),
+                path.join(childThemeDirectory, "design/**"),
+            ]
         );
     });
     describe("Standalone Theme", () => {
-        beforeAll(() => {
+        beforeAll((done) => {
             const options = {
                 ...baseOptions,
                 rootDirectories: [
@@ -40,7 +39,9 @@ describe.only("Integration Tests", () => {
                 ],
             };
 
-            return buildStyles(options);
+            return buildStyles(options, () => {
+                sleep(300).then(() => done());
+            });
         });
 
         it("builds a custom.css and sourcemap file", () => {

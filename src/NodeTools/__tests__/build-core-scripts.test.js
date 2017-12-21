@@ -4,7 +4,7 @@
  */
 
 const path = require("path");
-const remove = require("remove");
+const del = require("del");
 const glob = require("glob-promise");
 const fs = require("fs");
 const mock = require("mock-fs");
@@ -48,18 +48,15 @@ function buildCoreWithOptions() {
 }
 
 describe("Integration tests", () => {
-    afterAll(done => {
+    afterAll(() => {
         if (skipCleanup) return;
 
-        return remove(
+        return del.sync(
             [
                 path.resolve(dashboardAddonDirectory, "js"),
                 path.resolve(coreAddonDirectory, "js"),
                 path.resolve(coreAddonDirectory, "manifests")
-            ],
-            () => {
-                done();
-            }
+            ]
         );
     });
 

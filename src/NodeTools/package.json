@@ -66,8 +66,7 @@
         "del": "^3.0.0",
         "glob-promise": "^3.3.0",
         "jest": "^21.2.1",
-        "mock-fs": "^4.4.2",
-        "remove": "^0.1.5"
+        "mock-fs": "^4.4.2"
     },
     "scripts": {
         "test": "jest",
