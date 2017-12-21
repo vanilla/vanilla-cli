@@ -33,7 +33,7 @@ class BuildCmd extends NodeCommandBase {
         'process' => 'legacy',
         'cssTool' => 'scss',
         'entries' => [
-            'custom' => 'index.js',
+            'custom' => './index.js',
         ],
         'exports' => [],
     ];
@@ -61,7 +61,11 @@ class BuildCmd extends NodeCommandBase {
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
-            $this->buildToolBaseDirectory
+            $this->buildToolBaseDirectory,
+
+            // These are stuck here until there is a proper way to do versioned upgrades.
+            $this->buildToolBaseDirectory.'/BuildProcess/v1',
+            $this->buildToolBaseDirectory.'/BuildProcess/legacy'
         ];
     }
 
@@ -267,8 +271,13 @@ class BuildCmd extends NodeCommandBase {
             ? array_keys($addonJson['require'])
             : [];
 
-        // Everything builds against core by default
-        $requiredDirectories = [$this->vanillaSrcDir.'/core'];
+        $requiredDirectories = [];
+
+        if (\file_exists($this->vanillaSrcDir.'/addon.json')) {
+            $requiredDirectories[] = $this->vanillaSrcDir;
+        } else {
+            CliUtil::warn("WARNING: No core javascript base was found. Special resolving module resolution like @core, @vanilla, and @dashboard will not work.");
+        }
 
         foreach($requirements as $requirement) {
             $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
@@ -289,6 +298,10 @@ class BuildCmd extends NodeCommandBase {
      * @throws Exception If an addon cannot be resolved.
      */
     function resolveAddonLocationInVanilla($addonKey) {
+        if ($addonKey === basename($this->vanillaSrcDir)) {
+            return $this->vanillaSrcDir;
+        }
+
         $possiblePaths = [
             $this->vanillaSrcDir.'/addons/'.$addonKey,
             $this->vanillaSrcDir.'/applications/'.$addonKey,

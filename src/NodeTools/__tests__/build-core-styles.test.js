@@ -1,7 +1,7 @@
 const path = require("path");
-const remove = require("remove");
+const del = require("del");
 const fs = require("fs");
-const mock = require("mock-fs");
+const { sleep } = require("../library/utility");
 
 const buildStyles = require("../BuildProcess/core/build-styles");
 
@@ -20,19 +20,16 @@ const baseOptions = {
 };
 
 describe.only("Integration Tests", () => {
-    afterAll(done => {
-        return remove(
+    afterAll(() => {
+        del.sync(
             [
-                path.resolve(themeDirectory, "design"),
-                path.resolve(childThemeDirectory, "design"),
-            ],
-            () => {
-                done();
-            }
+                path.join(__dirname, "**/design/**"),
+            ]
         );
     });
+
     describe("Standalone Theme", () => {
-        beforeAll(() => {
+        beforeAll((done) => {
             const options = {
                 ...baseOptions,
                 rootDirectories: [
@@ -40,7 +37,7 @@ describe.only("Integration Tests", () => {
                 ],
             };
 
-            return buildStyles(options);
+            return buildStyles(options, () => done());
         });
 
         it("builds a custom.css and sourcemap file", () => {
@@ -64,7 +61,7 @@ describe.only("Integration Tests", () => {
     });
 
     describe("Child Theme", () => {
-        beforeAll(() => {
+        beforeAll((done) => {
             const options = {
                 ...baseOptions,
                 rootDirectories: [
@@ -73,7 +70,7 @@ describe.only("Integration Tests", () => {
                 ],
             };
 
-            return buildStyles(options);
+            return buildStyles(options, () => done());
         });
 
         it("builds a custom.css and sourcemap file", () => {

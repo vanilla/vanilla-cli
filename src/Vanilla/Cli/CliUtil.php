@@ -26,10 +26,9 @@ class CliUtil {
     }
 
     /**
-     * Throw an exception with the supplied message.
+     * Exits the process and prints an error message.
      *
-     * @param string $msg Exception's message.
-     * @throws Exception
+     * @param string $msg The Error's message.
      */
     public static function fail($msg) {
         $logger = new LogFormatter();
@@ -39,6 +38,19 @@ class CliUtil {
             ->error($msg);
 
         exit(1);
+    }
+
+    /**
+     * Prints a yellow warning message
+     *
+     * @param string $msg Warning's message.
+     */
+    public static function warn($msg) {
+        $logger = new LogFormatter();
+
+        $logger
+            ->setDateFormat('')
+            ->warn($msg.PHP_EOL);
     }
 
     /**

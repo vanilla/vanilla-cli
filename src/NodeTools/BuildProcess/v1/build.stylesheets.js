@@ -6,6 +6,8 @@
 const gulp = require("gulp");
 const util = require("gulp-util");
 const path = require("path");
+const glob = require("globby");
+const chalk = require("chalk").default;
 
 const plumber = require("gulp-plumber");
 const sourcemaps = require("gulp-sourcemaps");
@@ -30,21 +32,29 @@ function swallowError(error) {
  * Create the stylesheet gulp task function.
  * @export
  *
- * @param {string} primaryDirectory - The directory of the addon that initiated the build process.
- * @param {string[]} secondaryDirectories - Any parent directories to fetch source files from.
- * @param {string} cssTool - The CSS preprocessor to use.
+ * @param {BuildOptions} options
  *
- * @return {function} A gulp execution function.
+ * @return {any} A gulp execution function.
  */
-module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
-    const allSrcDirectories = [primaryDirectory, ...secondaryDirectories];
-    const destination = path.resolve(primaryDirectory, "design");
-    const sassTool = createSassTool(allSrcDirectories);
+module.exports = (options) => () => {
+
+    const { rootDirectories } = options;
+    const { cssTool } = options.buildOptions;
+    const destination = path.resolve(rootDirectories[0], "design");
+    const sassTool = createSassTool(rootDirectories);
 
     const minifier = process.env.NODE_ENV !== "test" ? cssnano : util.noop;
+    const src = getSourceFiles();
+
+    glob(src).then(results => {
+        results.forEach(srcFile => {
+            const prettyPath = srcFile.replace(options.vanillaDirectory, '');
+            print(chalk.yellow(`Using Entrypoint: ${prettyPath}`));
+        })
+    });
 
     const compiler = gulp
-        .src(getSourceFiles())
+        .src(src)
         .pipe(
             plumber({
                 errorHandler: swallowError
@@ -75,7 +85,7 @@ module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
      * @return {string[]} The entrypoints
      */
     function getSourceFiles() {
-        const rootTheme = allSrcDirectories.slice(-1)[0];
+        const rootTheme = rootDirectories.slice(-1)[0];
         const srcDir = path.resolve(rootTheme, "src");
 
         // Ignore partials as entrypoints.
@@ -96,6 +106,7 @@ module.exports = (primaryDirectory, secondaryDirectories, cssTool) => () => {
             return less();
         } else {
             const sass = require("gulp-sass");
+            // @ts-ignore
             return sass({ importer: sassTool.importer });
         }
     }

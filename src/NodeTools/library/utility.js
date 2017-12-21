@@ -16,7 +16,8 @@ module.exports = {
     printVerbose,
     printError,
     sleep,
-    getJsonFileForDirectory
+    getJsonFileForDirectory,
+    camelize,
 };
 
 const defaultSpawnOptions = {
@@ -79,6 +80,21 @@ function pluralize(word, count) {
     const plural = count === 1 ? word : word + "s";
     return plural;
 }
+
+/**
+ * Convert a string to camelcase.
+ *
+ * @param {string} str - The string to convert.
+ *
+ * @returns {string}
+ */
+function camelize(str) {
+    const regex = /(?:^\w|[A-Z]|\b\w)/g;
+
+    return str.replace(regex, (letter, index) => {
+      return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
+    }).replace(/\s+/g, '');
+  }
 
 /**
  * Log something to STDOUT. Use this instead of console.log();

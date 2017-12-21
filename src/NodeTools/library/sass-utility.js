@@ -57,14 +57,10 @@ function createSassTool(sourceDirectories) {
      * @param {string} content - The file content.
      * @param {string} entryFilePath - The path of the file.
      *
-     * @return {string} The new contets of a file.
+     * @return {string} The new contents of a file.
      */
     function swapPlaceholders(content, entryFilePath) {
         const placeholderRegex = /\/\*\*\s*@vanilla-cli-placeholder:\s*([^\s]*)\s*\*\*\//g;
-
-        const modifiedRelativeFilePath = path.relative(process.cwd(), entryFilePath);
-
-        print(chalk.yellow(`Using Entrypoint: ${modifiedRelativeFilePath}`));
 
         const replacedText = content.replace(placeholderRegex, (match, captureGroup1) => {
             const resolvedFilePaths = resolveAllFilePathsFromMutlipleAddons(`src/scss/${captureGroup1}`) || [];

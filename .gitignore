@@ -9,7 +9,6 @@
 /vanillaSrc
 /vendor/
 ~*
-composer.lock
 composer-local.json
 node_modules
 Thumbs.db

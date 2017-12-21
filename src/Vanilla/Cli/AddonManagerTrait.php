@@ -9,8 +9,6 @@ namespace Vanilla\Cli;
 use \Exception;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
-use Vanilla\Cli\CliUtil;
-use Garden\Cli\LogFormatter;
 
 /**
  * Trait for getting and using the AddonManager.
@@ -19,9 +17,6 @@ trait AddonManagerTrait {
 
     /** @var AddonManager */
     private $addonManager;
-
-    /** @var string */
-    private $_vanillaSrcDirectory;
 
     /**
      * Initialize the addon manager.
