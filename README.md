@@ -14,9 +14,9 @@ See the [vanilla-cli docs](https://docs.vanillaforums.com/developer/vanilla-cli)
 
 * [Installation](#installation)
 * [Basic Usage](#usage)
-* [Debugging](#debugging)
 * [Documentation](#documentation)
 * [Tests](#tests)
+* [Debugging](#debugging)
 
 ## Installation
 
@@ -43,7 +43,18 @@ try {
 }
 ```
 
+## Documentation
+
 More detailed usage documentation can be found at our official [vanilla-cli docs](https://docs.vanillaforums.com/developer/vanilla-cli/#usage).
+
+- [Getting Started](https://docs.vanillaforums.com/developer/vanilla-cli/#getting-started)
+- [Build Tools](https://docs.vanillaforums.com/developer/vanilla-cli/#build-tools)
+- [Addon Utilities](https://docs.vanillaforums.com/developer/vanilla-cli/#addon-utilities)
+- [Build Tool Quickstart Guide](https://docs.vanillaforums.com/developer/vanilla-cli/build-quickstart)
+- [Build Process - Core](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-core)
+- [Build Process - 1.0](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-v1)
+- [Build Process - Legacy](https://docs.vanillaforums.com/developer/vanilla-cli/build-process-legacy)
+- [How Bundling Works](https://docs.vanillaforums.com/developer/vanilla-cli/bundling-process)
 
 ## Tests
 
