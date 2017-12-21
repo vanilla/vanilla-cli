@@ -26,7 +26,7 @@ class CliUtil {
     }
 
     /**
-     * Exits the process and prints and error message.
+     * Exits the process and prints an error message.
      *
      * @param string $msg The Error's message.
      */

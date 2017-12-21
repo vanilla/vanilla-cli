@@ -21,15 +21,13 @@ const baseOptions = {
 
 describe.only("Integration Tests", () => {
     afterAll(() => {
-        const ouput = path.join(themeDirectory, "design");
-
         del.sync(
             [
-                path.join(themeDirectory, "design/**"),
-                path.join(childThemeDirectory, "design/**"),
+                path.join(__dirname, "**/design/**"),
             ]
         );
     });
+
     describe("Standalone Theme", () => {
         beforeAll((done) => {
             const options = {
@@ -39,9 +37,7 @@ describe.only("Integration Tests", () => {
                 ],
             };
 
-            return buildStyles(options, () => {
-                sleep(300).then(() => done());
-            });
+            return buildStyles(options, () => done());
         });
 
         it("builds a custom.css and sourcemap file", () => {
@@ -65,7 +61,7 @@ describe.only("Integration Tests", () => {
     });
 
     describe("Child Theme", () => {
-        beforeAll(() => {
+        beforeAll((done) => {
             const options = {
                 ...baseOptions,
                 rootDirectories: [
@@ -74,7 +70,7 @@ describe.only("Integration Tests", () => {
                 ],
             };
 
-            return buildStyles(options);
+            return buildStyles(options, () => done());
         });
 
         it("builds a custom.css and sourcemap file", () => {
