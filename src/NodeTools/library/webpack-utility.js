@@ -29,7 +29,7 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: [path.join(buildRoot, "./src/js")],
+                    include: [path.join(buildRoot, "./src/scripts"), path.join(buildRoot, "./src/js")],
                     exclude: ["node_modules"],
                     use: [
                         {
