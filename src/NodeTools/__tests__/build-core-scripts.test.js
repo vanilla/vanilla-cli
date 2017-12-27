@@ -47,6 +47,12 @@ function buildCoreWithOptions() {
     return buildScripts.run(options);
 }
 
+/**
+ * If this fails, it is likely that babel is not being run on the source files and webpack
+ * is attempting to bundle them without babel.
+ *
+ * @param {string} filePath - The file path to check.
+ */
 function veryifyBabelTranspilationForFile(filePath) {
     const badParseString = "Module parse failed";
     const featureThatShouldBeTranspiled = "{...";
@@ -163,10 +169,6 @@ describe("Integration tests", () => {
             expect(outputContents).not.toContain("MODULE_NOT_FOUND");
         })
 
-        /**
-         * If this fails, it is likely that babel is not being run on the source files and webpack
-         * is attempting to bundle them without babel.
-         */
         it("parses scripts with babel", () => {
             veryifyBabelTranspilationForFile(path.join(dashboardAddonDirectory, "js/app/dashboard-app.js"));
         })
