@@ -7,6 +7,7 @@
 const path = require("path");
 const fs = require("fs");
 const chalk = require('chalk').default;
+const detectPort = require("detect-port");
 const { spawn } = require("child_process");
 
 module.exports = {
@@ -18,6 +19,7 @@ module.exports = {
     sleep,
     getJsonFileForDirectory,
     camelize,
+    checkLiveReloadPort,
 };
 
 const defaultSpawnOptions = {
@@ -153,4 +155,19 @@ function sleep(milliseconds) {
             resolve();
         }, milliseconds)
     })
+}
+
+async function checkLiveReloadPort() {
+    const port = 35729;
+
+    try {
+        const portResult = await detectPort(port);
+        if (portResult === port) {
+            return;
+        } else {
+            fail(`Unable to start LiveReload server. Port ${port} is currently in use. You likely have another build tool currently in watch mode. Quit that process, then try running this command again.`);
+        }
+    } catch (err) {
+        fail(err);
+    }
 }
