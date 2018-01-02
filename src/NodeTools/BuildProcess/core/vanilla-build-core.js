@@ -12,7 +12,7 @@ const livereload = require("gulp-livereload");
 
 const buildScripts = require("./build-scripts");
 const buildStyles = require("./build-styles");
-const { print, printError, spawnChildProcess } = require("../../library/utility");
+const { print, printError, spawnChildProcess, checkLiveReloadPort } = require("../../library/utility");
 
 const options = getOptions();
 installNodeModules(options)
@@ -103,13 +103,9 @@ async function run(options) {
     const promises = [buildScripts.run(options), buildStyles(options)];
 
     if (options.watch) {
+        await checkLiveReloadPort();
         promises.push(startLiveReload(primaryDirectory));
     }
 
-    return Promise.all(promises)
-        .then(() => {
-            if (options.watch) {
-                startLiveReload(primaryDirectory);
-            }
-        });
+    return Promise.all(promises).then(() => {});
 }

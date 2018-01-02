@@ -9,7 +9,7 @@ const livereload = require("gulp-livereload");
 const argv = require("yargs").argv;
 const chalk = require("chalk").default;
 
-const { print, sleep } = require("../../library/utility");
+const { print, sleep, checkLiveReloadPort } = require("../../library/utility");
 
 const buildJs = require("./build.javascript");
 const buildStyles = require("./build.stylesheets");
@@ -52,27 +52,29 @@ gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
 gulp.task("build", ["build:assets", "build:styles", "build:js"]);
 
 gulp.task("watch", ["build"], () => {
-    livereload.listen();
+    checkLiveReloadPort().then(() => {
+        livereload.listen();
 
-    const onReload = file => livereload.changed(file.path);
+        const onReload = file => livereload.changed(file.path);
 
-    gulp.watch(
-        [
-            path.resolve(primaryDirectory, "design/*.css"),
-            path.resolve(primaryDirectory, "design/images/**/*"),
-            path.resolve(primaryDirectory, "js/*.js"),
-            path.resolve(primaryDirectory, "views/**/*")
-        ],
-        onReload
-    );
+        gulp.watch(
+            [
+                path.resolve(primaryDirectory, "design/*.css"),
+                path.resolve(primaryDirectory, "design/images/**/*"),
+                path.resolve(primaryDirectory, "js/*.js"),
+                path.resolve(primaryDirectory, "views/**/*")
+            ],
+            onReload
+        );
 
-    const { cssTool } = options.buildOptions;
+        const { cssTool } = options.buildOptions;
 
-    gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
-    gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
-    gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
+        gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
+        gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
+        gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
 
-    print("\n" + chalk.green("Watching for changes in src files..."));
+        print("\n" + chalk.green("Watching for changes in src files..."));
+    })
 });
 
 const taskToExecute = options.watch ? "watch" : "build";
