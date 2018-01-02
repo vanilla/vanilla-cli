@@ -47,6 +47,20 @@ function buildCoreWithOptions() {
     return buildScripts.run(options);
 }
 
+/**
+ * If this fails, it is likely that babel is not being run on the source files and webpack
+ * is attempting to bundle them without babel.
+ *
+ * @param {string} filePath - The file path to check.
+ */
+function veryifyBabelTranspilationForFile(filePath) {
+    const badParseString = "Module parse failed";
+    const featureThatShouldBeTranspiled = "{...";
+    const outputContents = fs.readFileSync(filePath, "utf8");
+    expect(outputContents).not.toContain(badParseString);
+    expect(outputContents).not.toContain(featureThatShouldBeTranspiled);
+}
+
 describe("Integration tests", () => {
     afterAll(() => {
         if (skipCleanup) return;
@@ -102,6 +116,14 @@ describe("Integration tests", () => {
             const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/core-admin.js"), "utf8");
             expect(outputContents).not.toContain("REACT_STRING");
         });
+
+        /**
+         * If this fails, it is likely that babel is not being run on the source files and webpack
+         * is attempting to bundle them without babel.
+         */
+        it("parses scripts with babel", () => {
+            veryifyBabelTranspilationForFile(path.join(coreAddonDirectory, "js/admin/core-admin.js"));
+        })
     }
 
     describe("builds the core javascript", coreAssertions);
@@ -145,6 +167,10 @@ describe("Integration tests", () => {
         it("finds all of the modules required from the core library", () => {
             const outputContents = fs.readFileSync(path.join(dashboardAddonDirectory, `js/${outputFilename}`), "utf8");
             expect(outputContents).not.toContain("MODULE_NOT_FOUND");
+        })
+
+        it("parses scripts with babel", () => {
+            veryifyBabelTranspilationForFile(path.join(dashboardAddonDirectory, "js/app/dashboard-app.js"));
         })
     });
 });

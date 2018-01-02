@@ -23,13 +23,32 @@ module.exports = {
  * @param {boolean} isDevMode - Which way to build.
  */
 function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
+
+    const scriptsPath = path.join(buildRoot, "./src/scripts");
+    const oldScriptsPath = path.join(buildRoot, "./src/js");
+
+    const includes = new Set([
+        scriptsPath,
+        oldScriptsPath,
+    ]);
+
+    // Add the realpaths as well because filesystems are complicated and the user could run the tool
+    // from the realpath or the symlink depending on the OS and shell.
+    includes.forEach(include => {
+        if (fs.existsSync(include)) {
+            includes.add(fs.realpathSync(include));
+        } else {
+            delete includes[include];
+        }
+    })
+
     const commonConfig = {
         context: buildRoot,
         module: {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: [path.join(buildRoot, "./src/js")],
+                    include: Array.from(includes),
                     exclude: ["node_modules"],
                     use: [
                         {
