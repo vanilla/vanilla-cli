@@ -73,7 +73,7 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
          * We are expecting this tool to be used in a different directory than itself.
          */
         resolveLoader: {
-            modules: [path.resolve(__dirname, "../node_modules")]
+            modules: [path.resolve(__dirname, "../node_modules"), "node_modules"]
         },
         output: {
             filename: "[name].js"
