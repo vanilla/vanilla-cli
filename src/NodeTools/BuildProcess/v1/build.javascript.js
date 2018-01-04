@@ -27,30 +27,22 @@ const { createBaseConfig } = require("../../library/webpack-utility");
 module.exports = (addonDirectory, options) => () => {
     let jsEntries = options.buildOptions.entries;
 
-    Object.keys(jsEntries).forEach(entryKey => {
-        const filePath = path.join(options.rootDirectories[0], 'src/js/index.js')
-        const prettyPath = filePath.replace(options.vanillaDirectory, '')
+    const expectedEntryPoint = "./index.js";
 
-        if (fs.existsSync(filePath)) {
-            print(chalk.yellow(`Using Entrypoint: ${prettyPath}`));
-            jsEntries[entryKey] = filePath;
-        } else {
-            // Don't throw if the "default" entry point is not found.
-            if (/src\/js\/index\.js/.test(filePath)) {
-                delete jsEntries[entryKey];
-            } else {
-                print(chalk.red(`Entrypoint provided but not found: ${prettyPath}`));
-                throw new Error();
-            }
-        }
-    });
+    if (Object.keys(jsEntries).length > 1 || jsEntries["custom"] !== expectedEntryPoint) {
+        printError("The build process v1 does not currently support custom entry points. \nhttps://docs.vanillaforums.com/developer/vanilla-cli/build-process-v1/#javascript\n\nFor custom entrypoints see the build process core.");
+        return;
+    }
 
-    if (Object.keys(jsEntries).length === 0) {
-        jsEntries = {};
+    if (!fs.existsSync(path.join(addonDirectory, 'src/js', expectedEntryPoint))) {
+        print(chalk.yellowBright("Javascript entrypoint src/js/index.js not found. Skipping JS build."));
+        return;
     }
 
     const v1Config = {
-        entry: jsEntries,
+        entry: {
+            custom: path.resolve(addonDirectory, "./src/js/index.js")
+        },
         output: {
             filename: "[name].js"
         }
