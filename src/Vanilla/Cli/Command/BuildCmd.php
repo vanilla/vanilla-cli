@@ -276,7 +276,7 @@ class BuildCmd extends NodeCommandBase {
         if (\file_exists($this->vanillaSrcDir.'/addon.json')) {
             $requiredDirectories[] = $this->vanillaSrcDir;
         } else {
-            CliUtil::warn("WARNING: No core javascript base was found. Special resolving module resolution like @core, @vanilla, and @dashboard will not work.");
+            CliUtil::warn("WARNING: No core javascript base was found. Special module resolution like @core, @vanilla, and @dashboard will not work.");
         }
 
         foreach($requirements as $requirement) {
