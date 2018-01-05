@@ -38,7 +38,7 @@ parentDirectories.forEach(parent => {
 });
 
 const devModeWarning = chalk.bold.yellow(`
-WARNING The process is starting in watch/dev mode. Be sure to run a production build before commiting your changes by running this command with the '--watch' option.
+WARNING The process is starting in watch/dev mode. Be sure to run a production build before commiting your changes by running this command without the '--watch' option.
 `);
 
 print(options.watch ? devModeWarning : "");
