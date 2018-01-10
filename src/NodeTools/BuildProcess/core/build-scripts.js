@@ -37,20 +37,24 @@ module.exports = {
  * @param {BuildOptions} options
  */
 async function run(options) {
-    let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+    try {
+        let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 
-    const exportsConfig = await createExportsConfig(primaryDirectory, options);
+        const exportsConfig = await createExportsConfig(primaryDirectory, options);
 
-    if (exportsConfig) {
-        await runSingleWebpackConfig(exportsConfig, options.watch);
-    }
+        if (exportsConfig) {
+            await runSingleWebpackConfig(exportsConfig, options.watch);
+        }
 
-    // The entries config MUST be created after the first process has completed
-    // or it will not be able to build against it.
-    const entriesConfig = await createEntriesConfig(primaryDirectory, options);
+        // The entries config MUST be created after the first process has completed
+        // or it will not be able to build against it.
+        const entriesConfig = await createEntriesConfig(primaryDirectory, options);
 
-    if (entriesConfig) {
-        await runSingleWebpackConfig(entriesConfig, options.watch);
+        if (entriesConfig) {
+            await runSingleWebpackConfig(entriesConfig, options.watch);
+        }
+    } catch (err) {
+        printError(err);
     }
 }
 
@@ -99,37 +103,44 @@ async function createExportsConfig(primaryDirectory, options) {
         directories.splice(index, 1);
     }
 
-    // The hashes here need to have quotes, or they won't be able to be uglified
-    const libraryName = `lib_${camelize(options.addonKey)}_[name]`;
-    const config = merge(baseConfig, {
-        entry: exports,
-        output: {
-            path: path.join(primaryDirectory, "js"),
-            filename: `[name]/lib-${options.addonKey}-[name].js`,
-            chunkFilename: `chunk/[name].js`,
-            publicPath: getChunkPublicPath(options),
-            library: libraryName
-        },
-        resolve: {
-            alias: getAliasesForRequirements(options)
-        },
-        plugins: [
-            ...getDllPLuginsForAddonDirectories(directories, options),
-            new webpack.DllPlugin({
-                context: options.vanillaDirectory,
-                path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
-                name: libraryName
-            })
-        ]
+    const configs = Object.keys(exports).map((exportKey) => {
+        const entry = {
+            [exportKey]: exports[exportKey],
+        };
+
+        const libraryName = "lib_" + camelize(options.addonKey) + "_" + camelize(exportKey);
+        const config = merge(baseConfig, {
+            entry,
+            output: {
+                path: path.join(primaryDirectory, "js"),
+                filename: `[name]/lib-${options.addonKey}-[name].js`,
+                chunkFilename: `chunk/[name].js`,
+                publicPath: getChunkPublicPath(options),
+                library: libraryName
+            },
+            resolve: {
+                alias: getAliasesForRequirements(options)
+            },
+            plugins: [
+                ...getDllPLuginsForAddonDirectories(directories, exportKey, options),
+                new webpack.DllPlugin({
+                    context: options.vanillaDirectory,
+                    path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
+                    name: libraryName
+                })
+            ]
+        });
+
+        config.resolve.modules.unshift(
+            path.resolve(options.vanillaDirectory, "node_modules"),
+            path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
+            path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
+        );
+
+        return config;
     });
 
-    config.resolve.modules.unshift(
-        path.resolve(options.vanillaDirectory, "node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
-    );
-
-    return config;
+    return configs;
 }
 
 /**
@@ -172,31 +183,37 @@ async function createEntriesConfig(primaryDirectory, options) {
         return;
     }
 
-    const libraryName = `${camelize(options.addonKey)}_[name]`;
+    const configs = Object.keys(entries).map((entryKey) => {
+        const entry = {
+            [entryKey]: entries[entryKey],
+        };
 
-    // @ts-ignore
-    const config = merge(baseConfig, {
-        entry: entries,
-        output: {
-            path: path.join(primaryDirectory, "js"),
-            filename: `[name]/${options.addonKey}-[name].js`,
-            publicPath: getChunkPublicPath(options),
-            chunkFilename: `chunk/[name].js`,
-            library: libraryName // Needed to allow multiple webpack builds in one page.
-        },
-        resolve: {
-            alias: getAliasesForRequirements(options)
-        },
-        plugins: getDllPLuginsForAddonDirectories(directories, options)
+        // @ts-ignore
+        const config = merge(baseConfig, {
+            entry,
+            output: {
+                path: path.join(primaryDirectory, "js"),
+                filename: `[name]/${options.addonKey}-[name].js`,
+                publicPath: getChunkPublicPath(options),
+                chunkFilename: `chunk/[name].js`,
+                library: camelize(options.addonKey) + "_" + camelize(entryKey), // Needed to allow multiple webpack builds in one page.
+            },
+            resolve: {
+                alias: getAliasesForRequirements(options),
+            },
+            plugins: getDllPLuginsForAddonDirectories(directories, entryKey, options),
+        });
+
+        config.resolve.modules.unshift(
+            path.resolve(options.vanillaDirectory, "node_modules"),
+            path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
+            path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
+        );
+
+        return config;
     });
 
-    config.resolve.modules.unshift(
-        path.resolve(options.vanillaDirectory, "node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
-    );
-
-    return config;
+    return configs;
 }
 
 /**
@@ -278,12 +295,36 @@ function getAliasesForRequirements(options) {
 }
 
 /**
+ * Filter manifests so that only manifests that much the current section are used.
+ *
+ * eg.
+ * app => app-manifest.json
+ * admin => admin-manifest.json
+ *
+ * The exception here is the bootstrap file which should more loosely match the manifest name.
+ *
+ * bootstrap-app => app-manifest.json
+ * bootstrap-admin => admin-manifest.json
+ *
+ * @param {string} entryKey - The entry key to filter by.
+ */
+function filterManifestPathsByEntryKey(entryKey) {
+    return function filterManifests(manifestPath) {
+        const manifestName = path.basename(manifestPath);
+        const lookupKey = entryKey.replace("bootstrap", "").replace("-", "");
+
+        return manifestName.includes(lookupKey);
+    }
+}
+
+/**
  * Generate DLL Plugins for any required addons and it self.
  *
  * @param {string[]} directories - The directories to generate DLL plugins for.
+ * @param {string} entryKey - The entryKey to filter the results with.
  * @param {BuildOptions} options
  */
-function getDllPLuginsForAddonDirectories(directories, options) {
+function getDllPLuginsForAddonDirectories(directories, entryKey, options) {
     return directories
         .filter(addonUsesCoreBuildProcess)
         .map(getManifestPathsForDirectory)
@@ -291,12 +332,13 @@ function getDllPLuginsForAddonDirectories(directories, options) {
             return [
                 ...result,
                 ...manifests,
-            ]
+            ];
         }, [])
+        .filter(filterManifestPathsByEntryKey(entryKey))
         .map(manifest => {
             return new webpack.DllReferencePlugin({
                 context: options.vanillaDirectory,
-                manifest: require(manifest)
+                manifest: require(manifest),
             });
         });
 }
@@ -329,5 +371,5 @@ function runSingleWebpackConfig(config, watch = false) {
 
             resolve();
         });
-    });
+    })
 }
