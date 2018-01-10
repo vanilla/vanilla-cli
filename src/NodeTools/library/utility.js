@@ -91,12 +91,10 @@ function pluralize(word, count) {
  * @returns {string}
  */
 function camelize(str) {
-    const regex = /(?:^\w|[A-Z]|\b\w)/g;
-
-    return str.replace(regex, (letter, index) => {
-      return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
-    }).replace(/\s+/g, '');
-  }
+    return str.replace(/[_.-](\w|$)/g, (substring, word) => {
+        return word.toUpperCase();
+    });
+}
 
 /**
  * Log something to STDOUT. Use this instead of console.log();
