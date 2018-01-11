@@ -114,7 +114,7 @@ async function createExportsConfig(primaryDirectory, options) {
             output: {
                 path: path.join(primaryDirectory, "js"),
                 filename: `[name]/lib-${options.addonKey}-[name].js`,
-                chunkFilename: `chunk/[name].js`,
+                chunkFilename: `chunk/[name]-${exportKey}.js`,
                 publicPath: getChunkPublicPath(options),
                 library: libraryName
             },
@@ -195,7 +195,7 @@ async function createEntriesConfig(primaryDirectory, options) {
                 path: path.join(primaryDirectory, "js"),
                 filename: `[name]/${options.addonKey}-[name].js`,
                 publicPath: getChunkPublicPath(options),
-                chunkFilename: `chunk/[name].js`,
+                chunkFilename: `chunk/[name]-${entryKey}.js`,
                 library: camelize(options.addonKey) + "_" + camelize(entryKey), // Needed to allow multiple webpack builds in one page.
             },
             resolve: {
