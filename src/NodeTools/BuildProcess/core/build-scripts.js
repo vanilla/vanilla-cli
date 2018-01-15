@@ -76,6 +76,35 @@ function getManifestPathsForDirectory(directory) {
 }
 
 /**
+ * Spread "*" declarations among all other sections.
+ *
+ * @param {Object} exports - The exports to transform.
+ *
+ * @returns {Object}
+ */
+function preprocessExports(exports) {
+    if (!("*" in exports)) {
+        return exports;
+    }
+
+    const star = exports["*"];
+    const output = {};
+
+    for (const [key, value] of Object.entries(exports)) {
+        if (key === "*") {
+            continue;
+        }
+
+        output[key] = [
+            ...star,
+            ...value,
+        ];
+    }
+
+    return output;
+}
+
+/**
  * Create export configuration for webpack.
  *
  * This configuration is builds all files defined in `addonJson.build.exports`.
@@ -89,11 +118,13 @@ function getManifestPathsForDirectory(directory) {
  */
 async function createExportsConfig(primaryDirectory, options) {
     const baseConfig = createBaseConfig(primaryDirectory, options.watch);
-    const { exports } = options.buildOptions;
+    let { exports } = options.buildOptions;
 
     if (!isValidEntryPoint(exports)) {
         return;
     }
+
+    exports = preprocessExports(exports);
 
     // Remove this addon's libraries so it doesn't build it's own exports against it's own exports
     const self = options.rootDirectories[0];
