@@ -9,10 +9,20 @@ const path = require("path");
 const webpack = require("webpack");
 const gulp = require("gulp");
 const livereload = require("gulp-livereload");
+const glob = require("glob");
+const fs = require("fs");
 
 const buildScripts = require("./build-scripts");
+const buildScriptsHot = require("./build-scripts-hot");
 const buildStyles = require("./build-styles");
-const { print, printError, spawnChildProcess, checkLiveReloadPort } = require("../../library/utility");
+const {
+    print,
+    printError,
+    printVerbose,
+    spawnChildProcess,
+    checkLiveReloadPort,
+    getAllCoreBuildAddons
+} = require("../../library/utility");
 
 const options = getOptions();
 installNodeModules(options)
@@ -43,13 +53,26 @@ function getOptions() {
  * @param {BuildOptions} options
  */
 async function installNodeModules(options) {
+    const { hot, vanillaDirectory, verbose } = options;
+
     print("Verifying node_module installation.");
+    hot && print("This may take a while the first time.");
     const originalDir = process.cwd();
 
     try {
-        for (const dir of options.rootDirectories) {
+        let directories = [];
+        if (hot) {
+            directories = getAllCoreBuildAddons(options)
+                .filter(addonPath => fs.existsSync(path.join(addonPath, "package.json")));
+        } else {
+            directories = options.rootDirectories;
+        }
+
+        for (const dir of directories) {
+            print(`Installing node modules for directory: ${chalk.yellow(dir)}`);
             process.chdir(dir);
-            await spawnChildProcess("yarn", ["install"], {});
+            const spawnOptions = verbose ? {stdio: "inherit"} : {};
+            await spawnChildProcess("yarn", ["install"], spawnOptions);
         }
     } catch(err) {
         printError(`\nNode module installation failed.\n    ${err}\n`);
@@ -100,7 +123,8 @@ async function run(options) {
     });
     print("");
 
-    const promises = [buildScripts.run(options), buildStyles(options)];
+    const jsProcess = options.hot ? buildScriptsHot.run(options) : buildScripts.run(options);
+    const promises = [jsProcess, buildStyles(options)];
 
     if (options.watch) {
         await checkLiveReloadPort();

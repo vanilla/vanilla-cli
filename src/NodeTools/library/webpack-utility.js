@@ -9,9 +9,17 @@ const webpack = require("webpack");
 const merge = require("webpack-merge");
 const babelPreset = require("./babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const chalk = require("chalk").default;
+
+const {
+    printVerbose,
+    getAllCoreBuildAddons,
+} = require("./utility");
 
 module.exports = {
     createBaseConfig,
+    preprocessWebpackExports,
+    getAliasesForRequirements,
 };
 
 /**
@@ -20,17 +28,24 @@ module.exports = {
  * Notably this is missing entry/output configs. Be sure to provide those.
  *
  * @param {string} buildRoot - The root path of the addon being built.
- * @param {boolean} isDevMode - Which way to build.
+ * @param {BuildOptions} options - Which way to build.
+ *
+ * @returns {Object}
  */
-function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
+function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
 
-    const scriptsPath = path.join(buildRoot, "./src/scripts");
     const oldScriptsPath = path.join(buildRoot, "./src/js");
 
     const includes = new Set([
-        scriptsPath,
         oldScriptsPath,
     ]);
+
+    if (options.buildOptions.process === "core") {
+        const coreBuildAddons = getAllCoreBuildAddons(options);
+        coreBuildAddons.forEach(coreAddon => {
+            includes.add(path.join(coreAddon, "./src/scripts"));
+        });
+    }
 
     // Add the realpaths as well because filesystems are complicated and the user could run the tool
     // from the realpath or the symlink depending on the OS and shell.
@@ -40,7 +55,7 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
         } else {
             delete includes[include];
         }
-    })
+    });
 
     const commonConfig = {
         context: buildRoot,
@@ -48,8 +63,8 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
             rules: [
                 {
                     test: /\.jsx?$/,
-                    include: Array.from(includes),
                     exclude: ["node_modules"],
+                    include: Array.from(includes),
                     use: [
                         {
                             loader: "babel-loader",
@@ -113,5 +128,77 @@ function createBaseConfig(buildRoot, isDevMode, shouldUglifyProd = true) {
     }
 
     // @ts-ignore
-    return merge(commonConfig, isDevMode ? devConfig : prodConfig);
+    return merge(commonConfig, options.watch || options.hot ? devConfig : prodConfig);
+}
+
+/**
+ * Spread "*" declarations among all other sections.
+ *
+ * @param {Object} exports - The exports to transform.
+ *
+ * @returns {Object}
+ */
+function preprocessWebpackExports(exports) {
+    if (!("*" in exports)) {
+        return exports;
+    }
+
+    const star = exports["*"];
+    const output = {};
+
+    for (const [key, value] of Object.entries(exports)) {
+        if (key === "*") {
+            continue;
+        }
+
+        output[key] = [
+            ...star,
+            ...value,
+        ];
+    }
+
+    return output;
+}
+
+/**
+ * Generate aliases for any required addons.
+ *
+ * Aliases will always be generated for core, applications/vanilla, and applications/dashboard
+ *
+ * @param {BuildOptions} options
+ * @param {boolean=} forceAll - Force the function to make aliases for every single addon.
+ *
+ * @returns {Object}
+ */
+function getAliasesForRequirements(options, forceAll = false) {
+    const { vanillaDirectory, requiredDirectories } = options;
+
+    const allowedKeys = requiredDirectories.map(dir => {
+        return path.basename(dir);
+    })
+
+    allowedKeys.push("vanilla", "dashboard", "core");
+
+    const result = {
+        '@core': path.resolve(vanillaDirectory, 'src/scripts'),
+    };
+    ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
+        const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
+
+        if(fs.existsSync(fullTopDirectory)) {
+            const subdirs = fs.readdirSync(fullTopDirectory);
+            subdirs.forEach(addonKey => {
+                const key = `@${addonKey}`;
+
+                const shouldAddResult = !result[key] && (forceAll || allowedKeys.includes(addonKey));
+                if (shouldAddResult) {
+                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey, 'src/scripts');
+                }
+            });
+        }
+    });
+
+    const outputString = Object.keys(result).join(chalk.white(", "));
+    printVerbose(`Using aliases: ${chalk.yellow(outputString)}`);
+    return result;
 }

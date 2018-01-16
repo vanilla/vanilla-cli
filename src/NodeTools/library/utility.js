@@ -9,6 +9,7 @@ const fs = require("fs");
 const chalk = require('chalk').default;
 const detectPort = require("detect-port");
 const { spawn } = require("child_process");
+const glob = require("glob");
 
 module.exports = {
     spawnChildProcess,
@@ -16,10 +17,13 @@ module.exports = {
     print,
     printVerbose,
     printError,
+    fail,
     sleep,
     getJsonFileForDirectory,
     camelize,
     checkLiveReloadPort,
+    getAllCoreBuildEntries,
+    getAllCoreBuildAddons,
 };
 
 const defaultSpawnOptions = {
@@ -128,6 +132,7 @@ function printVerbose(contents) {
  */
 function printError(error) {
     console.error(chalk.bold.red(error.toString()));
+    throw error;
 }
 
 /**
@@ -155,6 +160,9 @@ function sleep(milliseconds) {
     })
 }
 
+/**
+ * Check to see if the livereload port is already taken. If it is, fail with a warning.
+ */
 async function checkLiveReloadPort() {
     const port = 35729;
 
@@ -168,4 +176,88 @@ async function checkLiveReloadPort() {
     } catch (err) {
         fail(err);
     }
+}
+
+let cachedCoreBuildAddons;
+
+/**
+ * Get the path to all currently enabled addons that use the "core" build process.
+ *
+ * This function caches the result the first time because there are a lot of file lookups involved.
+ * I you enable another addon, you will need to restart the build tool.
+ *
+ * @param {BuildOptions} options
+ *
+ * @returns {string[]} - An array of filepaths.
+ */
+function getAllCoreBuildAddons(options) {
+    const { vanillaDirectory } = options;
+
+    if (cachedCoreBuildAddons) {
+        return cachedCoreBuildAddons;
+    }
+
+    const addonJsonPaths = glob.sync(path.join(vanillaDirectory, "**/addon.json"));
+    addonJsonPaths.unshift(path.join(vanillaDirectory, "addon.json"));
+
+    cachedCoreBuildAddons = addonJsonPaths
+        .filter(addonJsonPath => {
+            const directory = path.dirname(addonJsonPath);
+            const addonJson = getJsonFileForDirectory(directory, "addon");
+
+            if (addonJson && addonJson.build && addonJson.build.process === "core") {
+                return true;
+            } else {
+                return false;
+            }
+        })
+        .map(path.dirname)
+        .filter((item, index, self) => self.indexOf(item) == index)
+        .filter(addonPath => {
+            if (addonPath === vanillaDirectory) {
+                return true;
+            }
+
+            const addonKey = path.basename(addonPath);
+
+            if (options.enabledAddonKeys.includes(addonKey)) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+    return cachedCoreBuildAddons;
+}
+
+/**
+ * Get all of paths of all the entry files in addons identififed by `getAllCoreBuildAddons`.
+ *
+ * @param {BuildOptions} options - The root of the vanilla installation.
+ *
+ * @returns {Object} - An Object of keyed "sections" and entries for that section.
+ */
+function getAllCoreBuildEntries(options) {
+    const coreAddonPaths = getAllCoreBuildAddons(options);
+    const coreBuildEntries = [];
+
+    coreAddonPaths.forEach(coreAddonPath => {
+        const addonJson = getJsonFileForDirectory(coreAddonPath, "addon");
+        const { entries } = addonJson.build;
+
+        for (let [entryKey, entryPath] of Object.entries(entries)) {
+            // Special handling for bootstrap files.
+            if (entryKey.includes("bootstrap")) {
+                entryKey = entryKey.replace("bootstrap-", "");
+            }
+
+            if (!coreBuildEntries[entryKey]) {
+                coreBuildEntries[entryKey] = [];
+            }
+
+            coreBuildEntries[entryKey].push(path.join(coreAddonPath, entryPath));
+        }
+    });
+
+    return coreBuildEntries;
 }

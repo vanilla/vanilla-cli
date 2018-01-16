@@ -199,7 +199,7 @@ class NodeCommandBase extends Command {
         if ($hasHadNodeUpdate) {
             $reason = "\nThis tool's dependencies were installed with Node.js version {$vanillaLockJson['nodeVersion']}"
                 ."\n    Current Node.js version is {$currentNodeVersion}"
-                ."\nNode process $displayName's dependencies will need to be reinstalled";
+                ."\nNode process $displayName's dependencies will need to be reinstalled\n";
 
             $this->deleteDependenciesForDirectory($directoryPath);
             $this->installDependenciesForDirectory($directoryPath, $reason);
@@ -208,7 +208,7 @@ class NodeCommandBase extends Command {
         if ($hasHadPackageUpdate) {
             $reason = "\nNode process $displayName's dependencies were installed for package version $installedVersion"
                 ."\n    Current package version is $packageVersion"
-                ."\nNode process $displayName's dependencies will need to be reinstalled";
+                ."\nNode process $displayName's dependencies will need to be reinstalled\n";
 
             $this->deleteDependenciesForDirectory($directoryPath);
             $this->installDependenciesForDirectory($directoryPath, $reason);
@@ -219,7 +219,7 @@ class NodeCommandBase extends Command {
             CliUtil::write(
                 "Skipping install for node process $displayName - Already installed"
                 ."\n    Installed Version - $installedVersion"
-                ."\n    Current Version - $packageVersion"
+                ."\n    Current Version - $packageVersion\n"
             );
         }
     }

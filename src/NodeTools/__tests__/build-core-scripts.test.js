@@ -27,7 +27,10 @@ const baseOptions = {
     },
     vanillaDirectory: path.resolve(__dirname, "./fixtures/vanilla/"),
     watch: false,
-    verbose: false
+    verbose: false,
+    enabledAddonKeys: [
+        "dashboard",
+    ]
 };
 
 function buildCoreWithOptions() {

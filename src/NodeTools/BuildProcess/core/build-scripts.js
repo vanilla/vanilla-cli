@@ -10,7 +10,11 @@ const glob = require("glob");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
 
-const { createBaseConfig, createWebpackAliasesForDirectory } = require("../../library/webpack-utility");
+const {
+    createBaseConfig,
+    preprocessWebpackExports,
+    getAliasesForRequirements,
+} = require("../../library/webpack-utility");
 const {
     print,
     printError,
@@ -76,35 +80,6 @@ function getManifestPathsForDirectory(directory) {
 }
 
 /**
- * Spread "*" declarations among all other sections.
- *
- * @param {Object} exports - The exports to transform.
- *
- * @returns {Object}
- */
-function preprocessExports(exports) {
-    if (!("*" in exports)) {
-        return exports;
-    }
-
-    const star = exports["*"];
-    const output = {};
-
-    for (const [key, value] of Object.entries(exports)) {
-        if (key === "*") {
-            continue;
-        }
-
-        output[key] = [
-            ...star,
-            ...value,
-        ];
-    }
-
-    return output;
-}
-
-/**
  * Create export configuration for webpack.
  *
  * This configuration is builds all files defined in `addonJson.build.exports`.
@@ -117,14 +92,14 @@ function preprocessExports(exports) {
  * @return {Promise<Object>} - A webpack config
  */
 async function createExportsConfig(primaryDirectory, options) {
-    const baseConfig = createBaseConfig(primaryDirectory, options.watch);
+    const baseConfig = createBaseConfig(primaryDirectory, options);
     let { exports } = options.buildOptions;
 
     if (!isValidEntryPoint(exports)) {
         return;
     }
 
-    exports = preprocessExports(exports);
+    exports = preprocessWebpackExports(exports);
 
     // Remove this addon's libraries so it doesn't build it's own exports against it's own exports
     const self = options.rootDirectories[0];
@@ -203,7 +178,7 @@ function isValidEntryPoint(entry) {
  * @return {Promise<?Object>} - A webpack config or undefined if their were no entries.
  */
 async function createEntriesConfig(primaryDirectory, options) {
-    const baseConfig = createBaseConfig(primaryDirectory, options.watch);
+    const baseConfig = createBaseConfig(primaryDirectory, options);
     const { entries } = options.buildOptions;
     const directories = [
         ...options.requiredDirectories,
@@ -285,44 +260,6 @@ function getPathFromVanillaRoot(options) {
     } else {
         return root + "/";
     }
-}
-
-/**
- * Generate aliases for any required addons.
- *
- * Aliases will always be generated for core, applications/vanilla, and applications/dashboard
- *
- * @param {BuildOptions} options
- */
-function getAliasesForRequirements(options) {
-    const { vanillaDirectory, requiredDirectories } = options;
-
-    const allowedKeys = requiredDirectories.map(dir => {
-        return path.basename(dir);
-    })
-
-    allowedKeys.push("vanilla", "dashboard", "core");
-
-    const result = {
-        '@core': path.resolve(vanillaDirectory, 'src/scripts'),
-    };
-    ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
-        const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
-
-        if(fs.existsSync(fullTopDirectory)) {
-            const subdirs = fs.readdirSync(fullTopDirectory);
-            subdirs.forEach(addonKey => {
-                const key = `@${addonKey}`;
-                if (!result[key] && allowedKeys.includes(addonKey)) {
-                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey, 'src/scripts');
-                }
-            });
-        }
-    });
-
-    const outputString = Object.keys(result).join(chalk.white(", "));
-    printVerbose(`Using aliases: ${chalk.yellow(outputString)}`);
-    return result;
 }
 
 /**
