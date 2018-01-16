@@ -125,23 +125,6 @@ function run(options) {
         const compiler = webpack(config);
         const app = express();
 
-        // Print notice after first compile to edit your vanilla configuration.
-
-        let hasPrintedConfigNotice = false;
-
-        compiler.plugin("done", () => {
-            setTimeout(() => {
-                if (!hasPrintedConfigNotice) {
-                    print(
-                        "\nComplete hot reload setup by adding the following to your vanilla config file.\n" +
-                        chalk.yellowBright(`$Configuration["HotReload"]["Enable"] = true;`)
-                    );
-
-                    hasPrintedConfigNotice = true;
-                }
-            }, 100);
-        });
-
         // Allow CORS
         app.use(function(req, res, next) {
             res.header("Access-Control-Allow-Origin", "*");
@@ -157,6 +140,11 @@ function run(options) {
 
         app.listen(3030, () => {
             print("Dev server listening on port 3030.");
+
+            print(
+                "Complete hot reload setup by adding the following to your vanilla config file.\n" +
+                chalk.bold.yellowBright(`$Configuration["HotReload"]["Enable"] = true;\n`)
+            );
         });
 
     } catch (err) {
