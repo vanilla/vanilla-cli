@@ -6,9 +6,9 @@
 
 const path = require("path");
 const fs = require("fs");
-const chalk = require('chalk').default;
+const chalk = require("chalk").default;
 const detectPort = require("detect-port");
-const { spawn } = require("child_process");
+const {spawn} = require("child_process");
 const glob = require("glob");
 
 module.exports = {
@@ -63,7 +63,7 @@ async function spawnChildProcess(command, args, options = defaultSpawnOptions) {
 
         task.on("close", (code) => {
             if (code !== 0) {
-                reject(new Error(`command "${command} exited with a non-zero status code."`))
+                reject(new Error(`command "${command} exited with a non-zero status code."`));
             }
             return resolve(true);
         });
@@ -156,8 +156,8 @@ function sleep(milliseconds) {
     return new Promise(resolve => {
         setTimeout(() => {
             resolve();
-        }, milliseconds)
-    })
+        }, milliseconds);
+    });
 }
 
 /**
@@ -191,7 +191,7 @@ let cachedCoreBuildAddons;
  * @returns {string[]} - An array of filepaths.
  */
 function getAllCoreBuildAddons(options) {
-    const { vanillaDirectory } = options;
+    const {vanillaDirectory} = options;
 
     if (cachedCoreBuildAddons) {
         return cachedCoreBuildAddons;
@@ -243,7 +243,7 @@ function getAllCoreBuildEntries(options) {
 
     coreAddonPaths.forEach(coreAddonPath => {
         const addonJson = getJsonFileForDirectory(coreAddonPath, "addon");
-        const { entries } = addonJson.build;
+        const {entries} = addonJson.build;
 
         if (!entries) {
             return;

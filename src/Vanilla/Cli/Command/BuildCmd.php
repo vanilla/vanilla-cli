@@ -112,9 +112,9 @@ class BuildCmd extends NodeCommandBase {
     protected function setAddonJsonBuildOptions($rootDirectory = null) {
         if (!$rootDirectory) {
             $rootDirectory = getcwd();
+        } else {
+            $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
         }
-
-        $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
 
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
 
@@ -211,10 +211,6 @@ class BuildCmd extends NodeCommandBase {
      * @return array
      */
     protected function getEnabledAddonKeys() {
-        if (!$this->hot) {
-            return [];
-        }
-
         $filePath = $this->vanillaSrcDir.'/conf/config.php';
         if (!file_exists($filePath)) {
             CliUtil::fail("Unable to locate Vanilla configuration at $filePath.");
@@ -369,10 +365,6 @@ class BuildCmd extends NodeCommandBase {
      * @return string The resolved addonPath.
      */
     function resolveAddonLocationInVanilla($addonKey) {
-        if ($addonKey === basename($this->vanillaSrcDir)) {
-            return $this->vanillaSrcDir;
-        }
-
         $possiblePaths = [
             $this->vanillaSrcDir.'/addons/'.$addonKey,
             $this->vanillaSrcDir.'/applications/'.$addonKey,

@@ -18,10 +18,8 @@ const {
 const {
     print,
     printError,
-    printVerbose,
-    spawnChildProcess,
+    fail,
     getJsonFileForDirectory,
-    sleep,
     camelize
 } = require("../../library/utility");
 
@@ -29,10 +27,7 @@ const {
 module.exports = {
     run,
     getManifestPathsForDirectory,
-    createExportsConfig,
     isValidEntryPoint,
-    createEntriesConfig,
-    runSingleWebpackConfig
 };
 
 /**
