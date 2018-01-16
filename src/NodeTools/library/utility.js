@@ -245,6 +245,10 @@ function getAllCoreBuildEntries(options) {
         const addonJson = getJsonFileForDirectory(coreAddonPath, "addon");
         const { entries } = addonJson.build;
 
+        if (!entries) {
+            return;
+        }
+
         for (let [entryKey, entryPath] of Object.entries(entries)) {
             // Special handling for bootstrap files.
             if (entryKey.includes("bootstrap")) {

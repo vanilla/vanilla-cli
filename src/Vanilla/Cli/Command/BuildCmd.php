@@ -233,8 +233,8 @@ class BuildCmd extends NodeCommandBase {
         }
 
         if (valr("EnabledApplications", $Configuration)) {
-            foreach($Configuration["EnabledApplications"] as $appKey => $value) {
-                $result[] = $appKey;
+            foreach($Configuration["EnabledApplications"] as $arrayKey => $addonKey) {
+                $result[] = $addonKey;
             }
         }
 
