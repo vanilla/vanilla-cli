@@ -74,7 +74,8 @@ function buildConfigForSection(entries, sectionKey, options) {
                 require.resolve('webpack-hot-middleware/client')
                 + "?dynamicPublicPath=true"
                 + "&path=/__webpack_hmr"
-                + `&name=${sectionKey}`,
+                + `&name=${sectionKey}`
+                + "&reload=true",
                 dynamicEntryPath,
             ]
         },
