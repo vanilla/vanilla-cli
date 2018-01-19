@@ -11,8 +11,6 @@ use \Garden\Cli\Cli;
 use \Garden\Cli\Args;
 use \Garden\Cli\LogFormatter;
 use \Vanilla\Cli\CliUtil;
-use \Vanilla\Addon;
-use \Vanilla\AddonManager;
 
 /**
  * Class BuildCmd.
@@ -38,14 +36,20 @@ class BuildCmd extends NodeCommandBase {
         'exports' => [],
     ];
 
+    /** Whether or not to run in hot mode. */
+    private $watch = false;
+
+    /** @var boolean Whether or not to run in hot mode. */
+    private $hot = false;
+
+    /** @var string|null A section of entries to filter the hot process by. */
+    private $section = null;
+
     /** @var array An array of addon configurations to build with. */
     private $addonBuildConfigs = [];
 
     /** @var array An array of realpaths to roots of addons being built. */
     private $addonRootDirectories = [];
-
-    /** @var array An array of parent build configurations */
-    private $parentConfigs = [];
 
     /**
      * BuildCmd constructor.
@@ -56,6 +60,8 @@ class BuildCmd extends NodeCommandBase {
         parent::__construct($cli);
         $cli->description('Build frontend assets (scripts, stylesheets, and images).')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
+            ->opt('hot:h', 'Use a webpack hot reloading server.', false, 'bool')
+            ->opt('section:s', 'Limit the webpack hot reloading server to a only a certain section of Vanilla. Usually "app" or "admin"')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string');
 
@@ -84,9 +90,12 @@ class BuildCmd extends NodeCommandBase {
             'buildOptions' => $this->addonBuildConfigs[0],
             'rootDirectories' => $this->addonRootDirectories,
             'requiredDirectories' => $this->getRequiredAddonDirectories(),
-            'watch' => $args->getOpt('watch') ?: false,
+            'watch' => $this->watch,
+            'hot' => $this->hot,
+            'section' => $this->section,
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
+            'enabledAddonKeys' => $this->getEnabledAddonKeys(),
         ];
 
         $this->spawnNodeProcessFromPackageMain(
@@ -103,9 +112,9 @@ class BuildCmd extends NodeCommandBase {
     protected function setAddonJsonBuildOptions($rootDirectory = null) {
         if (!$rootDirectory) {
             $rootDirectory = getcwd();
+        } else {
+            $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
         }
-
-        $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
 
         $addonJson = CliUtil::getAddonJsonForDirectory($rootDirectory);
 
@@ -170,7 +179,10 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function setBuildOptionsFromArgs(Args $args) {
         $processArg = $args->getOpt('process') ?: false;
+        $hotArg = $args->getOpt('hot') ?: false;
+        $watchArg = $args->getOpt('watch') ?: false;
         $cssToolArg = $args->getOpt('csstool');
+        $sectionArg = $args->getOpt('section');
 
         if ($processArg) {
             $this->defaultConfigurationOptions['process'] = $processArg;
@@ -179,6 +191,54 @@ class BuildCmd extends NodeCommandBase {
         if ($cssToolArg) {
             $this->defaultConfigurationOptions['cssTool'] = $cssToolArg;
         }
+
+        if ($hotArg) {
+            $this->hot = $hotArg;
+        }
+
+        if($watchArg) {
+            $this->watch = $watch;
+        }
+
+        if ($sectionArg) {
+            $this->section = $sectionArg;
+        }
+    }
+
+    /**
+     * Get the keys of enabled themes, plugins, and applications.
+     *
+     * @return array
+     */
+    protected function getEnabledAddonKeys() {
+        $filePath = $this->vanillaSrcDir.'/conf/' . $this->configName;
+        if (!file_exists($filePath)) {
+            CliUtil::fail("Unable to locate Vanilla configuration at $filePath.");
+        }
+
+        CliUtil::write("Using vanilla configuration at $filePath.");
+        define("APPLICATION", "App");
+        require_once($filePath);
+
+        $result = [];
+
+        if (valr("EnabledPlugins", $Configuration)) {
+            foreach($Configuration["EnabledPlugins"] as $pluginKey => $value) {
+                $result[] = $pluginKey;
+            }
+        }
+
+        if (valr("EnabledApplications", $Configuration)) {
+            foreach($Configuration["EnabledApplications"] as $arrayKey => $addonKey) {
+                $result[] = $addonKey;
+            }
+        }
+
+        if (valr("Garden.Theme", $Configuration)) {
+            $result[] = $Configuration["Garden"]["Theme"];
+        }
+
+        return $result;
     }
 
     /**
@@ -246,6 +306,14 @@ class BuildCmd extends NodeCommandBase {
                 ' - pass "-csstool="less" as an argument to the build command.'
             );
         }
+
+        if ($this->hot && !($finalBuildConfig['process'] === 'core')) {
+            CliUtil::fail("The '--hot' parameter is only available for the 'core' build process.");
+        }
+
+        if (!$this->hot && $this->section) {
+            CliUtil::fail("The '--section' parameter is only available with the '--hot' option.");
+        }
     }
 
     /**
@@ -295,13 +363,8 @@ class BuildCmd extends NodeCommandBase {
      * @param string $addonKey The key of the addon to lookup.
      *
      * @return string The resolved addonPath.
-     * @throws Exception If an addon cannot be resolved.
      */
     function resolveAddonLocationInVanilla($addonKey) {
-        if ($addonKey === basename($this->vanillaSrcDir)) {
-            return $this->vanillaSrcDir;
-        }
-
         $possiblePaths = [
             $this->vanillaSrcDir.'/addons/'.$addonKey,
             $this->vanillaSrcDir.'/applications/'.$addonKey,

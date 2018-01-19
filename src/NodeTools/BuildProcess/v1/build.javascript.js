@@ -48,7 +48,7 @@ module.exports = (addonDirectory, options) => () => {
         }
     };
 
-    const baseConfig = createBaseConfig(addonDirectory, options.watch);
+    const baseConfig = createBaseConfig(addonDirectory, options);
     const finalConfig = merge(baseConfig, v1Config);
 
     return gulp

@@ -15,6 +15,9 @@ interface BuildOptions {
     requiredDirectories?: string[];
     watch: boolean;
     verbose: boolean;
+    hot: boolean;
+    section: string;
+    enabledAddonKeys: string[];
 }
 
 declare module "fs" {

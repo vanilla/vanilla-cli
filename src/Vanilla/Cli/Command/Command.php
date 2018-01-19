@@ -20,6 +20,9 @@ class Command {
     /** @var string */
     protected $vanillaSrcDir;
 
+    /** @var string */
+    protected $configName = "config.php";
+
     /** @var bool */
     protected $isVerbose;
 
@@ -33,8 +36,10 @@ class Command {
             ->command($this->getName())
             ->opt(
                 'vanillasrc',
-                'Vanilla source folder. This parameter can be skipped if you set VANILLACLI_VANILLA_SRC_DIR in your environment variables.'
-            )
+                'Vanilla source folder. This parameter can be skipped if you set VANILLACLI_VANILLA_SRC_DIR in your environment variables.')
+            ->opt(
+                'configname',
+                'Vanilla configuration file. This should be inside of your vanilla src directory. Defaults to "config.php". This parameter can be skipped if you set VANILLACLI_VANILLA_CONFIG_NAME in your environment variables.')
             ->opt('verbose:v', 'Show additional output.', false, 'bool')
         ;
     }
@@ -65,6 +70,12 @@ class Command {
      */
     public function run(Args $args) {
         $this->isVerbose = $args->getOpt('verbose') ?: false;
+        $configName =  $args->getOpt('configname', getenv('VANILLACLI_VANILLA_CONFIG_NAME'));
+
+        if ($configName) {
+            $this->configName = $configName;
+        }
+
         $potentialSrcDirectory = $args->getOpt('vanillasrc', getenv('VANILLACLI_VANILLA_SRC_DIR'));
 
         if (!$potentialSrcDirectory) {
