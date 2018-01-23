@@ -73,7 +73,7 @@ function buildConfigForSection(entries, sectionKey, options) {
             [sectionKey]: [
                 require.resolve('webpack-hot-middleware/client')
                 + "?dynamicPublicPath=true"
-                + "&path=/__webpack_hmr"
+                + "&path=__webpack_hmr"
                 + `&name=${sectionKey}`
                 + "&reload=true",
                 dynamicEntryPath,
@@ -82,7 +82,7 @@ function buildConfigForSection(entries, sectionKey, options) {
         output: {
             filename: `${sectionKey}-hot-bundle.js`,
             chunkFilename: `[name]-${sectionKey}-hot-chunk.js`,
-            publicPath: "http://127.0.0.1:3030",
+            publicPath: "http://127.0.0.1:3030/",
         },
         resolve: {
             alias: getAliasesForRequirements(options, true),
@@ -134,7 +134,7 @@ function run(options) {
         });
 
         app.use(devMiddleware(compiler, {
-            publicPath: "http://127.0.0.1:3030",
+            publicPath: "http://127.0.0.1:3030/",
         }));
 
         app.use(hotMiddleware(compiler));
