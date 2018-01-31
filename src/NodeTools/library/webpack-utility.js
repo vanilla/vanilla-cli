@@ -74,11 +74,25 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                             }
                         }
                     ]
+                },
+                {
+                    test: /\.svg$/,
+                    use: [
+                            {
+                            loader: 'html-loader',
+                            options: {
+                                minimize: true
+                            }
+                        }
+                    ]
                 }
             ]
         },
         resolve: {
             modules: [path.join(buildRoot, "node_modules"), "node_modules"],
+            alias: {
+                'quill$': path.resolve(__dirname, 'node_modules/quill/quill.js'),
+            },
             extensions: [".js", ".jsx", ".svg"]
         },
 
