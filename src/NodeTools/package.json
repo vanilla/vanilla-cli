@@ -43,6 +43,7 @@
         "gulp-sass": "^3.1.0",
         "gulp-size": "^2.1.0",
         "gulp-sourcemaps": "^2.6.0",
+        "html-loader": "^0.5.5",
         "imagemin-pngquant": "^5.0.1",
         "inquirer": "^4.0.1",
         "node-sass": "^4.7.2",

@@ -19,16 +19,6 @@ const { print, printVerbose, printError } = require("../../library/utility");
 const { createSassTool } = require('../../library/sass-utility');
 
 /**
- * Swallow the error and print it prevent gulp watch tasks from erroring out.
- *
- * @param {Error} error
- */
-function swallowError(error) {
-    printError(error.toString());
-    this.emit("end");
-}
-
-/**
  * Create the stylesheet gulp task function.
  * @export
  *
@@ -55,11 +45,7 @@ module.exports = (options) => () => {
 
     const compiler = gulp
         .src(src)
-        .pipe(
-            plumber({
-                errorHandler: swallowError
-            })
-        )
+        .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(modifyFile(sassTool.swapPlaceholders))
         .pipe(getStyleSheetBuilder())
@@ -70,7 +56,6 @@ module.exports = (options) => () => {
         )
         .pipe(minifier())
         .pipe(sourcemaps.write("."))
-        .on("error", swallowError)
         .pipe(gulp.dest(destination));
 
     if (process.env.NODE_ENV !== "test") {

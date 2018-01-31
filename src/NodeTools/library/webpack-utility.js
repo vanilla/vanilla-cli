@@ -79,7 +79,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         },
         resolve: {
             modules: [path.join(buildRoot, "node_modules"), "node_modules"],
-            extensions: [".js", ".jsx"]
+            extensions: [".js", ".jsx", ".svg"]
         },
 
         /**

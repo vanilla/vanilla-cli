@@ -197,7 +197,7 @@ class BuildCmd extends NodeCommandBase {
         }
 
         if($watchArg) {
-            $this->watch = $watch;
+            $this->watch = $watchArg;
         }
 
         if ($sectionArg) {
