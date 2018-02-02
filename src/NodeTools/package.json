@@ -1,6 +1,6 @@
 {
     "name": "vanilla-cli-node-tools",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "Node.js tooling for the Vanilla Cli.",
     "repository": "https://github.com/vanilla/vanilla-cli",
     "author": "Adam Charron <adam@charrondev.com>",
