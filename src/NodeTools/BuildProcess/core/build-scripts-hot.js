@@ -76,7 +76,7 @@ function buildConfigForSection(entries, sectionKey, options) {
                 + "&path=__webpack_hmr"
                 + `&name=${sectionKey}`
                 + "&reload=true",
-                dynamicEntryPath,
+                ...filteredEntries,
             ]
         },
         output: {
