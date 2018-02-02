@@ -144,7 +144,7 @@ function run(options) {
 
             print(
                 "Complete hot reload setup by adding the following to your vanilla config file.\n" +
-                chalk.bold.yellowBright(`$Configuration["HotReload"]["Enabled"] = true;\n`)
+                chalk.bold.red(`$Configuration["HotReload"]["Enabled"] = true;\n`)
             );
         });
 
