@@ -76,7 +76,7 @@ function buildConfigForSection(entries, sectionKey, options) {
                 + "&path=__webpack_hmr"
                 + `&name=${sectionKey}`
                 + "&reload=true",
-                dynamicEntryPath,
+                ...filteredEntries,
             ]
         },
         output: {
@@ -144,7 +144,7 @@ function run(options) {
 
             print(
                 "Complete hot reload setup by adding the following to your vanilla config file.\n" +
-                chalk.bold.yellowBright(`$Configuration["HotReload"]["Enable"] = true;\n`)
+                chalk.bold.red(`$Configuration["HotReload"]["Enabled"] = true;\n`)
             );
         });
 

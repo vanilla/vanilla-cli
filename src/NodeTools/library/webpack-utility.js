@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const webpack = require("webpack");
 const merge = require("webpack-merge");
-const babelPreset = require("./babel-preset");
+const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const chalk = require("chalk").default;
 
@@ -64,7 +64,11 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                 {
                     test: /\.jsx?$/,
                     exclude: ["node_modules"],
-                    include: Array.from(includes),
+                    include: [
+                        ...Array.from(includes),
+                        // We need to transpile quill's ES6 because we are building form source.
+                        /\/node_modules\/quill/,
+                    ],
                     use: [
                         {
                             loader: "babel-loader",
@@ -74,12 +78,26 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                             }
                         }
                     ]
+                },
+                {
+                    test: /\.svg$/,
+                    use: [
+                            {
+                            loader: 'html-loader',
+                            options: {
+                                minimize: true
+                            }
+                        }
+                    ]
                 }
             ]
         },
         resolve: {
             modules: [path.join(buildRoot, "node_modules"), "node_modules"],
-            extensions: [".js", ".jsx"]
+            alias: {
+                'quill$': path.join(buildRoot, 'node_modules/quill/quill.js'),
+            },
+            extensions: [".js", ".jsx", ".svg"]
         },
 
         /**
