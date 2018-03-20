@@ -136,13 +136,13 @@ class BuildCmd extends NodeCommandBase {
         if (!\valr('build.process', $addonJson)) {
             if (\valr('build.processVersion', $addonJson)) {
                 $logger
-                    ->message('The configuration key `build.processVersion` has been renamed to `build.version`.'.PHP_EOL)
+                    ->message('The configuration key `build.processVersion` has been renamed to `build.process`.'.PHP_EOL)
                     ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.PHP_EOL);
 
                 $addonJson['build']['process'] = $addonJson['build']['processVersion'];
             } elseif (array_key_exists('buildProcessVersion', $addonJson)) {
                 $logger
-                    ->message('The configuration key `buildProcessVersion` has been renamed to `build.version`.'.PHP_EOL)
+                    ->message('The configuration key `buildProcessVersion` has been renamed to `build.process`.'.PHP_EOL)
                     ->message('See https://docs.vanillaforums.com/developer/vanilla-cli#build-processversion for details.'.PHP_EOL.'The `buildProcessVersion` key will continue to be supported.'.PHP_EOL);
 
                 $addonJson['build']['process'] = $addonJson['buildProcessVersion'];
