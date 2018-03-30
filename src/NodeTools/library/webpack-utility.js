@@ -9,6 +9,7 @@ const webpack = require("webpack");
 const merge = require("webpack-merge");
 const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const { CheckerPlugin } = require('awesome-typescript-loader')
 const chalk = require("chalk").default;
 
 const {
@@ -80,6 +81,26 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                     ]
                 },
                 {
+                    test: /\.tsx?$/,
+                    exclude: ["node_modules"],
+                    include: Array.from(includes),
+                    use: [
+                        {
+                            loader: "awesome-typescript-loader",
+                            options: {
+                                // compiler: require.resolve("typescript"),
+                                configFileName: path.resolve(options.vanillaDirectory, "tsconfig.json"),
+                                useCache: true,
+                                babelOptions: {
+                                    babelrc: false,
+                                    ...babelPreset,
+                                },
+                                babelCore: require.resolve("babel-core"),
+                            }
+                        }
+                    ]
+                },
+                {
                     test: /\.svg$/,
                     use: [
                             {
@@ -97,7 +118,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             alias: {
                 'quill$': path.join(buildRoot, 'node_modules/quill/quill.js'),
             },
-            extensions: [".js", ".jsx", ".svg"]
+            extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"]
         },
 
         /**
@@ -122,7 +143,8 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             // Some libraries have dev enviroment specific behaviour
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify("development")
-            })
+            }),
+            new CheckerPlugin(),
         ]
     };
 
