@@ -90,6 +90,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                             options: {
                                 // compiler: require.resolve("typescript"),
                                 configFileName: path.resolve(options.vanillaDirectory, "tsconfig.json"),
+                                useBabel: true,
                                 useCache: true,
                                 babelOptions: {
                                     babelrc: false,
