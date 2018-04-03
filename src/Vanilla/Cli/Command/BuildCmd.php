@@ -211,14 +211,17 @@ class BuildCmd extends NodeCommandBase {
      * @return array
      */
     protected function getEnabledAddonKeys() {
-        $filePath = $this->vanillaSrcDir.'/conf/' . $this->configName;
-        if (!file_exists($filePath)) {
-            CliUtil::fail("Unable to locate Vanilla configuration at $filePath.");
+        $configPath = $this->vanillaSrcDir.'/conf/'.$this->configName;
+        $configDefaultsPath = $this->vanillaSrcDir.'/conf/config-defaults.php';
+        if (!file_exists($configPath)) {
+            CliUtil::fail("Unable to locate Vanilla configuration at $configPath.");
         }
 
-        CliUtil::write("Using vanilla configuration at $filePath.");
+        CliUtil::write("Using vanilla configuration at $configPath.");
         define("APPLICATION", "App");
-        require_once($filePath);
+        define("PATH_CACHE", "");
+        require_once($configDefaultsPath);
+        require_once($configPath);
 
         $result = [];
 
