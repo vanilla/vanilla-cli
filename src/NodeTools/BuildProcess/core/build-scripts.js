@@ -114,8 +114,8 @@ async function createExportsConfig(primaryDirectory, options) {
             entry,
             output: {
                 path: path.join(primaryDirectory, "js"),
-                filename: `[name]/lib-${options.addonKey}-[name].js`,
-                chunkFilename: `chunk/[name]-${exportKey}.js`,
+                filename: `[name]/lib-${options.addonKey}-[name].min.js`,
+                chunkFilename: `chunk/[name]-${exportKey}.min.js`,
                 publicPath: getChunkPublicPath(options),
                 library: libraryName
             },
@@ -189,14 +189,16 @@ async function createEntriesConfig(primaryDirectory, options) {
             [entryKey]: entries[entryKey],
         };
 
+        const outputFolder = entryKey.replace("bootstrap-", "");
+
         // @ts-ignore
         const config = merge(baseConfig, {
             entry,
             output: {
                 path: path.join(primaryDirectory, "js"),
-                filename: `[name]/${options.addonKey}-[name].js`,
+                filename: `${outputFolder}/${options.addonKey}-[name].min.js`,
                 publicPath: getChunkPublicPath(options),
-                chunkFilename: `chunk/[name]-${entryKey}.js`,
+                chunkFilename: `chunk/[name]-${entryKey}.min.js`,
                 library: camelize(options.addonKey) + "_" + camelize(entryKey), // Needed to allow multiple webpack builds in one page.
             },
             resolve: {
