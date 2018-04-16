@@ -125,7 +125,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         /**
          * We need to manually tell webpack where to resolve our loaders.
          * This is because process.cwd() probably won't contain the loaders we need
-         * We are expecting this tool to be used in a different directory than itself.
+         * We are expecting thirs tool to be used in a different directory than itself.
          */
         resolveLoader: {
             modules: [path.resolve(__dirname, "../node_modules")]
@@ -166,6 +166,30 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                 sourceMap: true
             })
         );
+    }
+
+    const prettierFile = path.join(options.vanillaDirectory, ".prettierrc.json");
+
+    if (fs.existsSync(prettierFile)) {
+        const prettierConfig = require(prettierFile);
+
+        const prettierTsLoader = {
+            test: /\.tsx?$/,
+            use: {
+                loader: 'prettier-loader',
+                options: {
+                    ...prettierConfig,
+                    parser: "typescript",
+                },
+            },
+            // force this loader to run first
+            enforce: 'pre',
+            // avoid running prettier on all the files!
+            // use it only on your source code and not on dependencies!
+            exclude: /node_modules/,
+        }
+
+        commonConfig.module.rules.push(prettierTsLoader);
     }
 
     // @ts-ignore

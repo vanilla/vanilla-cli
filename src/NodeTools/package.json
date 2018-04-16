@@ -54,6 +54,8 @@
         "pattern-replace-loader": "^1.0.4",
         "postcss": "^6.0.14",
         "postcss-sass": "^0.2.0",
+        "prettier": "^1.12.0",
+        "prettier-loader": "^2.1.0",
         "stylelint": "^8.3.1",
         "stylelint-config-recommended-scss": "^2.0.0",
         "stylelint-scss": "^2.1.0",
