@@ -6,7 +6,7 @@
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
     "dependencies": {
-        "@vanillaforums/babel-preset": "^1.0.4",
+        "@vanillaforums/babel-preset": "^1.0.5",
         "@vanillaforums/eslint-config": "^1.2.1",
         "autoprefixer": "^7.2.3",
         "babel-core": "^6.26.0",

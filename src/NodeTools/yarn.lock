@@ -154,9 +154,9 @@
   dependencies:
     "@types/node" "*"
 
-"@vanillaforums/babel-preset@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@vanillaforums/babel-preset/-/babel-preset-1.0.4.tgz#a53ce77d48e995cb8abb15f3863e168cedac99eb"
+"@vanillaforums/babel-preset@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@vanillaforums/babel-preset/-/babel-preset-1.0.5.tgz#ef10e8589b604bee06412d97189414199322d3f2"
   dependencies:
     babel-plugin-dynamic-import-node "^1.2.0"
     babel-plugin-syntax-dynamic-import "^6.18.0"
