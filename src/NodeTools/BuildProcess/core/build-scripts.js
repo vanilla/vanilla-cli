@@ -330,7 +330,8 @@ function runSingleWebpackConfig(config, watch = false) {
             print(
                 stats.toString({
                     chunks: false, // Makes the build much quieter
-                    colors: true // Shows colors in the console
+                    modules: false,
+                    colors: true, // Shows colors in the console
                 })
             );
 

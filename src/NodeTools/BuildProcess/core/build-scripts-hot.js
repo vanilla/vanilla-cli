@@ -13,6 +13,7 @@ const express = require("express");
 const chalk = require("chalk").default;
 const devMiddleware = require("webpack-dev-middleware");
 const hotMiddleware = require("webpack-hot-middleware");
+const TSLintPlugin = require('tslint-webpack-plugin');
 
 const {
     createBaseConfig,
@@ -22,25 +23,13 @@ const {
     print,
     printError,
     getAllCoreBuildEntries,
+    getAllCoreBuildAddons,
     fail,
 } = require("../../library/utility");
 
 module.exports = {
     run,
 };
-
-/**
- * Build dynamic entrypoints for a subsection of the entries.
- *
- * @param {string[]} entryPoints - The entrypoints to build into a javascript file.
- *
- * @returns {string}
- */
-function buildDynamicEntrypointForSection(entryPoints) {
-    return entryPoints
-        .map(entry => `import "${entry}";`)
-        .join("\n");
-}
 
 /**
  * Build a webpack configuration for a subset of entries.
@@ -54,16 +43,6 @@ function buildConfigForSection(entries, sectionKey, options) {
         fail(`Could not build section ${sectionKey}, as no addons have defined that section.`);
     }
     const filteredEntries = entries[sectionKey];
-    const dynamicEntryContents = buildDynamicEntrypointForSection(filteredEntries);
-
-    const tempDir = fs.mkdtempSync(os.tmpdir + path.sep);
-    const dynamicEntryPath = path.join(tempDir, `${sectionKey}.js`);
-    fs.writeFileSync(dynamicEntryPath, dynamicEntryContents, "utf8");
-
-    // Backdate the file by 10 seconds because https://github.com/webpack/watchpack/issues/25
-    const now = Date.now() / 1000;
-    const then = now - 10;
-    fs.utimesSync(dynamicEntryPath, then, then);
 
     const baseConfig = createBaseConfig(options.vanillaDirectory, options);
 
@@ -92,14 +71,11 @@ function buildConfigForSection(entries, sectionKey, options) {
         ],
     });
 
-    const nodeModuleDirectories = glob.sync(path.join(options.vanillaDirectory, "**/node_modules"));
+    const coreBuildNodeModules = getAllCoreBuildAddons(options).map(addonDirectory => {
+        return path.join(addonDirectory, "node_modules");
+    })
 
-    config.resolve.modules.unshift(
-        path.resolve(options.vanillaDirectory, "node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
-        path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
-        ...nodeModuleDirectories,
-    );
+    config.resolve.modules.unshift(...coreBuildNodeModules);
 
     return config;
 }
@@ -118,10 +94,27 @@ function run(options) {
         if (options.section) {
             config = [buildConfigForSection(entries, options.section, options)];
         } else {
-            config = Object.keys(entries).map(entryKey => {
-                return buildConfigForSection(entries, entryKey, options);
-            });
+            config = Object.keys(entries)
+                .filter(section => section !== "polyfills")
+                .map(entryKey => {
+                    return buildConfigForSection(entries, entryKey, options);
+                });
         }
+
+        // Push the lint plugin into the last set of entries
+        // const tslintFile = path.join(options.vanillaDirectory, "tslint.json");
+        // const lintDirectories = getAllCoreBuildAddons(options).map(dir => {
+        //     return path.join(dir, "src/scripts/**/*.ts");
+        // });
+
+        // const lintPlugin = new TSLintPlugin({
+        //     // format: "verbose",
+        //     files: lintDirectories,
+        //     project: path.join(options.vanillaDirectory, "tsconfig.json"),
+        //     config: tslintFile,
+        // });
+
+        // config[config.length - 1].plugins.push(lintPlugin);
 
         const compiler = webpack(config);
         const app = express();
@@ -135,6 +128,11 @@ function run(options) {
 
         app.use(devMiddleware(compiler, {
             publicPath: "http://127.0.0.1:3030/",
+            stats: {
+                chunks: false, // Makes the build much quieter
+                modules: false,
+                colors: true // Shows colors in the console
+            }
         }));
 
         app.use(hotMiddleware(compiler));

@@ -9,7 +9,10 @@ const webpack = require("webpack");
 const merge = require("webpack-merge");
 const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const { CheckerPlugin } = require('awesome-typescript-loader')
+const PrettierPlugin = require("prettier-webpack-plugin");
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const HappyPack = require('happypack');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
 
 const {
@@ -59,6 +62,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
     });
 
     const commonConfig = {
+        cache: true,
         context: buildRoot,
         module: {
             rules: [
@@ -72,11 +76,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                     ],
                     use: [
                         {
-                            loader: "babel-loader",
-                            options: {
-                                ...babelPreset,
-                                cacheDirectory: true
-                            }
+                            loader: 'happypack/loader?id=babel',
                         }
                     ]
                 },
@@ -86,18 +86,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                     include: Array.from(includes),
                     use: [
                         {
-                            loader: "awesome-typescript-loader",
-                            options: {
-                                // compiler: require.resolve("typescript"),
-                                configFileName: path.resolve(options.vanillaDirectory, "tsconfig.json"),
-                                useBabel: true,
-                                useCache: true,
-                                babelOptions: {
-                                    babelrc: false,
-                                    ...babelPreset,
-                                },
-                                babelCore: require.resolve("babel-core"),
-                            }
+                            loader: 'happypack/loader?id=ts',
                         }
                     ]
                 },
@@ -121,6 +110,44 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             },
             extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"]
         },
+        plugins: [
+            new HardSourceWebpackPlugin({
+                // Either an absolute path or relative to webpack's options.context.
+                cacheDirectory: path.join(options.vanillaDirectory, 'node_modules/.cache/hard-source/[confighash]'),
+            }),
+            new HappyPack({
+                id: 'ts',
+                verbose: options.verbose,
+                loaders: [
+                    {
+                        path: 'ts-loader',
+                        query: {
+                            happyPackMode: true,
+                            configFile: path.resolve(options.vanillaDirectory, "tsconfig.json"),
+                        }
+                    }
+                ]
+            }),
+            new HappyPack({
+                id: 'babel',
+                verbose: options.verbose,
+                loaders: [
+                    {
+                        path: 'babel-loader',
+                        query: {
+                            ...babelPreset,
+                            cacheDirectory: true
+                        }
+                    }
+                ]
+            }),
+            new ForkTsCheckerWebpackPlugin({
+                tsconfig: path.join(options.vanillaDirectory, "tsconfig.json"),
+                tslint: path.join(options.vanillaDirectory, "tslint.json"),
+                checkSyntacticErrors: true,
+                async: false,
+            }),
+        ],
 
         /**
          * We need to manually tell webpack where to resolve our loaders.
@@ -132,25 +159,27 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         },
         output: {
             filename: "[name].js"
-        }
+        },
+        stats: "minimal",
     };
 
     const devConfig = {
-        cache: true,
+        mode: "development",
         devtool: "eval-source-map",
         plugins: [
-            // Prevent a bad build from crashing the process.
-            new webpack.NoEmitOnErrorsPlugin(),
             // Some libraries have dev enviroment specific behaviour
             new webpack.DefinePlugin({
                 "process.env.NODE_ENV": JSON.stringify("development")
             }),
-            new CheckerPlugin(),
-        ]
+        ],
+        optimization: {
+            noEmitOnErrors: true,
+        }
     };
 
     const prodConfig = {
         devtool: "source-map",
+        mode: "production",
         plugins: [
             // NODE_ENV should be production so that modules do not perform certain development checks
             new webpack.DefinePlugin({
@@ -172,24 +201,11 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
 
     if (fs.existsSync(prettierFile)) {
         const prettierConfig = require(prettierFile);
-
-        const prettierTsLoader = {
-            test: /\.tsx?$/,
-            use: {
-                loader: 'prettier-loader',
-                options: {
-                    ...prettierConfig,
-                    parser: "typescript",
-                },
-            },
-            // force this loader to run first
-            enforce: 'pre',
-            // avoid running prettier on all the files!
-            // use it only on your source code and not on dependencies!
-            exclude: /node_modules/,
-        }
-
-        commonConfig.module.rules.push(prettierTsLoader);
+        commonConfig.plugins.unshift(new PrettierPlugin({
+            ...prettierConfig,
+            parser: "typescript",
+            extensions: [".ts", ".tsx"],
+        }));
     }
 
     // @ts-ignore
