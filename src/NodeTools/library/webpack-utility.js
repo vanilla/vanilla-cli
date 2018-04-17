@@ -113,7 +113,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                         path: 'babel-loader',
                         query: {
                             ...babelPreset,
-                            cacheDirectory: false
+                            cacheDirectory: true
                         }
                     }
                 ]
@@ -176,7 +176,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
 
 function mergeTypescriptConfig(options, config, includedFiles) {
     // Push in the prettier plugin.
-    const prettierFile = path.join(options.vanillaDirectory, ".prettierrc.json");
+    const prettierFile = path.join(options.vanillaDirectory, "prettier.config.js");
     const tsConfigFile = path.join(options.vanillaDirectory, "tsconfig.json");
     const tslintFile = path.join(options.vanillaDirectory, "tslint.json");
 
@@ -190,8 +190,7 @@ function mergeTypescriptConfig(options, config, includedFiles) {
     }
 
     if (fs.existsSync(tsConfigFile)) {
-    // Push in happypack and the typechecker
-
+        // Push in happypack and the typechecker
         config.plugins.push(
             new HappyPack({
                 id: 'ts',
@@ -211,7 +210,7 @@ function mergeTypescriptConfig(options, config, includedFiles) {
                 tsconfig: tsConfigFile,
                 tslint: fs.existsSync(tslintFile) ? tslintFile : false,
                 checkSyntacticErrors: true,
-                async: false,
+                async: true,
             }),
         );
 
