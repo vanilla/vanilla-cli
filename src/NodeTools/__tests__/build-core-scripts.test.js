@@ -81,13 +81,13 @@ describe("Integration tests", () => {
         beforeAll(buildCoreWithOptions);
 
         it("generates lib bundles for all 'exports' in addon.json", () => {
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.js"))).toBe(true);
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/lib-core-app.js"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.min.js"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/lib-core-app.min.js"))).toBe(true);
         });
 
         it("generates lib sourcemaps for all 'exports' in addon.json", () => {
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.js.map"))).toBe(true);
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/lib-core-app.js.map"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.min.js.map"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/lib-core-app.min.js.map"))).toBe(true);
         });
 
         it("generates manifest files for all `exports` in addon.json", () => {
@@ -97,18 +97,18 @@ describe("Integration tests", () => {
 
         test("The core lib bundle contains the string from the react stub", () => {
             // Final bundles should not contain react in them.
-            const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.js"), "utf8");
+            const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.min.js"), "utf8");
             expect(outputContents).toContain("REACT_STRING");
         });
 
         it("generates entry bundles for all 'entries' in addon.json", async function() {
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/core-admin.js"))).toBe(true);
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/core-app.js"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/core-admin.min.js"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/core-app.min.js"))).toBe(true);
         });
 
         it("generates entry sourcemaps for all 'entries' in addon.json", () => {
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/core-admin.js.map"))).toBe(true);
-            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/core-app.js.map"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/core-admin.min.js.map"))).toBe(true);
+            expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/core-app.min.js.map"))).toBe(true);
         });
 
         /**
@@ -116,7 +116,7 @@ describe("Integration tests", () => {
          */
         it("does not include code from exports inside of the built entries", () => {
             // Final bundles should not contain react in them.
-            const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/core-admin.js"), "utf8");
+            const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/core-admin.min.js"), "utf8");
             expect(outputContents).not.toContain("REACT_STRING");
         });
 
@@ -125,7 +125,7 @@ describe("Integration tests", () => {
          * is attempting to bundle them without babel.
          */
         it("parses scripts with babel", () => {
-            veryifyBabelTranspilationForFile(path.join(coreAddonDirectory, "js/admin/core-admin.js"));
+            veryifyBabelTranspilationForFile(path.join(coreAddonDirectory, "js/admin/core-admin.min.js"));
         })
     }
 
@@ -133,7 +133,7 @@ describe("Integration tests", () => {
     describe("builds core twice in a row without issues.", coreAssertions);
 
     describe("Builds an application on top of core", () => {
-        const outputFilename = "app/dashboard-app.js";
+        const outputFilename = "app/dashboard-app.min.js";
 
         beforeAll(() => {
             const options = {...baseOptions };
@@ -173,7 +173,7 @@ describe("Integration tests", () => {
         })
 
         it("parses scripts with babel", () => {
-            veryifyBabelTranspilationForFile(path.join(dashboardAddonDirectory, "js/app/dashboard-app.js"));
+            veryifyBabelTranspilationForFile(path.join(dashboardAddonDirectory, "js/app/dashboard-app.min.js"));
         })
     });
 });
