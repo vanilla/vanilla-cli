@@ -17,7 +17,6 @@ interface BuildOptions {
     verbose: boolean;
     hot: boolean;
     section: string;
-    analyze: boolean;
     enabledAddonKeys: string[];
 }
 

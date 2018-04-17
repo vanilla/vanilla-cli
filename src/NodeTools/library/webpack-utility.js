@@ -14,7 +14,6 @@ const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const {
     printVerbose,
@@ -170,10 +169,6 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
     }
 
     commonConfig = mergeTypescriptConfig(options, commonConfig, includes);
-
-    if (options.analyze) {
-        commonConfig.plugins.push(new BundleAnalyzerPlugin());
-    }
 
     // @ts-ignore
     return merge(commonConfig, options.watch || options.hot ? devConfig : prodConfig);
