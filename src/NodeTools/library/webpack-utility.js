@@ -16,7 +16,6 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-
 const {
     printVerbose,
     getAllCoreBuildAddons,
@@ -63,7 +62,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         }
     });
 
-    const commonConfig = {
+    let commonConfig = {
         cache: true,
         context: buildRoot,
         module: {
@@ -79,16 +78,6 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                     use: [
                         {
                             loader: 'happypack/loader?id=babel',
-                        }
-                    ]
-                },
-                {
-                    test: /\.tsx?$/,
-                    exclude: ["node_modules"],
-                    include: Array.from(includes),
-                    use: [
-                        {
-                            loader: 'happypack/loader?id=ts',
                         }
                     ]
                 },
@@ -118,19 +107,6 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                 cacheDirectory: path.join(options.vanillaDirectory, 'node_modules/.cache/hard-source/[confighash]'),
             }),
             new HappyPack({
-                id: 'ts',
-                verbose: options.verbose,
-                rules: [
-                    {
-                        path: 'ts-loader',
-                        query: {
-                            happyPackMode: true,
-                            configFile: path.resolve(options.vanillaDirectory, "tsconfig.json"),
-                        }
-                    }
-                ]
-            }),
-            new HappyPack({
                 id: 'babel',
                 verbose: options.verbose,
                 rules: [
@@ -142,12 +118,6 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                         }
                     }
                 ]
-            }),
-            new ForkTsCheckerWebpackPlugin({
-                tsconfig: path.join(options.vanillaDirectory, "tsconfig.json"),
-                tslint: path.join(options.vanillaDirectory, "tslint.json"),
-                checkSyntacticErrors: true,
-                async: false,
             }),
         ],
 
@@ -199,19 +169,71 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         );
     }
 
+    commonConfig = mergeTypescriptConfig(options, commonConfig, includes);
+
+    if (options.analyze) {
+        commonConfig.plugins.push(new BundleAnalyzerPlugin());
+    }
+
+    // @ts-ignore
+    return merge(commonConfig, options.watch || options.hot ? devConfig : prodConfig);
+}
+
+function mergeTypescriptConfig(options, config, includedFiles) {
+    // Push in the prettier plugin.
     const prettierFile = path.join(options.vanillaDirectory, ".prettierrc.json");
+    const tsConfigFile = path.join(options.vanillaDirectory, "tsconfig.json");
+    const tslintFile = path.join(options.vanillaDirectory, "tslint.json");
 
     if (fs.existsSync(prettierFile)) {
         const prettierConfig = require(prettierFile);
-        commonConfig.plugins.unshift(new PrettierPlugin({
+        config.plugins.unshift(new PrettierPlugin({
             ...prettierConfig,
             parser: "typescript",
             extensions: [".ts", ".tsx"],
         }));
     }
 
-    // @ts-ignore
-    return merge(commonConfig, options.watch || options.hot ? devConfig : prodConfig);
+    if (fs.existsSync(tsConfigFile)) {
+    // Push in happypack and the typechecker
+
+        config.plugins.push(
+            new HappyPack({
+                id: 'ts',
+                verbose: options.verbose,
+                rules: [
+                    {
+                        path: 'ts-loader',
+                        query: {
+                            happyPackMode: true,
+                            configFile: tsConfigFile
+                        }
+                    }
+                ]
+        }));
+        config.plugins.push(
+            new ForkTsCheckerWebpackPlugin({
+                tsconfig: tsConfigFile,
+                tslint: fs.existsSync(tslintFile) ? tslintFile : false,
+                checkSyntacticErrors: true,
+                async: false,
+            }),
+        );
+
+        // Push in the loaders
+        config.module.rules.push({
+            test: /\.tsx?$/,
+            exclude: ["node_modules"],
+            include: Array.from(includedFiles),
+            use: [
+                {
+                    loader: 'happypack/loader?id=ts',
+                }
+            ]
+        })
+    }
+
+    return config;
 }
 
 /**
