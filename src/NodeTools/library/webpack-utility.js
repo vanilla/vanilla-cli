@@ -14,6 +14,8 @@ const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 
 const {
     printVerbose,
@@ -118,7 +120,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             new HappyPack({
                 id: 'ts',
                 verbose: options.verbose,
-                loaders: [
+                rules: [
                     {
                         path: 'ts-loader',
                         query: {
@@ -131,12 +133,12 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             new HappyPack({
                 id: 'babel',
                 verbose: options.verbose,
-                loaders: [
+                rules: [
                     {
                         path: 'babel-loader',
                         query: {
                             ...babelPreset,
-                            cacheDirectory: true
+                            cacheDirectory: false
                         }
                     }
                 ]

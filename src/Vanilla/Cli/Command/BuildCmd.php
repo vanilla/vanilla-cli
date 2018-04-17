@@ -42,6 +42,9 @@ class BuildCmd extends NodeCommandBase {
     /** @var boolean Whether or not to run in hot mode. */
     private $hot = false;
 
+    /** @var boolean Whether or not to run in hot mode. */
+    private $analyze = false;
+
     /** @var string|null A section of entries to filter the hot process by. */
     private $section = null;
 
@@ -63,7 +66,9 @@ class BuildCmd extends NodeCommandBase {
             ->opt('hot:h', 'Use a webpack hot reloading server.', false, 'bool')
             ->opt('section:s', 'Limit the webpack hot reloading server to a only a certain section of Vanilla. Usually "app" or "admin"')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
-            ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string');
+            ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string')
+            ->opt('analyze:a', "Analyze the size of the outputted bundle.", false, 'bool')
+        ;
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
@@ -96,6 +101,7 @@ class BuildCmd extends NodeCommandBase {
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
             'enabledAddonKeys' => $this->getEnabledAddonKeys(),
+            'analyze' => $this->analyze,
         ];
 
         $this->spawnNodeProcessFromPackageMain(
@@ -183,6 +189,7 @@ class BuildCmd extends NodeCommandBase {
         $watchArg = $args->getOpt('watch') ?: false;
         $cssToolArg = $args->getOpt('csstool');
         $sectionArg = $args->getOpt('section');
+        $analyzeArg = $args->getOpt('analyze');
 
         if ($processArg) {
             $this->defaultConfigurationOptions['process'] = $processArg;
@@ -202,6 +209,10 @@ class BuildCmd extends NodeCommandBase {
 
         if ($sectionArg) {
             $this->section = $sectionArg;
+        }
+
+        if($analyzeArg) {
+            $this->analyze = $analyzeArg;
         }
     }
 
@@ -316,6 +327,10 @@ class BuildCmd extends NodeCommandBase {
 
         if (!$this->hot && $this->section) {
             CliUtil::fail("The '--section' parameter is only available with the '--hot' option.");
+        }
+
+        if (($this->hot || $this->watch) && $this->analyze) {
+            CliUtil::fail("The '--analyze' parameter is not available with the '--hot' or '--watch' options.");
         }
     }
 

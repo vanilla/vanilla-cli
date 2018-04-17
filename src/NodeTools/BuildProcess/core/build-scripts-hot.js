@@ -13,7 +13,6 @@ const express = require("express");
 const chalk = require("chalk").default;
 const devMiddleware = require("webpack-dev-middleware");
 const hotMiddleware = require("webpack-hot-middleware");
-const TSLintPlugin = require('tslint-webpack-plugin');
 
 const {
     createBaseConfig,
@@ -100,21 +99,6 @@ function run(options) {
                     return buildConfigForSection(entries, entryKey, options);
                 });
         }
-
-        // Push the lint plugin into the last set of entries
-        // const tslintFile = path.join(options.vanillaDirectory, "tslint.json");
-        // const lintDirectories = getAllCoreBuildAddons(options).map(dir => {
-        //     return path.join(dir, "src/scripts/**/*.ts");
-        // });
-
-        // const lintPlugin = new TSLintPlugin({
-        //     // format: "verbose",
-        //     files: lintDirectories,
-        //     project: path.join(options.vanillaDirectory, "tsconfig.json"),
-        //     config: tslintFile,
-        // });
-
-        // config[config.length - 1].plugins.push(lintPlugin);
 
         const compiler = webpack(config);
         const app = express();

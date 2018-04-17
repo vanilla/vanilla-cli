@@ -312,15 +312,15 @@ function getDllPLuginsForAddonDirectories(directories, entryKey, options) {
  * Run a single webpack config.
  *
  * @param {Object} config - A valid webpack config.
- * @param {boolean} watch - Whether or not to run in watch mode.
+ * @param {BuildOptions} options - Whether or not to run in watch mode.
  *
  * @returns {Promise<void>}
  */
-function runSingleWebpackConfig(config, watch = false) {
+function runSingleWebpackConfig(config, options) {
     return new Promise((resolve, reject) => {
         const compiler = webpack(config);
 
-        const executionFunction = watch ? compiler.watch.bind(compiler, {}) : compiler.run.bind(compiler);
+        const executionFunction = options.watch ? compiler.watch.bind(compiler, {}) : compiler.run.bind(compiler);
 
         executionFunction((err, stats) => {
             if (err) {
@@ -330,7 +330,7 @@ function runSingleWebpackConfig(config, watch = false) {
             print(
                 stats.toString({
                     chunks: false, // Makes the build much quieter
-                    modules: false,
+                    modules: options.verbose || false,
                     colors: true, // Shows colors in the console
                 })
             );
