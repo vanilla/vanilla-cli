@@ -180,9 +180,7 @@ function mergeTypescriptConfig(options, config, includedFiles) {
     const tsConfigFile = path.join(options.vanillaDirectory, "tsconfig.json");
     const tslintFile = path.join(options.vanillaDirectory, "tslint.json");
 
-    const isNotWatchOrDevMode = !(options.watch || options.hot);
-
-    if (fs.existsSync(prettierFile) && isNotWatchOrDevMode) {
+    if (fs.existsSync(prettierFile) && !options.skipPrettify) {
         const prettierConfig = require(prettierFile);
         config.plugins.unshift(new PrettierPlugin({
             ...prettierConfig,
