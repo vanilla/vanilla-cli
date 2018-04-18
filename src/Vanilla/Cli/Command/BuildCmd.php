@@ -63,7 +63,9 @@ class BuildCmd extends NodeCommandBase {
             ->opt('hot:h', 'Use a webpack hot reloading server.', false, 'bool')
             ->opt('section:s', 'Limit the webpack hot reloading server to a only a certain section of Vanilla. Usually "app" or "admin"')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
-            ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string');
+            ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string')
+            ->opt('skip-prettify:p', "Skip automatic formatting with prettier", false, 'bool')
+        ;
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
         $this->dependencyDirectories = [
@@ -96,6 +98,7 @@ class BuildCmd extends NodeCommandBase {
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
             'enabledAddonKeys' => $this->getEnabledAddonKeys(),
+            'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
         ];
 
         $this->spawnNodeProcessFromPackageMain(

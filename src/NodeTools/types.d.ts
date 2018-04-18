@@ -4,8 +4,8 @@ interface StringToStringObject {
 
 interface BuildOptions {
     buildOptions: {
-        process: 'legacy' | '1.0' | 'core';
-        cssTool: 'scss' | 'less';
+        process: "legacy" | "1.0" | "core";
+        cssTool: "scss" | "less";
         entries?: StringToStringObject;
         exports?: StringToStringObject;
     };
@@ -18,6 +18,7 @@ interface BuildOptions {
     hot: boolean;
     section: string;
     enabledAddonKeys: string[];
+    skipPrettify: boolean;
 }
 
 declare module "fs" {
