@@ -13,6 +13,7 @@ const PrettierPlugin = require("prettier-webpack-plugin");
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
+const happyThreadPool = HappyPack.ThreadPool({ size: 4, id: "scripts" });
 
 const {
     printVerbose,
@@ -103,6 +104,7 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             new HappyPack({
                 id: 'babel',
                 verbose: options.verbose,
+                threadPool: happyThreadPool,
                 rules: [
                     {
                         path: 'babel-loader',
@@ -190,6 +192,7 @@ function mergeTypescriptConfig(options, config, includedFiles) {
             new HappyPack({
                 id: 'ts',
                 verbose: options.verbose,
+                threadPool: happyThreadPool,
                 rules: [
                     {
                         path: 'ts-loader',
