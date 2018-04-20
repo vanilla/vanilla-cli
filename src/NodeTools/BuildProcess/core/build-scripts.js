@@ -42,7 +42,9 @@ async function run(options) {
         const exportsConfig = await createExportsConfig(primaryDirectory, options);
 
         if (exportsConfig) {
-            await runSingleWebpackConfig(exportsConfig, options);
+            for (const config of exportsConfig) {
+                await runSingleWebpackConfig(config, options);
+            }
         }
 
         // The entries config MUST be created after the first process has completed
@@ -50,7 +52,9 @@ async function run(options) {
         const entriesConfig = await createEntriesConfig(primaryDirectory, options);
 
         if (entriesConfig) {
-            await runSingleWebpackConfig(entriesConfig, options);
+            for (const config of entriesConfig) {
+                await runSingleWebpackConfig(config, options);
+            }
         }
     } catch (err) {
         printError(err);

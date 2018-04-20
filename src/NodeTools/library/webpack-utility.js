@@ -10,10 +10,10 @@ const merge = require("webpack-merge");
 const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const PrettierPlugin = require("prettier-webpack-plugin");
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
+const happyThreadPool = HappyPack.ThreadPool({ size: 4, id: "scripts" });
 
 const {
     printVerbose,
@@ -101,13 +101,10 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"]
         },
         plugins: [
-            new HardSourceWebpackPlugin({
-                // Either an absolute path or relative to webpack's options.context.
-                cacheDirectory: path.join(options.vanillaDirectory, 'node_modules/.cache/hard-source/[confighash]'),
-            }),
             new HappyPack({
                 id: 'babel',
                 verbose: options.verbose,
+                threadPool: happyThreadPool,
                 rules: [
                     {
                         path: 'babel-loader',
@@ -195,6 +192,7 @@ function mergeTypescriptConfig(options, config, includedFiles) {
             new HappyPack({
                 id: 'ts',
                 verbose: options.verbose,
+                threadPool: happyThreadPool,
                 rules: [
                     {
                         path: 'ts-loader',
