@@ -13,6 +13,7 @@ const express = require("express");
 const chalk = require("chalk").default;
 const devMiddleware = require("webpack-dev-middleware");
 const hotMiddleware = require("webpack-hot-middleware");
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const {
     createBaseConfig,
@@ -66,6 +67,10 @@ function buildConfigForSection(entries, sectionKey, options) {
             alias: getAliasesForRequirements(options, true),
         },
         plugins: [
+            new HardSourceWebpackPlugin({
+                // Either an absolute path or relative to webpack's options.context.
+                cacheDirectory: path.normalize(path.join(__dirname, '../node_modules/.cache/hard-source/[confighash]')),
+            }),
             new webpack.HotModuleReplacementPlugin(),
         ],
     });

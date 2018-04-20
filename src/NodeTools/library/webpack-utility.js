@@ -10,7 +10,6 @@ const merge = require("webpack-merge");
 const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const PrettierPlugin = require("prettier-webpack-plugin");
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
@@ -101,10 +100,6 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
             extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"]
         },
         plugins: [
-            new HardSourceWebpackPlugin({
-                // Either an absolute path or relative to webpack's options.context.
-                cacheDirectory: path.join(options.vanillaDirectory, 'node_modules/.cache/hard-source/[confighash]'),
-            }),
             new HappyPack({
                 id: 'babel',
                 verbose: options.verbose,
