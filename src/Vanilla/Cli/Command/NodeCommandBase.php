@@ -7,7 +7,6 @@
 
 namespace Vanilla\Cli\Command;
 
-use \Garden\Cli\Args;
 use \Garden\Cli\Cli;
 use \Vanilla\Cli\CliUtil;
 use \Exception;
@@ -23,9 +22,6 @@ class NodeCommandBase extends Command {
     /** @var array */
     protected $dependencyDirectories = [];
 
-    /** @var string The absolute directory of the tools installation */
-    protected $toolRealPath;
-
     /** @var bool */
     protected $isDebugMode = false;
 
@@ -33,31 +29,25 @@ class NodeCommandBase extends Command {
     protected $isVerbose = false;
 
     /**
-     * NodeCommandBase constructor.
-     *
-     * @param Cli $cli The CLI instance
+     * @inheritdoc
      */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli
             ->opt('debug:d', 'Break node process on the first line to attach a debugger.', false, 'bool')
             ->opt('reinitialize:r', 'Delete all tool dependencies before building.', false, 'bool')
         ;
-
-        $this->toolRealPath = realpath(__DIR__.'/../../../..');
     }
 
     /**
      * @inheritdoc
      */
-    public function run(Args $args) {
-        parent::run($args);
-
-        $this->isVerbose = $args->getOpt('verbose') ?: false;
-        $this->isDebugMode = $args->getOpt('debug') ?: false;
+    public function run() {
+        $this->isVerbose = $this->args->getOpt('verbose') ?: false;
+        $this->isDebugMode = $this->args->getOpt('debug') ?: false;
 
         $this->checkValidNodeInstallation();
-        $shouldReinitalize = $args->getOpt('reinitialize') ?: false;
+        $shouldReinitalize = $this->args->getOpt('reinitialize') ?: false;
 
         // Ensure all dependencies are installed correctly for the process.
         foreach($this->dependencyDirectories as $directory) {
@@ -89,8 +79,8 @@ class NodeCommandBase extends Command {
         ];
         $options = array_merge($verboseOptions, $options);
         $serializedOptions = json_encode($options);
-        $tsNodePath = $this->toolRealPath.'/node_modules/.bin/ts-node';
-        $tsProject = $this->toolRealPath.'/tsconfig.json';
+        $tsNodePath = $this->cliSrcDir.'/node_modules/.bin/ts-node';
+        $tsProject = $this->cliSrcDir.'/tsconfig.json';
 
         $command = "$tsNodePath -P $tsProject $debugArg '$nodeFilePath' --color --options '$serializedOptions'";
         passthru($command);

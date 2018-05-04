@@ -17,16 +17,8 @@ use Vanilla\Cli\AddonManagerTrait;
  * @package Vanilla\Cli\Command
  */
 class AddonCacheCmd extends Command {
-
-    use AddonManagerTrait;
-
-    /**
-     * AddonCacheCmd constructor.
-     *
-     * @param Cli $cli
-     */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli->description('Generate addons\'s cache files.')
             ->opt('regenerate:r', 'Regenerate the cache files.');
     }
@@ -34,17 +26,15 @@ class AddonCacheCmd extends Command {
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
-        parent::run($args);
-
-        $this->initializeAddonManager($this->vanillaSrcDir, true);
-
-        if ($args->getOpt('regenerate', false) !== false) {
-            $this->getAddonManager()->clearCache();
+    public final function run() {
+        /** @var AddonManager $addonManager */
+        $addonManager = $this->container->get(AddonManager::class);
+        if ($this->args->getOpt('regenerate', false) !== false) {
+            $addonManager->clearCache();
         }
 
-        foreach (array_keys($this->getAddonManager()->getScanDirs()) as $addonType) {
-            $this->getAddonManager()->lookupAllByType($addonType);
+        foreach (array_keys($addonManager->getScanDirs()) as $addonType) {
+            $addonManager->lookupAllByType($addonType);
         }
     }
 }

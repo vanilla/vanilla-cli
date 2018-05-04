@@ -6,12 +6,10 @@
 
 namespace Vanilla\Cli\Command;
 
-use \Garden\Cli\Args;
 use \Garden\Cli\Cli;
 use \Vanilla\Addon;
 use \Vanilla\AddonManager;
 use \Vanilla\Cli\CliUtil;
-use Vanilla\Cli\AddonManagerTrait;
 
 /**
  * Class AddonJsonCmd
@@ -19,32 +17,23 @@ use Vanilla\Cli\AddonManagerTrait;
  * @package Vanilla\Cli\Command
  */
 class AddonJsonCmd extends Command {
-
-    use AddonManagerTrait;
-
-    /**
-     * AddonJsonCmd constructor.
-     *
-     * @param Cli $cli
-     */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli->description('Convert addons\' info array to json.');
     }
 
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
-        parent::run($args);
-
-        $this->initializeAddonManager($this->vanillaSrcDir);
+    public final function run() {
+        /** @var AddonManager $addonManager */
+        $addonManager = $this->container->get(AddonManager::class);
 
         $addonsOutput = '';
         $warningsOutput = '';
-        foreach (array_keys($this->getAddonManager()->getScanDirs()) as $addonType) {
+        foreach (array_keys($addonManager->getScanDirs()) as $addonType) {
             ob_start();
-            $addons = $this->getAddonManager()->scan($addonType);
+            $addons = $addonManager->scan($addonType);
             $warningsOutput = ob_get_contents();
             ob_end_clean();
             ob_start();

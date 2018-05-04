@@ -54,13 +54,8 @@ class BuildCmd extends NodeCommandBase {
     /** @var array An array of realpaths to roots of addons being built. */
     private $addonRootDirectories = [];
 
-    /**
-     * BuildCmd constructor.
-     *
-     * @param Cli $cli The CLI instance.
-     */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli->description('Build frontend assets (scripts, stylesheets, and images).')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
             ->opt('hot:h', 'Use a webpack hot reloading server.', false, 'bool')
@@ -69,7 +64,15 @@ class BuildCmd extends NodeCommandBase {
             ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string')
             ->opt('skip-prettify:p', "Skip automatic formatting with prettier", false, 'bool')
         ;
+    }
 
+    /**
+     * BuildCmd constructor.
+     *
+     * @param Cli $cli The CLI instance.
+     */
+    public function __construct(Args $args) {
+        parent::__construct($args);
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/Build';
         $this->dependencyDirectories = [
             $this->toolRealPath,
@@ -79,10 +82,10 @@ class BuildCmd extends NodeCommandBase {
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
-        parent::run($args);
+    public final function run() {
+        parent::run();
 
-        $this->setBuildOptionsFromArgs($args);
+        $this->setBuildOptionsFromArgs();
         $this->setAddonJsonBuildOptions();
         $this->setDefaultBuildOptions();
         $this->validateBuildOptions();
@@ -97,7 +100,7 @@ class BuildCmd extends NodeCommandBase {
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
             'enabledAddonKeys' => $this->getEnabledAddonKeys(),
-            'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
+            'skipPrettify' => $this->args->getOpt('skip-prettify') ?: false,
         ];
 
         $this->spawnNodeProcessFromFile(
@@ -179,12 +182,12 @@ class BuildCmd extends NodeCommandBase {
      *
      * @param Args $args The CLI arguments.
      */
-    protected function setBuildOptionsFromArgs(Args $args) {
-        $processArg = $args->getOpt('process') ?: false;
-        $hotArg = $args->getOpt('hot') ?: false;
-        $watchArg = $args->getOpt('watch') ?: false;
-        $cssToolArg = $args->getOpt('csstool');
-        $sectionArg = $args->getOpt('section');
+    protected function setBuildOptionsFromArgs() {
+        $processArg = $this->args->getOpt('process') ?: false;
+        $hotArg = $this->args->getOpt('hot') ?: false;
+        $watchArg = $this->args->getOpt('watch') ?: false;
+        $cssToolArg = $this->args->getOpt('csstool');
+        $sectionArg = $this->args->getOpt('section');
 
         if ($processArg) {
             $this->defaultConfigurationOptions['process'] = $processArg;
