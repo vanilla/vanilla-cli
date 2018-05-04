@@ -3,42 +3,29 @@
  * @license MIT
  */
 
-const path = require("path");
-const fs = require("fs");
-const os = require("os");
-const glob = require("glob");
-const webpack = require("webpack");
-const merge = require("webpack-merge");
-const express = require("express");
-const chalk = require("chalk").default;
-const devMiddleware = require("webpack-dev-middleware");
-const hotMiddleware = require("webpack-hot-middleware");
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+import path from "path";
+import fs from "fs";
+import os from "os";
+import glob from "glob";
+import webpack, { Configuration } from "webpack";
+import merge from "webpack-merge";
+import express from "express";
+import chalk from "chalk";
+import devMiddleware from "webpack-dev-middleware";
+import hotMiddleware from "webpack-hot-middleware";
+import HardSourceWebpackPlugin from "hard-source-webpack-plugin";
 
-const {
-    createBaseConfig,
-    getAliasesForRequirements,
-} = require("../../library/webpack-utility");
-const {
-    print,
-    printError,
-    getAllCoreBuildEntries,
-    getAllCoreBuildAddons,
-    fail,
-} = require("../../library/utility");
-
-module.exports = {
-    run,
-};
+import { createBaseConfig, getAliasesForRequirements } from "../../library/webpack-utility";
+import { print, printError, getAllCoreBuildEntries, getAllCoreBuildAddons, fail } from "../../library/utility";
 
 /**
  * Build a webpack configuration for a subset of entries.
  *
- * @param {Object} entries - An Object of "sectionKey => string[]"
- * @param {string} sectionKey - The section key to build a config for.
- * @param {BuildOptions} options
+ * @param entries - An Object of "sectionKey => string[]"
+ * @param sectionKey - The section key to build a config for.
+ * @param options
  */
-function buildConfigForSection(entries, sectionKey, options) {
+function buildConfigForSection(entries: IBuildEntries | IBuildExports, sectionKey: string, options: ICliOptions) {
     if (!(sectionKey in entries)) {
         fail(`Could not build section ${sectionKey}, as no addons have defined that section.`);
     }
@@ -50,13 +37,13 @@ function buildConfigForSection(entries, sectionKey, options) {
         name: sectionKey,
         entry: {
             [sectionKey]: [
-                require.resolve('webpack-hot-middleware/client')
-                + "?dynamicPublicPath=true"
-                + "&path=__webpack_hmr"
-                + `&name=${sectionKey}`
-                + "&reload=true",
+                require.resolve("webpack-hot-middleware/client") +
+                    "?dynamicPublicPath=true" +
+                    "&path=__webpack_hmr" +
+                    `&name=${sectionKey}` +
+                    "&reload=true",
                 ...filteredEntries,
-            ]
+            ],
         },
         output: {
             filename: `${sectionKey}-hot-bundle.js`,
@@ -69,7 +56,9 @@ function buildConfigForSection(entries, sectionKey, options) {
         plugins: [
             new HardSourceWebpackPlugin({
                 // Either an absolute path or relative to webpack's options.context.
-                cacheDirectory: path.normalize(path.join(__dirname, '../../node_modules/.cache/hard-source/[confighash]')),
+                cacheDirectory: path.normalize(
+                    path.join(__dirname, "../../node_modules/.cache/hard-source/[confighash]"),
+                ),
             }),
             new webpack.HotModuleReplacementPlugin(),
         ],
@@ -77,9 +66,9 @@ function buildConfigForSection(entries, sectionKey, options) {
 
     const coreBuildNodeModules = getAllCoreBuildAddons(options).map(addonDirectory => {
         return path.join(addonDirectory, "node_modules");
-    })
+    });
 
-    config.resolve.modules.unshift(...coreBuildNodeModules);
+    config.resolve!.modules!.unshift(...coreBuildNodeModules);
 
     return config;
 }
@@ -87,9 +76,9 @@ function buildConfigForSection(entries, sectionKey, options) {
 /**
  * Run the hot javascript build process.
  *
- * @param {BuildOptions} options
+ * @param options
  */
-function run(options) {
+export default function run(options: ICliOptions) {
     try {
         const entries = getAllCoreBuildEntries(options);
 
@@ -109,20 +98,22 @@ function run(options) {
         const app = express();
 
         // Allow CORS
-        app.use(function(req, res, next) {
+        app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             next();
         });
 
-        app.use(devMiddleware(compiler, {
-            publicPath: "http://127.0.0.1:3030/",
-            stats: {
-                chunks: false, // Makes the build much quieter
-                modules: false,
-                colors: true // Shows colors in the console
-            }
-        }));
+        app.use(
+            devMiddleware(compiler, {
+                publicPath: "http://127.0.0.1:3030/",
+                stats: {
+                    chunks: false, // Makes the build much quieter
+                    modules: false,
+                    colors: true, // Shows colors in the console
+                },
+            }),
+        );
 
         app.use(hotMiddleware(compiler));
 
@@ -131,10 +122,9 @@ function run(options) {
 
             print(
                 "Complete hot reload setup by adding the following to your vanilla config file.\n" +
-                chalk.bold.red(`$Configuration["HotReload"]["Enabled"] = true;\n`)
+                    chalk.bold.red(`$Configuration["HotReload"]["Enabled"] = true;\n`),
             );
         });
-
     } catch (err) {
         if (options.verbose) {
             throw err;

@@ -20,6 +20,9 @@ class BuildCmd extends NodeCommandBase {
     /** @var string  */
     protected $buildToolBaseDirectory;
 
+    /** @var string  */
+    protected $cliRoot;
+
     /** @var array The build configuration options.
      *
      * - process: 'legacy' | '1.0'
@@ -67,13 +70,9 @@ class BuildCmd extends NodeCommandBase {
             ->opt('skip-prettify:p', "Skip automatic formatting with prettier", false, 'bool')
         ;
 
-        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
+        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/Build';
         $this->dependencyDirectories = [
-            $this->buildToolBaseDirectory,
-
-            // These are stuck here until there is a proper way to do versioned upgrades.
-            $this->buildToolBaseDirectory.'/BuildProcess/v1',
-            $this->buildToolBaseDirectory.'/BuildProcess/legacy'
+            $this->toolRealPath,
         ];
     }
 
@@ -101,8 +100,8 @@ class BuildCmd extends NodeCommandBase {
             'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
         ];
 
-        $this->spawnNodeProcessFromPackageMain(
-            $this->getBuildProcessDirectory(),
+        $this->spawnNodeProcessFromFile(
+            $this->getBuildProcessDirectory()."/index.ts",
             $processOptions
         );
     }
@@ -393,7 +392,7 @@ class BuildCmd extends NodeCommandBase {
      * @return array The directory names
      */
     protected function getPossibleBuildProcessVersions() {
-        $buildDirectories = glob($this->buildToolBaseDirectory.'/BuildProcess/*');
+        $buildDirectories = glob($this->buildToolBaseDirectory.'/process/*');
         $validBuildDirectories = [];
         foreach ($buildDirectories as $directory) {
             $validBuildDirectories[] = basename($directory);
@@ -410,7 +409,7 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function getBuildProcessDirectory() {
         $processVersion = $this->addonBuildConfigs[0]['process'];
-        $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
+        $path = $this->buildToolBaseDirectory.'/process/'.$processVersion;
         if (!\file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::fail("Could not find build process version $processVersion"
