@@ -3,47 +3,33 @@
  * @license MIT
  */
 
-const path = require("path");
-const fs = require("fs");
-const webpack = require("webpack");
-const merge = require("webpack-merge");
-const babelPreset = require("@vanillaforums/babel-preset");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const PrettierPlugin = require("prettier-webpack-plugin");
-const glob = require("glob");
-const HappyPack = require('happypack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const chalk = require("chalk").default;
+import path from "path";
+import fs from "fs";
+import webpack, { Configuration } from "webpack";
+import merge from "webpack-merge";
+import babelPreset from "@vanillaforums/babel-preset";
+import UglifyJsPlugin from "uglifyjs-webpack-plugin";
+import PrettierPlugin from "prettier-webpack-plugin";
+import HappyPack from "happypack";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import chalk from "chalk";
+import { printVerbose, getAllCoreBuildAddons } from "./utility";
+import glob from "glob";
+
 const happyThreadPool = HappyPack.ThreadPool({ size: 4, id: "scripts" });
-
-const {
-    printVerbose,
-    getAllCoreBuildAddons,
-} = require("./utility");
-
-module.exports = {
-    createBaseConfig,
-    preprocessWebpackExports,
-    getAliasesForRequirements,
-};
 
 /**
  * Create the base configuration for webpack builds.
  *
  * Notably this is missing entry/output configs. Be sure to provide those.
  *
- * @param {string} buildRoot - The root path of the addon being built.
- * @param {BuildOptions} options - Which way to build.
- *
- * @returns {Object}
+ * @param buildRoot - The root path of the addon being built.
+ * @param options - Which way to build.
  */
-function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
-
+export function createBaseConfig(buildRoot: string, options: ICliOptions, shouldUglifyProd = true) {
     const oldScriptsPath = path.join(buildRoot, "./src/js");
 
-    const includes = new Set([
-        oldScriptsPath,
-    ]);
+    const includes = new Set([oldScriptsPath]);
 
     if (options.buildOptions.process === "core") {
         const coreBuildAddons = getAllCoreBuildAddons(options);
@@ -58,11 +44,11 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         if (fs.existsSync(include)) {
             includes.add(fs.realpathSync(include));
         } else {
-            delete includes[include];
+            includes.delete(include);
         }
     });
 
-    let commonConfig = {
+    let commonConfig: Configuration = {
         cache: true,
         context: buildRoot,
         module: {
@@ -77,44 +63,44 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
                     ],
                     use: [
                         {
-                            loader: 'happypack/loader?id=babel',
-                        }
-                    ]
+                            loader: "happypack/loader?id=babel",
+                        },
+                    ],
                 },
                 {
                     test: /\.svg$/,
                     use: [
-                            {
-                            loader: 'html-loader',
+                        {
+                            loader: "html-loader",
                             options: {
-                                minimize: true
-                            }
-                        }
-                    ]
-                }
-            ]
+                                minimize: true,
+                            },
+                        },
+                    ],
+                },
+            ],
         },
         resolve: {
             modules: [path.join(buildRoot, "node_modules"), "node_modules"],
             alias: {
-                'quill$': path.join(buildRoot, 'node_modules/quill/quill.js'),
+                quill$: path.join(buildRoot, "node_modules/quill/quill.js"),
             },
-            extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"]
+            extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"],
         },
         plugins: [
             new HappyPack({
-                id: 'babel',
+                id: "babel",
                 verbose: options.verbose,
                 threadPool: happyThreadPool,
-                rules: [
+                loaders: [
                     {
-                        path: 'babel-loader',
+                        path: "babel-loader",
                         query: {
                             ...babelPreset,
-                            cacheDirectory: true
-                        }
-                    }
-                ]
+                            cacheDirectory: true,
+                        },
+                    },
+                ],
             }),
         ],
 
@@ -124,26 +110,26 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
          * We are expecting thirs tool to be used in a different directory than itself.
          */
         resolveLoader: {
-            modules: [path.resolve(__dirname, "../node_modules")]
+            modules: [path.resolve(__dirname, "../../../node_modules")],
         },
         output: {
-            filename: "[name].js"
+            filename: "[name].js",
         },
         stats: "minimal",
     };
 
-    const devConfig = {
+    const devConfig: Configuration = {
         mode: "development",
         devtool: "eval-source-map",
         plugins: [
             // Some libraries have dev enviroment specific behaviour
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify("development")
+                "process.env.NODE_ENV": JSON.stringify("development"),
             }),
         ],
         optimization: {
             noEmitOnErrors: true,
-        }
+        },
     };
 
     const prodConfig = {
@@ -152,27 +138,27 @@ function createBaseConfig(buildRoot, options, shouldUglifyProd = true) {
         plugins: [
             // NODE_ENV should be production so that modules do not perform certain development checks
             new webpack.DefinePlugin({
-                "process.env.NODE_ENV": JSON.stringify("production")
-            })
-        ]
+                "process.env.NODE_ENV": JSON.stringify("production"),
+            }),
+        ],
     };
 
     if (shouldUglifyProd) {
         prodConfig.plugins.push(
             // @ts-ignore
             new UglifyJsPlugin({
-                sourceMap: true
-            })
+                sourceMap: true,
+            }),
         );
     }
 
-    commonConfig = mergeTypescriptConfig(options, commonConfig, includes);
+    commonConfig = mergeTypescriptConfig(options, commonConfig, Array.from(includes));
 
     // @ts-ignore
     return merge(commonConfig, options.watch || options.hot ? devConfig : prodConfig);
 }
 
-function mergeTypescriptConfig(options, config, includedFiles) {
+function mergeTypescriptConfig(options: ICliOptions, config: Configuration, includedFiles: string[]) {
     // Push in the prettier plugin.
     const prettierFile = path.join(options.vanillaDirectory, "prettier.config.js");
     const tsConfigFile = path.join(options.vanillaDirectory, "tsconfig.json");
@@ -180,50 +166,53 @@ function mergeTypescriptConfig(options, config, includedFiles) {
 
     if (fs.existsSync(prettierFile) && !options.skipPrettify) {
         const prettierConfig = require(prettierFile);
-        config.plugins.unshift(new PrettierPlugin({
-            ...prettierConfig,
-            parser: "typescript",
-            extensions: [".ts", ".tsx"],
-        }));
+        config.plugins!.unshift(
+            new PrettierPlugin({
+                ...prettierConfig,
+                parser: "typescript",
+                extensions: [".ts", ".tsx"],
+            }),
+        );
     }
 
     if (fs.existsSync(tsConfigFile)) {
         // Push in happypack and the typechecker
-        config.plugins.push(
+        config.plugins!.push(
             new HappyPack({
-                id: 'ts',
+                id: "ts",
                 verbose: options.verbose,
                 threadPool: happyThreadPool,
-                rules: [
+                loaders: [
                     {
-                        path: 'ts-loader',
+                        path: "ts-loader",
                         query: {
                             happyPackMode: true,
-                            configFile: tsConfigFile
-                        }
-                    }
-                ]
-        }));
-        config.plugins.push(
+                            configFile: tsConfigFile,
+                        },
+                    },
+                ],
+            }),
+        );
+        config.plugins!.push(
             new ForkTsCheckerWebpackPlugin({
                 tsconfig: tsConfigFile,
-                tslint: fs.existsSync(tslintFile) ? tslintFile : false,
+                tslint: fs.existsSync(tslintFile) ? tslintFile : undefined,
                 checkSyntacticErrors: true,
                 async: true,
             }),
         );
 
         // Push in the loaders
-        config.module.rules.push({
+        config.module!.rules.push({
             test: /\.tsx?$/,
             exclude: ["node_modules"],
-            include: Array.from(includedFiles),
+            include: includedFiles,
             use: [
                 {
-                    loader: 'happypack/loader?id=ts',
-                }
-            ]
-        })
+                    loader: "happypack/loader?id=ts",
+                },
+            ],
+        });
     }
 
     return config;
@@ -232,13 +221,19 @@ function mergeTypescriptConfig(options, config, includedFiles) {
 /**
  * Spread "*" declarations among all other sections.
  *
- * @param {Object} exports - The exports to transform.
- *
- * @returns {Object}
+ * @param exports - The exports to transform.
  */
+<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
 function preprocessWebpackExports(exports, addonDirectory) {
+=======
+export function preprocessWebpackExports(exports: IBuildExports) {
+    if (!("*" in exports)) {
+        return exports;
+    }
+
+>>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
     const star = exports["*"];
-    const output = {};
+    const output: any = {};
 
     const expandGlobs = (items) => {
         const newItems = [];
@@ -260,10 +255,14 @@ function preprocessWebpackExports(exports, addonDirectory) {
             continue;
         }
 
+<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
         output[key] = [
             ...expandGlobs(star),
             ...expandGlobs(value),
         ];
+=======
+        output[key] = [...star, ...value];
+>>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
     }
 
     exports = output;
@@ -277,32 +276,40 @@ function preprocessWebpackExports(exports, addonDirectory) {
  *
  * Aliases will always be generated for core, applications/vanilla, and applications/dashboard
  *
- * @param {BuildOptions} options
- * @param {boolean=} forceAll - Force the function to make aliases for every single addon.
- *
- * @returns {Object}
+ * @param options
+ * @param forceAll - Force the function to make aliases for every single addon.
  */
-function getAliasesForRequirements(options, forceAll = false) {
+export function getAliasesForRequirements(options: ICliOptions, forceAll = false) {
     const { vanillaDirectory, requiredDirectories } = options;
+    if (!requiredDirectories) {
+        return {};
+    }
 
     const allowedKeys = requiredDirectories.map(dir => {
         return path.basename(dir);
-    })
+    });
 
     allowedKeys.push("vanilla", "dashboard");
 
+<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
     const result = {};
     ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
+=======
+    const result: { [key: string]: string } = {
+        "@core": path.resolve(vanillaDirectory, "src/scripts"),
+    };
+    ["applications", "addons", "plugins", "themes"].forEach(topDirectory => {
+>>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
         const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
 
-        if(fs.existsSync(fullTopDirectory)) {
+        if (fs.existsSync(fullTopDirectory)) {
             const subdirs = fs.readdirSync(fullTopDirectory);
             subdirs.forEach(addonKey => {
                 const key = `@${addonKey}`;
 
                 const shouldAddResult = !result[key] && (forceAll || allowedKeys.includes(addonKey));
                 if (shouldAddResult) {
-                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey, 'src/scripts');
+                    result[key] = path.join(vanillaDirectory, topDirectory, addonKey, "src/scripts");
                 }
             });
         }

@@ -89,8 +89,10 @@ class NodeCommandBase extends Command {
         ];
         $options = array_merge($verboseOptions, $options);
         $serializedOptions = json_encode($options);
+        $tsNodePath = $this->toolRealPath.'/node_modules/.bin/ts-node';
+        $tsProject = $this->toolRealPath.'/tsconfig.json';
 
-        $command = "node $debugArg '$nodeFilePath' --color --options '$serializedOptions'";
+        $command = "$tsNodePath -P $tsProject $debugArg '$nodeFilePath' --color --options '$serializedOptions'";
         passthru($command);
     }
 

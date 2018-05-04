@@ -3,26 +3,26 @@
  * @license MIT
  */
 
-const gulp = require("gulp");
-const fs = require("fs");
-const path = require("path");
-const sourcemaps = require("gulp-sourcemaps");
-const size = require("gulp-size");
-const cache = require("gulp-cache");
-const imagemin = require("gulp-imagemin");
+import gulp from "gulp";
+import fs from "fs";
+import path from "path";
+import sourcemaps from "gulp-sourcemaps";
+import size from "gulp-size";
+import cache from "gulp-cache";
+import imagemin from "gulp-imagemin";
 
 /**
  * Gulp build process for images.
  *
- * @param {string} addonDirectory - The directory to build from.
- * @param {Object} options - The build options.
+ * @param addonDirectory - The directory to build from.
+ * @param options - The build options.
  *
- * @return {any} A gulp execution function.
+ * @return A gulp execution function.
  */
-module.exports = (addonDirectory, options) => () => {
+const buildAssets = (addonDirectory: string, options: ICliOptions) => () => {
     if (!fs.existsSync(path.join(addonDirectory, "src/images"))) {
         return;
-    };
+    }
 
     const process = gulp
         .src(path.join(addonDirectory, "src/images/**/*"))
@@ -31,9 +31,9 @@ module.exports = (addonDirectory, options) => () => {
                 imagemin({
                     optimizationLevel: 3,
                     progressive: true,
-                    interlaced: true
-                })
-            )
+                    interlaced: true,
+                }),
+            ),
         )
         .pipe(gulp.dest(path.join(addonDirectory, "design/images")));
 
@@ -43,3 +43,5 @@ module.exports = (addonDirectory, options) => () => {
 
     return process;
 };
+
+export default buildAssets;

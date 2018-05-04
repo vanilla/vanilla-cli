@@ -3,43 +3,26 @@
  * @license MIT
  */
 
-const path = require("path");
-const fs = require("fs");
-const chalk = require("chalk").default;
-const glob = require("glob");
-const webpack = require("webpack");
-const merge = require("webpack-merge");
+import path from "path";
+import fs from "fs";
+import chalk from "chalk";
+import glob from "glob";
+import webpack, { Configuration, Stats } from "webpack";
+import merge from "webpack-merge";
 
-const {
-    createBaseConfig,
-    preprocessWebpackExports,
-    getAliasesForRequirements,
-} = require("../../library/webpack-utility");
-const {
-    print,
-    printError,
-    fail,
-    getJsonFileForDirectory,
-    camelize
-} = require("../../library/utility");
-
-// EXPORTS
-module.exports = {
-    run,
-    getManifestPathsForDirectory,
-    isValidEntryPoint,
-};
+import { createBaseConfig, preprocessWebpackExports, getAliasesForRequirements } from "../../library/webpack-utility";
+import { print, printError, fail, getJsonFileForDirectory, camelize } from "../../library/utility";
 
 /**
  * Run the javascript build process.
  *
- * @param {BuildOptions} options
+ * @param options
  */
-async function run(options) {
+export default async function run(options: ICliOptions) {
     try {
-        let primaryDirectory = options.rootDirectories.slice(0, 1)[0];
+        const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 
-        const exportsConfig = await createExportsConfig(primaryDirectory, options);
+        const exportsConfig = await createExportConfigs(primaryDirectory, options);
 
         if (exportsConfig) {
             for (const config of exportsConfig) {
@@ -64,11 +47,10 @@ async function run(options) {
 /**
  * Get the contents of all manifest files in a directory.
  *
- * @param {string} directory - The directory search through.
- *
- * @return {string[]}
+ * @param directory - The directory search through.
+ * @throws If an error is encountered while looking for files.
  */
-function getManifestPathsForDirectory(directory) {
+function getManifestPathsForDirectory(directory: string): string[] {
     try {
         return glob.sync(path.join(directory, "manifests/**/*-manifest.json"));
     } catch (err) {
@@ -76,6 +58,8 @@ function getManifestPathsForDirectory(directory) {
 
         ${err}`);
     }
+
+    return [];
 }
 
 /**
@@ -85,30 +69,28 @@ function getManifestPathsForDirectory(directory) {
  * It never runs in watch mode. If a file has both entries and exports the
  * exports must be run first.
  *
- * @param {string} primaryDirectory - The main addon directory.
- * @param {BuildOptions} options - The options passed from the PHP process.
- *
- * @return {Promise<Object>} - A webpack config
+ * @param primaryDirectory - The main addon directory.
+ * @param options - The options passed from the PHP process.
  */
-async function createExportsConfig(primaryDirectory, options) {
+function createExportConfigs(primaryDirectory: string, options: ICliOptions): Configuration[] {
     const baseConfig = createBaseConfig(primaryDirectory, options);
     let { exports } = options.buildOptions;
 
     if (!isValidEntryPoint(exports)) {
-        return;
+        return [];
     }
 
-    exports = preprocessWebpackExports(exports, primaryDirectory);
+    exports = preprocessWebpackExports(exports!, primaryDirectory);
 
     // Remove this addon's libraries so it doesn't build it's own exports against it's own exports
     const self = options.rootDirectories[0];
-    let directories = options.requiredDirectories;
+    const directories = options.requiredDirectories;
     if (options.requiredDirectories.includes(self)) {
         const index = options.requiredDirectories.indexOf(self);
         directories.splice(index, 1);
     }
 
-    const configs = Object.keys(exports).map((exportKey) => {
+    const configs = Object.keys(exports).map(exportKey => {
         const entry = {
             [exportKey]: exports[exportKey],
         };
@@ -121,22 +103,22 @@ async function createExportsConfig(primaryDirectory, options) {
                 filename: `[name]/lib-${options.addonKey}-[name].min.js`,
                 chunkFilename: `chunk/[name]-${exportKey}.min.js`,
                 publicPath: getChunkPublicPath(options),
-                library: libraryName
+                library: libraryName,
             },
             resolve: {
-                alias: getAliasesForRequirements(options)
+                alias: getAliasesForRequirements(options),
             },
             plugins: [
                 ...getDllPLuginsForAddonDirectories(directories, exportKey, options),
                 new webpack.DllPlugin({
                     context: options.vanillaDirectory,
                     path: path.join(primaryDirectory, "manifests/[name]-manifest.json"),
-                    name: libraryName
-                })
-            ]
+                    name: libraryName,
+                }),
+            ],
         });
 
-        config.resolve.modules.unshift(
+        config.resolve!.modules!.unshift(
             path.resolve(options.vanillaDirectory, "node_modules"),
             path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
             path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
@@ -150,13 +132,9 @@ async function createExportsConfig(primaryDirectory, options) {
 
 /**
  * Validate an entry point.
- *
- * @param {any} entry
- *
- * @returns {boolean}
  */
-function isValidEntryPoint(entry) {
-    if (entry instanceof Array && entry.length > 0) {
+function isValidEntryPoint(entry: IBuildEntries | IBuildExports) {
+    if (Array.isArray(entry) && entry.length > 0) {
         return true;
     }
     if (entry instanceof Object && Object.keys(entry).length > 0) {
@@ -171,24 +149,19 @@ function isValidEntryPoint(entry) {
  * This configuration is builds all files defined in `addonJson.build.entries`.
  * If a file has both entries and exports the exports must be run first.
  *
- * @param {string} primaryDirectory - The main addon directory.
- * @param {BuildOptions} options - The options passed from the PHP process.
- *
- * @return {Promise<?Object>} - A webpack config or undefined if their were no entries.
+ * @param primaryDirectory - The main addon directory.
+ * @param options - The options passed from the PHP process.
  */
-async function createEntriesConfig(primaryDirectory, options) {
+function createEntriesConfig(primaryDirectory: string, options: ICliOptions): Configuration[] {
     const baseConfig = createBaseConfig(primaryDirectory, options);
     const { entries } = options.buildOptions;
-    const directories = [
-        ...options.requiredDirectories,
-        ...options.rootDirectories,
-    ];
+    const directories = [...options.requiredDirectories, ...options.rootDirectories];
 
     if (!isValidEntryPoint(entries)) {
-        return;
+        return [];
     }
 
-    const configs = Object.keys(entries).map((entryKey) => {
+    const configs = Object.keys(entries).map(entryKey => {
         const entry = {
             [entryKey]: entries[entryKey],
         };
@@ -211,7 +184,7 @@ async function createEntriesConfig(primaryDirectory, options) {
             plugins: getDllPLuginsForAddonDirectories(directories, entryKey, options),
         });
 
-        config.resolve.modules.unshift(
+        config.resolve!.modules!.unshift(
             path.resolve(options.vanillaDirectory, "node_modules"),
             path.resolve(options.vanillaDirectory, "applications/dashboard/node_modules"),
             path.resolve(options.vanillaDirectory, "applications/vanilla/node_modules"),
@@ -225,10 +198,8 @@ async function createEntriesConfig(primaryDirectory, options) {
 
 /**
  * Determine if the addon uses the core build process.
- *
- * @param {string} directory
  */
-function addonUsesCoreBuildProcess(directory) {
+function addonUsesCoreBuildProcess(directory: string) {
     const addonJson = getJsonFileForDirectory(directory, "addon");
     if (addonJson && addonJson.build && addonJson.build.process === "core") {
         return directory;
@@ -238,20 +209,31 @@ function addonUsesCoreBuildProcess(directory) {
 /**
  * Get the base path for the requiring dynamic chunks.
  *
- * @param {BuildOptions} options
+ * @param options
  */
+<<<<<<< HEAD:src/NodeTools/BuildProcess/core/build-scripts.js
 function getChunkPublicPath(options) {
+=======
+function getChunkPublicPath(options: ICliOptions) {
+    const { addonKey } = options;
+    const basePath = addonKey === "core" ? "" : `themes/${addonKey}/`;
+
+>>>>>>> Convert to typescript:src/Build/process/core/scripts.ts
     return getPathFromVanillaRoot(options) + `js/`;
 }
 
 /**
  * Get the base path for the requiring dynamic chunks.
- *
- * @param {BuildOptions} options
  */
+<<<<<<< HEAD:src/NodeTools/BuildProcess/core/build-scripts.js
 function getPathFromVanillaRoot(options) {
     const { rootDirectories, vanillaDirectory } = options;
     const root = rootDirectories[0].replace(vanillaDirectory, '/').replace("//", "/");
+=======
+function getPathFromVanillaRoot(options: ICliOptions) {
+    const { addonKey, rootDirectories, vanillaDirectory } = options;
+    const root = rootDirectories[0].replace(vanillaDirectory, "/").replace("//", "/");
+>>>>>>> Convert to typescript:src/Build/process/core/scripts.ts
     if (root.endsWith("/")) {
         return root;
     } else {
@@ -271,34 +253,29 @@ function getPathFromVanillaRoot(options) {
  * bootstrap-app => app-manifest.json
  * bootstrap-admin => admin-manifest.json
  *
- * @param {string} entryKey - The entry key to filter by.
+ * @param entryKey - The entry key to filter by.
  */
-function filterManifestPathsByEntryKey(entryKey) {
-    return function filterManifests(manifestPath) {
+function filterManifestPathsByEntryKey(entryKey: string) {
+    return function filterManifests(manifestPath: string) {
         const manifestName = path.basename(manifestPath);
         const lookupKey = entryKey.replace("bootstrap", "").replace("-", "");
 
         return manifestName.includes(lookupKey);
-    }
+    };
 }
 
 /**
  * Generate DLL Plugins for any required addons and it self.
  *
- * @param {string[]} directories - The directories to generate DLL plugins for.
- * @param {string} entryKey - The entryKey to filter the results with.
- * @param {BuildOptions} options
+ * @param directories - The directories to generate DLL plugins for.
+ * @param entryKey - The entryKey to filter the results with.
+ * @param options
  */
-function getDllPLuginsForAddonDirectories(directories, entryKey, options) {
+function getDllPLuginsForAddonDirectories(directories: string[], entryKey: string, options: ICliOptions) {
     return directories
         .filter(addonUsesCoreBuildProcess)
         .map(getManifestPathsForDirectory)
-        .reduce((result, manifests) => {
-            return [
-                ...result,
-                ...manifests,
-            ];
-        }, [])
+        .reduce((accumulator: string[], manifests: string[]) => accumulator.concat(manifests), [])
         .filter(filterManifestPathsByEntryKey(entryKey))
         .map(manifest => {
             return new webpack.DllReferencePlugin({
@@ -311,18 +288,18 @@ function getDllPLuginsForAddonDirectories(directories, entryKey, options) {
 /**
  * Run a single webpack config.
  *
- * @param {Object} config - A valid webpack config.
- * @param {BuildOptions} options - Whether or not to run in watch mode.
+ * @param config - A valid webpack config.
+ * @param options - Whether or not to run in watch mode.
  *
  * @returns {Promise<void>}
  */
-function runSingleWebpackConfig(config, options) {
+function runSingleWebpackConfig(config: Configuration, options: ICliOptions) {
     return new Promise((resolve, reject) => {
         const compiler = webpack(config);
 
         const executionFunction = options.watch ? compiler.watch.bind(compiler, {}) : compiler.run.bind(compiler);
 
-        executionFunction((err, stats) => {
+        executionFunction((err: Error, stats: Stats) => {
             if (err) {
                 reject("The build encountered an error:" + err);
             }
@@ -332,10 +309,10 @@ function runSingleWebpackConfig(config, options) {
                     chunks: false, // Makes the build much quieter
                     modules: options.verbose || false,
                     colors: true, // Shows colors in the console
-                })
+                }),
             );
 
             resolve();
         });
-    })
+    });
 }

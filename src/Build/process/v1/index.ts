@@ -3,17 +3,17 @@
  * @license MIT
  */
 
-const path = require("path");
-const gulp = require("gulp");
-const livereload = require("gulp-livereload");
-const argv = require("yargs").argv;
-const chalk = require("chalk").default;
+import path from "path";
+import gulp from "gulp";
+import livereload from "gulp-livereload";
+import { argv } from "yargs";
+import chalk from "chalk";
 
-const { print, sleep, checkLiveReloadPort } = require("../../library/utility");
+import { print, sleep, checkLiveReloadPort } from "../../library/utility";
 
-const buildJs = require("./build.javascript");
-const buildStyles = require("./build.stylesheets");
-const buildAssets = require("./build.assets");
+import buildJs from "./scripts";
+import StylesheetBuilder from "../../library/StylesheetBuilder";
+import buildAssets from "./assets";
 
 /**
  * @var Object The options passed from the PHP process.
@@ -23,7 +23,7 @@ const buildAssets = require("./build.assets");
  * - watch - Should this be in watch mode.
  * - verbose - Display verbose output.
  */
-const options = JSON.parse(argv.options);
+const options: ICliOptions = JSON.parse(argv.options);
 
 // Set the verbose option globally.
 // @ts-ignore
@@ -45,9 +45,9 @@ print(options.watch ? devModeWarning : "");
 
 gulp.task("build:js", buildJs(primaryDirectory, options));
 
-gulp.task("build:styles", buildStyles(options));
+gulp.task("build:styles", new StylesheetBuilder(options).compiler);
 
-gulp.task("build:assets", buildAssets(primaryDirectory, options.buildOptions));
+gulp.task("build:assets", buildAssets(primaryDirectory, options));
 
 gulp.task("build", ["build:assets", "build:styles", "build:js"]);
 
@@ -55,16 +55,16 @@ gulp.task("watch", ["build"], () => {
     checkLiveReloadPort().then(() => {
         livereload.listen();
 
-        const onReload = file => livereload.changed(file.path);
+        const onReload = (file: any) => livereload.changed(file.path);
 
         gulp.watch(
             [
                 path.resolve(primaryDirectory, "design/*.css"),
                 path.resolve(primaryDirectory, "design/images/**/*"),
                 path.resolve(primaryDirectory, "js/*.js"),
-                path.resolve(primaryDirectory, "views/**/*")
+                path.resolve(primaryDirectory, "views/**/*"),
             ],
-            onReload
+            onReload,
         );
 
         const { cssTool } = options.buildOptions;
@@ -74,7 +74,7 @@ gulp.task("watch", ["build"], () => {
         gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
 
         print("\n" + chalk.green("Watching for changes in src files..."));
-    })
+    });
 });
 
 const taskToExecute = options.watch ? "watch" : "build";
