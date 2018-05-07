@@ -84,7 +84,7 @@ abstract class Command {
         $this->cliSrcDir = realpath(__DIR__.'/../../../..');
 
         // Load the bootstrap file and get the container.
-        require_once($this->vanillaSrcDir.'/bootstrap-cli.php');
+        require __DIR__.'/../../../../bootstrap.php';
         $this->container = $container;
     }
 

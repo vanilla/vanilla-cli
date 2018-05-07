@@ -10,7 +10,9 @@ namespace Vanilla\Cli\Command;
 use \Garden\Cli\Cli;
 use \Garden\Cli\Args;
 use \Garden\Cli\LogFormatter;
+use Vanilla\Addon;
 use \Vanilla\Cli\CliUtil;
+use \Vanilla\AddonManager;
 
 /**
  * Class BuildCmd.
@@ -54,6 +56,9 @@ class BuildCmd extends NodeCommandBase {
     /** @var array An array of realpaths to roots of addons being built. */
     private $addonRootDirectories = [];
 
+    /** @var AddonManager */
+    private $addonManager;
+
     public static function commandInfo(Cli $cli) {
         parent::commandInfo($cli);
         $cli->description('Build frontend assets (scripts, stylesheets, and images).')
@@ -73,10 +78,8 @@ class BuildCmd extends NodeCommandBase {
      */
     public function __construct(Args $args) {
         parent::__construct($args);
-        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/Build';
-        $this->dependencyDirectories = [
-            $this->toolRealPath,
-        ];
+        $this->buildToolBaseDirectory = $this->cliSrcDir.'/src/Build';
+        $this->addonManager = $this->container->get(AddonManager::class);
     }
 
     /**
@@ -216,37 +219,8 @@ class BuildCmd extends NodeCommandBase {
      * @return array
      */
     protected function getEnabledAddonKeys() {
-        $configPath = $this->vanillaSrcDir.'/conf/'.$this->configName;
-        $configDefaultsPath = $this->vanillaSrcDir.'/conf/config-defaults.php';
-        if (!file_exists($configPath)) {
-            CliUtil::fail("Unable to locate Vanilla configuration at $configPath.");
-        }
-
-        CliUtil::write("Using vanilla configuration at $configPath.");
-        define("APPLICATION", "App");
-        define("PATH_CACHE", "");
-        require_once($configDefaultsPath);
-        require_once($configPath);
-
-        $result = [];
-
-        if (valr("EnabledPlugins", $Configuration)) {
-            foreach($Configuration["EnabledPlugins"] as $pluginKey => $value) {
-                $result[] = $pluginKey;
-            }
-        }
-
-        if (valr("EnabledApplications", $Configuration)) {
-            foreach($Configuration["EnabledApplications"] as $arrayKey => $addonKey) {
-                $result[] = $addonKey;
-            }
-        }
-
-        if (valr("Garden.Theme", $Configuration)) {
-            $result[] = $Configuration["Garden"]["Theme"];
-        }
-
-        return $result;
+        $addons = $this->addonManager->getEnabled();
+        return array_keys($addons);
     }
 
     /**

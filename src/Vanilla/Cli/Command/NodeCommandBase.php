@@ -50,12 +50,10 @@ class NodeCommandBase extends Command {
         $shouldReinitalize = $this->args->getOpt('reinitialize') ?: false;
 
         // Ensure all dependencies are installed correctly for the process.
-        foreach($this->dependencyDirectories as $directory) {
-            if ($shouldReinitalize) {
-                $this->deleteDependenciesForDirectory($directory);
-            }
-            $this->checkNeedsInstallation($directory);
+        if ($shouldReinitalize) {
+            $this->deleteDependenciesForDirectory($this->cliSrcDir);
         }
+        $this->checkNeedsInstallation($this->cliSrcDir);
     }
 
     /**
