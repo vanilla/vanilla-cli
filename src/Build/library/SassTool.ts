@@ -3,32 +3,31 @@
  * @license MIT
  */
 
-const path = require("path");
-const fs = require("fs");
-const chalk = require("chalk").default;
+import path from "path";
+import fs from "fs";
+import chalk from "chalk";
+import { print, printVerbose, printError } from "./utility";
 
-const { print, printVerbose, printError } = require("./utility");
-
-module.exports = {
-    createSassTool
-}
-
-function createSassTool(sourceDirectories) {
-
-    return {
-        importer,
-        swapPlaceholders,
-    };
+export default class SassTool {
+    constructor(private sourceDirectories: string[]) {}
 
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix.
      *
      * @public
-     * @param {string} url - The filepath.
-     * @param {string} prev - The previous filepath.
+     * @param url - The filepath.
+     * @param prev - The previous filepath.
      * @param {function} done - Completion callback.
      */
-    function importer(url, prev, done) {
+    public importer(
+        url: string,
+        prev: string,
+        done: (
+            results: {
+                file: string;
+            },
+        ) => void,
+    ) {
         const nodeModuleRegex = /^~/;
         const cssHttpImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
 
@@ -38,7 +37,7 @@ function createSassTool(sourceDirectories) {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
             trueFilePath = `'${url}'`;
         } else if (url.match(nodeModuleRegex)) {
-            trueFilePath = resolveFilePathInNodeModules(url.replace(nodeModuleRegex, ""));
+            trueFilePath = this.resolveFilePathInNodeModules(url.replace(nodeModuleRegex, ""));
             printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else {
             trueFilePath = url;
@@ -53,17 +52,16 @@ function createSassTool(sourceDirectories) {
      * The function will attempt to resolve a file of the captured name in all source directories.
      * filenames containing "variables" will be matched in reverse order or source directories.
      *
-     * @public
-     * @param {string} content - The file content.
-     * @param {string} entryFilePath - The path of the file.
+     * @param content - The file content.
+     * @param entryFilePath - The path of the file.
      *
-     * @return {string} The new contents of a file.
+     * @return The new contents of a file.
      */
-    function swapPlaceholders(content, entryFilePath) {
+    public swapPlaceholders(content: string, entryFilePath: string): string {
         const placeholderRegex = /\/\*\*\s*@vanilla-cli-placeholder:\s*([^\s]*)\s*\*\*\//g;
 
         const replacedText = content.replace(placeholderRegex, (match, captureGroup1) => {
-            const resolvedFilePaths = resolveAllFilePathsFromMutlipleAddons(`src/scss/${captureGroup1}`) || [];
+            const resolvedFilePaths = this.resolveAllFilePathsFromMutlipleAddons(`src/scss/${captureGroup1}`) || [];
 
             // Everything but variables should be oldest to youngest.
             if (!/variables/.test(captureGroup1)) {
@@ -75,7 +73,7 @@ function createSassTool(sourceDirectories) {
             resolvedFilePaths.forEach(resolvedFilePath => {
                 const relativeFilePath = path.relative(entryFilePath, resolvedFilePath);
 
-                printVerbose(`Inserting file ${chalk.yellow(relativeFilePath)} into parent entrypoint.`)
+                printVerbose(`Inserting file ${chalk.yellow(relativeFilePath)} into parent entrypoint.`);
                 output += `@import "${resolvedFilePath}";\n`;
             });
             return output;
@@ -84,20 +82,17 @@ function createSassTool(sourceDirectories) {
         return replacedText;
     }
 
-
     /**
      * Attempt to resolve a file in potentially multiple addon directories.
      *
      * Will attempt to lookup up the child, then check parents.
      *
-     * @private
-     * @param {string} requestPath - The requested file to lookup.
+     * @param requestPath - The requested file to lookup.
      *
-     * @return {string} A resolved absolute file path.
-     * @throws {Error} If the file couldn't be resolved anywhere.
+     * @return A resolved absolute file path.
      */
-    function resolveOneFilePathFromMutlipleAddons(requestPath) {
-        for (const srcDirectory of sourceDirectories) {
+    private resolveOneFilePathFromMutlipleAddons(requestPath: string): string | undefined {
+        for (const srcDirectory of this.sourceDirectories) {
             const lookupPath = path.join(srcDirectory, requestPath);
 
             if (fs.existsSync(lookupPath)) {
@@ -111,16 +106,14 @@ function createSassTool(sourceDirectories) {
      *
      * Will attempt to lookup up the child, then check parents.
      *
-     * @private
-     * @param {string} requestPath - The requested file to lookup.
+     * @param requestPath - The requested file to lookup.
      *
-     * @return {string[]} A resolved absolute file path.
-     * @throws {Error} If the file couldn't be resolved anywhere.
+     * @return A resolved absolute file path.
      */
-    function resolveAllFilePathsFromMutlipleAddons(requestPath) {
+    private resolveAllFilePathsFromMutlipleAddons(requestPath: string): string[] {
         const paths = [];
 
-        for (const srcDirectory of sourceDirectories) {
+        for (const srcDirectory of this.sourceDirectories) {
             const lookupPath = path.join(srcDirectory, requestPath);
 
             if (fs.existsSync(lookupPath)) {
@@ -136,16 +129,15 @@ function createSassTool(sourceDirectories) {
      *
      * Checks the package.json for "style" and "main" keys to find an scss/css entrypoint.
      *
-     * @private
-     * @param {string} requestPath - The path to look up.
+     * @param requestPath - The path to look up.
      *
-     * @returns {string} The resolved absolute file path.
-     * @throws {Error} If no file can be located.
+     * @returns The resolved absolute file path.
+     * @throws If no file can be located.
      */
-    function resolveFilePathInNodeModules(requestPath) {
+    private resolveFilePathInNodeModules(requestPath: string): string {
         const moduleBasePath = path.join("node_modules", requestPath);
-        const packageJsonPath = path.join(moduleBasePath, 'package.json');
-        const resolvedPath = resolveOneFilePathFromMutlipleAddons(moduleBasePath);
+        const packageJsonPath = path.join(moduleBasePath, "package.json");
+        const resolvedPath = this.resolveOneFilePathFromMutlipleAddons(moduleBasePath);
 
         if (!resolvedPath) {
             throw new Error(`Failed css node_module lookup. Package ${moduleBasePath}} not found.`);

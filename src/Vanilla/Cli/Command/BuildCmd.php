@@ -10,7 +10,9 @@ namespace Vanilla\Cli\Command;
 use \Garden\Cli\Cli;
 use \Garden\Cli\Args;
 use \Garden\Cli\LogFormatter;
+use Vanilla\Addon;
 use \Vanilla\Cli\CliUtil;
+use \Vanilla\AddonManager;
 
 /**
  * Class BuildCmd.
@@ -19,6 +21,9 @@ class BuildCmd extends NodeCommandBase {
 
     /** @var string  */
     protected $buildToolBaseDirectory;
+
+    /** @var string  */
+    protected $cliRoot;
 
     /** @var array The build configuration options.
      *
@@ -51,13 +56,11 @@ class BuildCmd extends NodeCommandBase {
     /** @var array An array of realpaths to roots of addons being built. */
     private $addonRootDirectories = [];
 
-    /**
-     * BuildCmd constructor.
-     *
-     * @param Cli $cli The CLI instance.
-     */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    /** @var AddonManager */
+    private $addonManager;
+
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli->description('Build frontend assets (scripts, stylesheets, and images).')
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
             ->opt('hot:h', 'Use a webpack hot reloading server.', false, 'bool')
@@ -66,24 +69,26 @@ class BuildCmd extends NodeCommandBase {
             ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string')
             ->opt('skip-prettify:p', "Skip automatic formatting with prettier", false, 'bool')
         ;
+    }
 
-        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/NodeTools';
-        $this->dependencyDirectories = [
-            $this->buildToolBaseDirectory,
-
-            // These are stuck here until there is a proper way to do versioned upgrades.
-            $this->buildToolBaseDirectory.'/BuildProcess/v1',
-            $this->buildToolBaseDirectory.'/BuildProcess/legacy'
-        ];
+    /**
+     * BuildCmd constructor.
+     *
+     * @param Cli $cli The CLI instance.
+     */
+    public function __construct(Args $args) {
+        parent::__construct($args);
+        $this->buildToolBaseDirectory = $this->cliSrcDir.'/src/Build';
+        $this->addonManager = $this->container->get(AddonManager::class);
     }
 
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
-        parent::run($args);
+    public final function run() {
+        parent::run();
 
-        $this->setBuildOptionsFromArgs($args);
+        $this->setBuildOptionsFromArgs();
         $this->setAddonJsonBuildOptions();
         $this->setDefaultBuildOptions();
         $this->validateBuildOptions();
@@ -98,11 +103,11 @@ class BuildCmd extends NodeCommandBase {
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
             'enabledAddonKeys' => $this->getEnabledAddonKeys(),
-            'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
+            'skipPrettify' => $this->args->getOpt('skip-prettify') ?: false,
         ];
 
-        $this->spawnNodeProcessFromPackageMain(
-            $this->getBuildProcessDirectory(),
+        $this->spawnNodeProcessFromFile(
+            $this->getBuildProcessDirectory()."/index.ts",
             $processOptions
         );
     }
@@ -180,12 +185,12 @@ class BuildCmd extends NodeCommandBase {
      *
      * @param Args $args The CLI arguments.
      */
-    protected function setBuildOptionsFromArgs(Args $args) {
-        $processArg = $args->getOpt('process') ?: false;
-        $hotArg = $args->getOpt('hot') ?: false;
-        $watchArg = $args->getOpt('watch') ?: false;
-        $cssToolArg = $args->getOpt('csstool');
-        $sectionArg = $args->getOpt('section');
+    protected function setBuildOptionsFromArgs() {
+        $processArg = $this->args->getOpt('process') ?: false;
+        $hotArg = $this->args->getOpt('hot') ?: false;
+        $watchArg = $this->args->getOpt('watch') ?: false;
+        $cssToolArg = $this->args->getOpt('csstool');
+        $sectionArg = $this->args->getOpt('section');
 
         if ($processArg) {
             $this->defaultConfigurationOptions['process'] = $processArg;
@@ -214,37 +219,8 @@ class BuildCmd extends NodeCommandBase {
      * @return array
      */
     protected function getEnabledAddonKeys() {
-        $configPath = $this->vanillaSrcDir.'/conf/'.$this->configName;
-        $configDefaultsPath = $this->vanillaSrcDir.'/conf/config-defaults.php';
-        if (!file_exists($configPath)) {
-            CliUtil::fail("Unable to locate Vanilla configuration at $configPath.");
-        }
-
-        CliUtil::write("Using vanilla configuration at $configPath.");
-        define("APPLICATION", "App");
-        define("PATH_CACHE", "");
-        require_once($configDefaultsPath);
-        require_once($configPath);
-
-        $result = [];
-
-        if (valr("EnabledPlugins", $Configuration)) {
-            foreach($Configuration["EnabledPlugins"] as $pluginKey => $value) {
-                $result[] = $pluginKey;
-            }
-        }
-
-        if (valr("EnabledApplications", $Configuration)) {
-            foreach($Configuration["EnabledApplications"] as $arrayKey => $addonKey) {
-                $result[] = $addonKey;
-            }
-        }
-
-        if (valr("Garden.Theme", $Configuration)) {
-            $result[] = $Configuration["Garden"]["Theme"];
-        }
-
-        return $result;
+        $addons = $this->addonManager->getEnabled();
+        return array_keys($addons);
     }
 
     /**
@@ -393,7 +369,7 @@ class BuildCmd extends NodeCommandBase {
      * @return array The directory names
      */
     protected function getPossibleBuildProcessVersions() {
-        $buildDirectories = glob($this->buildToolBaseDirectory.'/BuildProcess/*');
+        $buildDirectories = glob($this->buildToolBaseDirectory.'/process/*');
         $validBuildDirectories = [];
         foreach ($buildDirectories as $directory) {
             $validBuildDirectories[] = basename($directory);
@@ -410,7 +386,7 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function getBuildProcessDirectory() {
         $processVersion = $this->addonBuildConfigs[0]['process'];
-        $path = $this->buildToolBaseDirectory.'/BuildProcess/'.$processVersion;
+        $path = $this->buildToolBaseDirectory.'/process/'.$processVersion;
         if (!\file_exists($path)) {
             $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
             CliUtil::fail("Could not find build process version $processVersion"

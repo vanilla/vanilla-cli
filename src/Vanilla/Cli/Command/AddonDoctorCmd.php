@@ -20,25 +20,17 @@ use Vanilla\Cli\AddonManagerTrait;
  */
 class AddonDoctorCmd extends Command {
 
-    use AddonManagerTrait;
-
-    /**
-     * AddonDoctorCmd constructor.
-     *
-     * @param Cli $cli
-     */
-    public function __construct(Cli $cli) {
-        parent::__construct($cli);
+    public static function commandInfo(Cli $cli) {
+        parent::commandInfo($cli);
         $cli->description('Verify addons\' requirements.');
     }
 
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
-        parent::run($args);
-
-        $this->initializeAddonManager($this->vanillaSrcDir);
+    public final function run() {
+        /** @var AddonManager $addonManager */
+        $addonManager = $this->container->get(AddonManager::class);
 
         $getRelativePath = function($from, $path) {
             $path = explode(DIRECTORY_SEPARATOR, $path);
@@ -55,7 +47,7 @@ class AddonDoctorCmd extends Command {
 
         $sickAddonsCount = 0;
         $issuesCount = 0;
-        foreach ($this->getAddonManager()->getScanDirs() as $addonType => $scanDirectories) {
+        foreach ($addonManager->getScanDirs() as $addonType => $scanDirectories) {
             foreach ($scanDirectories as $scanDirectory) {
                 $addonDirs = glob($this->vanillaSrcDir."$scanDirectory/*", GLOB_ONLYDIR);
                 foreach ($addonDirs as $subdir) {

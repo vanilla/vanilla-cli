@@ -11,6 +11,7 @@ use \IteratorIterator;
 use \RegexIterator;
 use \Garden\Cli\Args;
 use \Vanilla\Cli\Command\Command;
+use Garden\Container\Container;
 
 /**
  * Class Cli
@@ -20,6 +21,9 @@ use \Vanilla\Cli\Command\Command;
 class Cli {
     private $cli;
     private $commands = [];
+
+    /** @var Container */
+    private $container;
 
     /**
      * Cli constructor.
@@ -39,8 +43,8 @@ class Cli {
         foreach ($commandsIt as $info) {
             $commandName = $commandNameSpace.pathinfo($info[0], PATHINFO_FILENAME);
             if (is_subclass_of($commandName, $commandNameSpace.'Command')) {
-                $command = new $commandName($this->cli);
-                $this->commands[$command->getName()] = $command;
+                $commandName::commandInfo($this->cli);
+                $this->commands[$commandName::getName()] = $commandName;
             }
         }
     }
@@ -52,8 +56,8 @@ class Cli {
      */
     private function dispatch(Args $args) {
             /** @var Command $command */
-            $command = $this->commands[$args->getCommand()];
-            $command->run($args);
+            $command = new $this->commands[$args->getCommand()]($args);
+            $command->run();
     }
 
     /**
