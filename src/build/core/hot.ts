@@ -15,8 +15,8 @@ import devMiddleware from "webpack-dev-middleware";
 import hotMiddleware from "webpack-hot-middleware";
 import HardSourceWebpackPlugin from "hard-source-webpack-plugin";
 
-import { createBaseConfig, getAliasesForRequirements } from "../../library/webpack-utility";
-import { print, printError, getAllCoreBuildEntries, getAllCoreBuildAddons, fail } from "../../library/utility";
+import { createBaseConfig, getAliasesForRequirements } from "../library/webpack-utility";
+import { print, printError, getAllCoreBuildEntries, getAllCoreBuildAddons, fail } from "../library/utility";
 
 /**
  * Build a webpack configuration for a subset of entries.

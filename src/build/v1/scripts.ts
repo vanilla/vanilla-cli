@@ -13,8 +13,8 @@ import stream from "webpack-stream";
 import merge from "webpack-merge";
 import gulp from "gulp";
 import chalk from "chalk";
-import { print, printError } from "../../library/utility";
-import { createBaseConfig } from "../../library/webpack-utility";
+import { print, printError } from "../library/utility";
+import { createBaseConfig } from "../library/webpack-utility";
 
 /**
  * Create the javascript build process.

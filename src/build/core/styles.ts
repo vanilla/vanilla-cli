@@ -5,8 +5,8 @@
 import path from "path";
 import gulp from "gulp";
 import chalk from "chalk";
-import { print } from "../../library/utility";
-import StylesheetBuilder from "../../library/StylesheetBuilder";
+import { print } from "../library/utility";
+import StylesheetBuilder from "../library/StylesheetBuilder";
 
 /**
  * Build the stylesheets and start a watch process if necessary.

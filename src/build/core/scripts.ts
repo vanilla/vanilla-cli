@@ -10,8 +10,8 @@ import glob from "glob";
 import webpack, { Configuration, Stats } from "webpack";
 import merge from "webpack-merge";
 
-import { createBaseConfig, preprocessWebpackExports, getAliasesForRequirements } from "../../library/webpack-utility";
-import { print, printError, fail, getJsonFileForDirectory, camelize } from "../../library/utility";
+import { createBaseConfig, preprocessWebpackExports, getAliasesForRequirements } from "../library/webpack-utility";
+import { print, printError, fail, getJsonFileForDirectory, camelize } from "../library/utility";
 
 /**
  * Run the javascript build process.

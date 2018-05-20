@@ -9,10 +9,10 @@ import livereload from "gulp-livereload";
 import { argv } from "yargs";
 import chalk from "chalk";
 
-import { print, sleep, checkLiveReloadPort } from "../../library/utility";
+import { print, sleep, checkLiveReloadPort } from "../library/utility";
 
 import buildJs from "./scripts";
-import StylesheetBuilder from "../../library/StylesheetBuilder";
+import StylesheetBuilder from "../library/StylesheetBuilder";
 import buildAssets from "./assets";
 
 /**

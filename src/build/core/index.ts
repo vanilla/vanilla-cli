@@ -22,7 +22,7 @@ import {
     spawnChildProcess,
     checkLiveReloadPort,
     getAllCoreBuildAddons,
-} from "../../library/utility";
+} from "../library/utility";
 
 const options = getOptions();
 installNodeModules().then(() => run());

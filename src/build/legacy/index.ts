@@ -8,7 +8,7 @@ import chalk from "chalk";
 import path from "path";
 import fs from "fs";
 import { spawn, exec, SpawnOptions } from "child_process";
-import { print, printError, printVerbose, spawnChildProcess, getJsonFileForDirectory } from "../../library/utility";
+import { print, printError, printVerbose, spawnChildProcess, getJsonFileForDirectory } from "../library/utility";
 
 const options = JSON.parse(argv.options);
 

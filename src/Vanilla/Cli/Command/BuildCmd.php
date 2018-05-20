@@ -17,6 +17,12 @@ use \Vanilla\Cli\CliUtil;
  */
 class BuildCmd extends NodeCommandBase {
 
+    private static $processVersions = [
+        "core",
+        "v1",
+        "legacy",
+    ];
+
     /** @var string  */
     protected $buildToolBaseDirectory;
 
@@ -70,7 +76,7 @@ class BuildCmd extends NodeCommandBase {
             ->opt('skip-prettify:p', "Skip automatic formatting with prettier", false, 'bool')
         ;
 
-        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/Build';
+        $this->buildToolBaseDirectory = $this->toolRealPath.'/src/build';
         $this->dependencyDirectories = [
             $this->toolRealPath,
         ];
@@ -380,20 +386,6 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
-     * Return all of the current build process versions.
-     *
-     * @return array The directory names
-     */
-    protected function getPossibleBuildProcessVersions() {
-        $buildDirectories = glob($this->buildToolBaseDirectory.'/process/*');
-        $validBuildDirectories = [];
-        foreach ($buildDirectories as $directory) {
-            $validBuildDirectories[] = basename($directory);
-        }
-        return $validBuildDirectories;
-    }
-
-    /**
      * Get the directory of the build process to execute.
      *
      * @param string $processVersion The arguments from the CLI.
@@ -402,9 +394,9 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function getBuildProcessDirectory() {
         $processVersion = $this->addonBuildConfigs[0]['process'];
-        $path = $this->buildToolBaseDirectory.'/process/'.$processVersion;
+        $path = $this->buildToolBaseDirectory.'/'.$processVersion;
         if (!\file_exists($path)) {
-            $buildVersions = implode(', ', $this->getPossibleBuildProcessVersions());
+            $buildVersions = implode(', ', $this::$processVersions);
             CliUtil::fail("Could not find build process version $processVersion"
                 ."\n    Available build process versions are"
                 ."\n$buildVersions");
