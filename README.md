@@ -20,7 +20,7 @@ See the [vanilla-cli docs](https://docs.vanillaforums.com/developer/vanilla-cli)
 
 ## Installation
 
-See our [Installation Docs](https://docs.vanillaforums.com/developer/vanilla-cli/installation/) and our [Quickstart Guide](https://docs.vanillaforums.com/developer/vanilla-cli/build-quickstart/).r
+See our [Installation Docs](https://docs.vanillaforums.com/developer/vanilla-cli/installation/) and our [Quickstart Guide](https://docs.vanillaforums.com/developer/vanilla-cli/build-quickstart/).
 
 ## Basic Usage
 
