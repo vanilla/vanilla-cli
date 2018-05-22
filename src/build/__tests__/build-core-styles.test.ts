@@ -1,40 +1,33 @@
-const path = require("path");
-const del = require("del");
-const fs = require("fs");
-const { sleep } = require("../library/utility");
+import path from "path";
+import del from "del";
+import fs from "fs";
+import { sleep } from "../library/utility";
 
-const buildStyles = require("../BuildProcess/core/build-styles");
+import buildStyles from "../core/styles";
 
 const themeDirectory = path.resolve(__dirname, "./fixtures/vanilla/themes/theme");
 const childThemeDirectory = path.resolve(__dirname, "./fixtures/vanilla/themes/child-theme");
 
-/** @type {BuildOptions} */
-const baseOptions = {
+const baseOptions: any = {
     buildOptions: {
         process: "core",
         cssTool: "scss",
     },
     vanillaDirectory: path.resolve(__dirname, "./fixtures/vanilla/"),
     watch: false,
-    verbose: false
+    verbose: false,
 };
 
 describe.only("Integration Tests", () => {
     afterAll(() => {
-        del.sync(
-            [
-                path.join(__dirname, "**/design/**"),
-            ]
-        );
+        del.sync([path.join(__dirname, "**/design/**")]);
     });
 
     describe("Standalone Theme", () => {
-        beforeAll((done) => {
+        beforeAll(done => {
             const options = {
                 ...baseOptions,
-                rootDirectories: [
-                    themeDirectory,
-                ],
+                rootDirectories: [themeDirectory],
             };
 
             return buildStyles(options, () => done());
@@ -61,13 +54,10 @@ describe.only("Integration Tests", () => {
     });
 
     describe("Child Theme", () => {
-        beforeAll((done) => {
+        beforeAll(done => {
             const options = {
                 ...baseOptions,
-                rootDirectories: [
-                    childThemeDirectory,
-                    themeDirectory,
-                ],
+                rootDirectories: [childThemeDirectory, themeDirectory],
             };
 
             return buildStyles(options, () => done());
@@ -95,7 +85,7 @@ describe.only("Integration Tests", () => {
         it("Does not contain overriden variables", () => {
             const outputContents = fs.readFileSync(path.join(childThemeDirectory, "design/custom.css"), "utf8");
             expect(outputContents.includes("DEFAULT_VARIABLE")).not.toBe(true);
-        })
+        });
 
         it("includes a custom partial from the child theme", () => {
             const outputContents = fs.readFileSync(path.join(childThemeDirectory, "design/custom.css"), "utf8");
@@ -103,6 +93,5 @@ describe.only("Integration Tests", () => {
 
             expect(partialRegex.test(outputContents)).toBe(true);
         });
-
     });
 });

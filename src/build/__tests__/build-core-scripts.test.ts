@@ -3,34 +3,28 @@
  * @license MIT
  */
 
-const path = require("path");
-const del = require("del");
-const glob = require("glob-promise");
-const fs = require("fs");
-const mock = require("mock-fs");
+import path from "path";
+import del from "del";
+import glob from "glob-promise";
+import fs from "fs";
+import mock from "mock-fs";
+import buildScripts, { getManifestPathsForDirectory, isValidEntryPoint } from "../core/scripts";
 
 const skipCleanup = process.env.NO_CLEANUP || false;
-
-const buildScripts = require("../BuildProcess/core/build-scripts");
 
 // Fixtures
 const coreAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla");
 const dashboardAddonDirectory = path.resolve(__dirname, "./fixtures/vanilla/applications/dashboard");
 
-/**
- * @type {BuildOptions}
- */
-const baseOptions = {
+const baseOptions: any = {
     buildOptions: {
         process: "core",
-        cssTool: "scss"
+        cssTool: "scss",
     },
     vanillaDirectory: path.resolve(__dirname, "./fixtures/vanilla/"),
     watch: false,
     verbose: false,
-    enabledAddonKeys: [
-        "dashboard",
-    ]
+    enabledAddonKeys: ["dashboard"],
 };
 
 function buildCoreWithOptions() {
@@ -38,25 +32,25 @@ function buildCoreWithOptions() {
     options.addonKey = "core";
     options.buildOptions.entries = {
         app: "./src/scripts/core.js",
-        admin: "./src/scripts/core-admin.js"
+        admin: "./src/scripts/core-admin.js",
     };
     options.buildOptions.exports = {
         app: ["./src/scripts/garden.js", "react"],
-        admin: ["./src/scripts/garden.js", "react"]
+        admin: ["./src/scripts/garden.js", "react"],
     };
     options.rootDirectories = [coreAddonDirectory];
     options.requiredDirectories = [coreAddonDirectory];
 
-    return buildScripts.run(options);
+    return buildScripts(options);
 }
 
 /**
  * If this fails, it is likely that babel is not being run on the source files and webpack
  * is attempting to bundle them without babel.
  *
- * @param {string} filePath - The file path to check.
+ * @param filePath - The file path to check.
  */
-function veryifyBabelTranspilationForFile(filePath) {
+function veryifyBabelTranspilationForFile(filePath: string) {
     const badParseString = "Module parse failed";
     const featureThatShouldBeTranspiled = "{...";
     const outputContents = fs.readFileSync(filePath, "utf8");
@@ -66,15 +60,15 @@ function veryifyBabelTranspilationForFile(filePath) {
 
 describe("Integration tests", () => {
     afterAll(() => {
-        if (skipCleanup) return;
+        if (skipCleanup) {
+            return;
+        }
 
-        return del.sync(
-            [
-                path.resolve(dashboardAddonDirectory, "js"),
-                path.resolve(coreAddonDirectory, "js"),
-                path.resolve(coreAddonDirectory, "manifests")
-            ]
-        );
+        return del.sync([
+            path.resolve(dashboardAddonDirectory, "js"),
+            path.resolve(coreAddonDirectory, "js"),
+            path.resolve(coreAddonDirectory, "manifests"),
+        ]);
     });
 
     function coreAssertions() {
@@ -93,15 +87,18 @@ describe("Integration tests", () => {
         it("generates manifest files for all `exports` in addon.json", () => {
             expect(fs.existsSync(path.join(coreAddonDirectory, "manifests/admin-manifest.json"))).toBe(true);
             expect(fs.existsSync(path.join(coreAddonDirectory, "manifests/app-manifest.json"))).toBe(true);
-        })
+        });
 
         test("The core lib bundle contains the string from the react stub", () => {
             // Final bundles should not contain react in them.
-            const outputContents = fs.readFileSync(path.join(coreAddonDirectory, "js/admin/lib-core-admin.min.js"), "utf8");
+            const outputContents = fs.readFileSync(
+                path.join(coreAddonDirectory, "js/admin/lib-core-admin.min.js"),
+                "utf8",
+            );
             expect(outputContents).toContain("REACT_STRING");
         });
 
-        it("generates entry bundles for all 'entries' in addon.json", async function() {
+        it("generates entry bundles for all 'entries' in addon.json", async () => {
             expect(fs.existsSync(path.join(coreAddonDirectory, "js/admin/core-admin.min.js"))).toBe(true);
             expect(fs.existsSync(path.join(coreAddonDirectory, "js/app/core-app.min.js"))).toBe(true);
         });
@@ -126,7 +123,7 @@ describe("Integration tests", () => {
          */
         it("parses scripts with babel", () => {
             veryifyBabelTranspilationForFile(path.join(coreAddonDirectory, "js/admin/core-admin.min.js"));
-        })
+        });
     }
 
     describe("builds the core javascript", coreAssertions);
@@ -136,16 +133,16 @@ describe("Integration tests", () => {
         const outputFilename = "app/dashboard-app.min.js";
 
         beforeAll(() => {
-            const options = {...baseOptions };
+            const options = { ...baseOptions };
             options.addonKey = "dashboard";
             options.buildOptions.entries = {
-                app: "./src/scripts/index.js"
+                app: "./src/scripts/index.js",
             };
             options.buildOptions.exports = {};
             options.rootDirectories = [dashboardAddonDirectory];
             options.requiredDirectories = [coreAddonDirectory];
 
-            return buildScripts.run(options);
+            return buildScripts(options);
         });
 
         it("Does not generate any 'lib' bundles", () => {
@@ -170,11 +167,11 @@ describe("Integration tests", () => {
         it("finds all of the modules required from the core library", () => {
             const outputContents = fs.readFileSync(path.join(dashboardAddonDirectory, `js/${outputFilename}`), "utf8");
             expect(outputContents).not.toContain("MODULE_NOT_FOUND");
-        })
+        });
 
         it("parses scripts with babel", () => {
             veryifyBabelTranspilationForFile(path.join(dashboardAddonDirectory, "js/app/dashboard-app.min.js"));
-        })
+        });
     });
 });
 
@@ -194,12 +191,12 @@ describe("function unit tests", () => {
                 [file1]: "",
                 [file2]: "",
                 [invalidFile]: "",
-                [nestedFile]: ""
+                [nestedFile]: "",
             });
         });
 
         it("finds only the 3 valid manifests", () => {
-            const manifestPaths = buildScripts.getManifestPathsForDirectory("/test");
+            const manifestPaths = getManifestPathsForDirectory("/test");
             expect(manifestPaths).toContain(file1);
             expect(manifestPaths).toContain(file2);
             expect(manifestPaths).toContain(nestedFile);
@@ -210,33 +207,33 @@ describe("function unit tests", () => {
     describe("isValidEntryPoint", () => {
         it("Accepts an object of string => string", () => {
             const input = {
-                "string": "string"
+                string: "string",
             };
-            expect(buildScripts.isValidEntryPoint(input)).toBe(true);
-        })
+            expect(isValidEntryPoint(input)).toBe(true);
+        });
 
         it("Accepts an object of string => string[]", () => {
             const input = {
-                "string": ["string", "string"]
+                string: ["string", "string"],
             };
-            expect(buildScripts.isValidEntryPoint(input)).toBe(true);
-        })
+            expect(isValidEntryPoint(input)).toBe(true);
+        });
 
         it("Accepts an array of strings", () => {
-            const input = ["string"];
-            expect(buildScripts.isValidEntryPoint(input)).toBe(true);
-        })
+            const input: any = ["string"];
+            expect(isValidEntryPoint(input)).toBe(true);
+        });
 
         it("Accepts an array of strings", () => {
-            const input = ["string"];
-            expect(buildScripts.isValidEntryPoint(input)).toBe(true);
-        })
+            const input: any = ["string"];
+            expect(isValidEntryPoint(input)).toBe(true);
+        });
 
         it("Rejects empty objects and arrays", () => {
             const emptyObject = {};
-            const emptyArray = [];
-            expect(buildScripts.isValidEntryPoint(emptyObject)).toBe(false);
-            expect(buildScripts.isValidEntryPoint(emptyArray)).toBe(false);
-        })
-    })
+            const emptyArray: any = [];
+            expect(isValidEntryPoint(emptyObject)).toBe(false);
+            expect(isValidEntryPoint(emptyArray)).toBe(false);
+        });
+    });
 });

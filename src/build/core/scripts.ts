@@ -50,7 +50,7 @@ export default async function run(options: ICliOptions) {
  * @param directory - The directory search through.
  * @throws If an error is encountered while looking for files.
  */
-function getManifestPathsForDirectory(directory: string): string[] {
+export function getManifestPathsForDirectory(directory: string): string[] {
     try {
         return glob.sync(path.join(directory, "manifests/**/*-manifest.json"));
     } catch (err) {
@@ -133,7 +133,7 @@ function createExportConfigs(primaryDirectory: string, options: ICliOptions): Co
 /**
  * Validate an entry point.
  */
-function isValidEntryPoint(entry: IBuildEntries | IBuildExports) {
+export function isValidEntryPoint(entry: IBuildEntries | IBuildExports) {
     if (Array.isArray(entry) && entry.length > 0) {
         return true;
     }
@@ -152,7 +152,7 @@ function isValidEntryPoint(entry: IBuildEntries | IBuildExports) {
  * @param primaryDirectory - The main addon directory.
  * @param options - The options passed from the PHP process.
  */
-function createEntriesConfig(primaryDirectory: string, options: ICliOptions): Configuration[] {
+export function createEntriesConfig(primaryDirectory: string, options: ICliOptions): Configuration[] {
     const baseConfig = createBaseConfig(primaryDirectory, options);
     const { entries } = options.buildOptions;
     const directories = [...options.requiredDirectories, ...options.rootDirectories];

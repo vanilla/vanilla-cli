@@ -1,0 +1,8 @@
+.imported-selector {
+  content: ""; }
+
+.test {
+  content: "DEFAULT_VARIABLE";
+  content: "NOT_OVERRIDABLE_VARIBALE"; }
+
+/*# sourceMappingURL=custom.css.map */

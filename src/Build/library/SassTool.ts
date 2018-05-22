@@ -57,7 +57,7 @@ export default class SassTool {
      *
      * @return The new contents of a file.
      */
-    public swapPlaceholders(content: string, entryFilePath: string): string {
+    public swapPlaceholders = (content: string, entryFilePath: string): string => {
         const placeholderRegex = /\/\*\*\s*@vanilla-cli-placeholder:\s*([^\s]*)\s*\*\*\//g;
 
         const replacedText = content.replace(placeholderRegex, (match, captureGroup1) => {
@@ -80,7 +80,7 @@ export default class SassTool {
         });
 
         return replacedText;
-    }
+    };
 
     /**
      * Attempt to resolve a file in potentially multiple addon directories.
