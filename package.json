@@ -84,7 +84,7 @@
         "ts-jest": "^22.4.6"
     },
     "scripts": {
-        "test": "jest",
+        "test": "jest --no-cache",
         "test:watch": "jest --watch",
         "test:dirty": "cross-env NO_CLEANUP=true jest"
     },
