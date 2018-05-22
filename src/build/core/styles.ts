@@ -17,9 +17,5 @@ import StylesheetBuilder from "../library/StylesheetBuilder";
 export default function buildStyles(options: ICliOptions, callback?: () => void) {
     gulp.task("build", new StylesheetBuilder(options).compiler);
 
-    if (callback) {
-        gulp.on("task_stop", callback);
-    }
-
-    gulp.start("build");
+    gulp.start("build", callback);
 }
