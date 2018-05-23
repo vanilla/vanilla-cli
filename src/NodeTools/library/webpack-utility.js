@@ -235,13 +235,24 @@ function mergeTypescriptConfig(options, config, includedFiles) {
  *
  * @returns {Object}
  */
-function preprocessWebpackExports(exports) {
-    if (!("*" in exports)) {
-        return exports;
-    }
-
+function preprocessWebpackExports(exports, addonDirectory) {
     const star = exports["*"];
     const output = {};
+
+    const expandGlobs = (items) => {
+        const newItems = [];
+
+        items.forEach(item => {
+            if (!item.includes("*")) {
+                newItems.push(item);
+            }
+
+            const resolvedPath = path.join(addonDirectory, item);
+            newItems.concat(glob.sync(resolvedPath));
+        });
+
+        return newItems;
+    };
 
     for (const [key, value] of Object.entries(exports)) {
         if (key === "*") {
@@ -249,12 +260,15 @@ function preprocessWebpackExports(exports) {
         }
 
         output[key] = [
-            ...star,
-            ...value,
+            ...expandGlobs(star),
+            ...expandGlobs(value),
         ];
     }
 
-    return output;
+    exports = output;
+
+
+    return exports;
 }
 
 /**
@@ -274,11 +288,9 @@ function getAliasesForRequirements(options, forceAll = false) {
         return path.basename(dir);
     })
 
-    allowedKeys.push("vanilla", "dashboard", "core");
+    allowedKeys.push("vanilla", "dashboard");
 
-    const result = {
-        '@core': path.resolve(vanillaDirectory, 'src/scripts'),
-    };
+    const result = {};
     ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
         const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
 

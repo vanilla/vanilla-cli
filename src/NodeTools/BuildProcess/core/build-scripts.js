@@ -98,7 +98,7 @@ async function createExportsConfig(primaryDirectory, options) {
         return;
     }
 
-    exports = preprocessWebpackExports(exports);
+    exports = preprocessWebpackExports(exports, primaryDirectory);
 
     // Remove this addon's libraries so it doesn't build it's own exports against it's own exports
     const self = options.rootDirectories[0];
@@ -241,11 +241,7 @@ function addonUsesCoreBuildProcess(directory) {
  * @param {BuildOptions} options
  */
 function getChunkPublicPath(options) {
-    const { addonKey } = options;
-    let basePath = (addonKey === "core") ? "" : `themes/${addonKey}/`;
-
-    const path = getPathFromVanillaRoot(options) + `js/`
-    return path;
+    return getPathFromVanillaRoot(options) + `js/`;
 }
 
 /**
@@ -254,7 +250,7 @@ function getChunkPublicPath(options) {
  * @param {BuildOptions} options
  */
 function getPathFromVanillaRoot(options) {
-    const { addonKey, rootDirectories, vanillaDirectory } = options;
+    const { rootDirectories, vanillaDirectory } = options;
     const root = rootDirectories[0].replace(vanillaDirectory, '/').replace("//", "/");
     if (root.endsWith("/")) {
         return root;

@@ -63,13 +63,40 @@ class CliUtil {
             $addonJson = json_decode(file_get_contents($addonJsonPath), true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                CliUtil::write("\n\nThere were some issues parsing your addon.json file. Please ensure that it is valid JSON");
-                CliUtil::fail("\nError Type: ".json_last_error_msg());
+                self::write("\n\nThere were some issues parsing your addon.json file. Please ensure that it is valid JSON");
+                self::fail("\nError Type: ".json_last_error_msg());
             }
 
             return $addonJson;
-        } else {
-            CliUtil::fail("No addon.json file was found. Make sure that you are in an addon's directory");
         }
+        self::fail("No addon.json file was found. Make sure that you are in an addon's directory");
+    }
+
+    /**
+     * Resolve the file path of an addon inside of vanilla.
+     *
+     * This is because we need a path inside of Vanilla, but some shells like fish automatically
+     * resolve symlinks. Many addons are symlinked into a vanilla for installation.
+     *
+     * @param string $vanillaRootDir The vanilla root directory.
+     * @param string $addonKey The key of the addon to lookup.
+     *
+     * @return string|null The resolved addonPath.
+     */
+    public static function resolveAddonLocationInVanilla($vanillaRootDir, $addonKey) {
+        $possiblePaths = [
+            $vanillaRootDir.'/addons/'.$addonKey,
+            $vanillaRootDir.'/applications/'.$addonKey,
+            $vanillaRootDir.'/plugins/'.$addonKey,
+            $vanillaRootDir.'/themes/'.$addonKey,
+        ];
+
+        foreach($possiblePaths as $path) {
+            if (\file_exists($path)) {
+                return $path;
+            }
+        }
+
+        self::fail("Could not find required addon $addonKey in your vanilla source directory ".$vanillaRootDir);
     }
 }
