@@ -10,6 +10,7 @@ const merge = require("webpack-merge");
 const babelPreset = require("@vanillaforums/babel-preset");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const PrettierPlugin = require("prettier-webpack-plugin");
+const glob = require("glob");
 const HappyPack = require('happypack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const chalk = require("chalk").default;
