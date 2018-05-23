@@ -197,10 +197,8 @@ function getAllCoreBuildAddons(options) {
         return cachedCoreBuildAddons;
     }
 
-    const addonJsonPaths = glob.sync(path.join(vanillaDirectory, "**/addon.json"));
-    addonJsonPaths.unshift(path.join(vanillaDirectory, "addon.json"));
-
-    cachedCoreBuildAddons = addonJsonPaths
+    cachedCoreBuildAddons =  glob
+        .sync(path.join(vanillaDirectory, "**/addon.json"))
         .filter(addonJsonPath => {
             const directory = path.dirname(addonJsonPath);
             const addonJson = getJsonFileForDirectory(directory, "addon");
@@ -214,10 +212,6 @@ function getAllCoreBuildAddons(options) {
         .map(path.dirname)
         .filter((item, index, self) => self.indexOf(item) == index)
         .filter(addonPath => {
-            if (addonPath === vanillaDirectory) {
-                return true;
-            }
-
             const addonKey = path.basename(addonPath);
 
             if (options.enabledAddonKeys.includes(addonKey)) {
@@ -226,6 +220,8 @@ function getAllCoreBuildAddons(options) {
                 return false;
             }
         });
+
+    cachedCoreBuildAddons.unshift(options.vanillaDirectory);
 
     return cachedCoreBuildAddons;
 }
@@ -242,6 +238,9 @@ function getAllCoreBuildEntries(options) {
     const coreBuildEntries = [];
 
     coreAddonPaths.forEach(coreAddonPath => {
+        if (!fs.existsSync(path.join(coreAddonPath, "addon.json"))) {
+            return;
+        }
         const addonJson = getJsonFileForDirectory(coreAddonPath, "addon");
         const {entries} = addonJson.build;
 

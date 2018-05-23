@@ -80,7 +80,7 @@ class BuildCmd extends NodeCommandBase {
     /**
      * @inheritdoc
      */
-    public final function run(Args $args) {
+    final public function run(Args $args) {
         parent::run($args);
 
         $this->setBuildOptionsFromArgs($args);
@@ -96,7 +96,7 @@ class BuildCmd extends NodeCommandBase {
             'hot' => $this->hot,
             'section' => $this->section,
             'vanillaDirectory' => $this->vanillaSrcDir,
-            'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
+            'addonKey' => $this->hot ? "dashboard" : CliUtil::getAddonJsonForDirectory(getcwd())["key"],
             'enabledAddonKeys' => $this->getEnabledAddonKeys(),
             'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
         ];
@@ -114,7 +114,8 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function setAddonJsonBuildOptions($rootDirectory = null) {
         if (!$rootDirectory) {
-            $rootDirectory = getcwd();
+            // Hot builds start are rooted in the dashboard addon (vanilla's core).
+            $rootDirectory = $this->hot ? $this->resolveAddonLocationInVanilla("dashboard") : getcwd();
         } else {
             $rootDirectory = $this->resolveAddonLocationInVanilla(basename($rootDirectory));
         }
@@ -129,7 +130,7 @@ class BuildCmd extends NodeCommandBase {
         $logger = $logger->setDateFormat('');
 
         // Add the addon root directory to the list.
-        array_push($this->addonRootDirectories, $rootDirectory);
+        $this->addonRootDirectories[] = $rootDirectory;
 
         if (!array_key_exists('build', $addonJson) && !array_key_exists('buildProcessVersion', $addonJson)) {
             return;
@@ -159,7 +160,7 @@ class BuildCmd extends NodeCommandBase {
         }
 
         $buildConfig = array_merge($this->defaultConfigurationOptions, $addonJson['build']);
-        array_push($this->addonBuildConfigs, $buildConfig);
+        $this->addonBuildConfigs[] = $buildConfig;
 
         // Recursively fetch any parents if they exist.
         if (array_key_exists('parent', $addonJson)) {
@@ -209,6 +210,7 @@ class BuildCmd extends NodeCommandBase {
     }
 
     /**
+     * TODO: Replace this with calls to our addon manager.
      * Get the keys of enabled themes, plugins, and applications.
      *
      * @return array
@@ -254,8 +256,8 @@ class BuildCmd extends NodeCommandBase {
      */
     protected function setDefaultBuildOptions() {
         if (count($this->addonBuildConfigs) === 0) {
-            array_push($this->addonBuildConfigs, $this->defaultConfigurationOptions);
-            array_push($this->addonRootDirectories, getcwd());
+            $this->addonBuildConfigs[] = $this->defaultConfigurationOptions;
+            $this->addonRootDirectories[] = getcwd();
         }
     }
 
@@ -266,8 +268,6 @@ class BuildCmd extends NodeCommandBase {
      * - that csstool is v1 only.
      * - Maps `process` 1.0 -> v1.
      * - Check if the addon has a less folder but no cssTool specified.
-     *
-     * @param Args $args
      */
     protected function validateBuildOptions() {
         $requiredIdenticalKeys = [
@@ -346,13 +346,6 @@ class BuildCmd extends NodeCommandBase {
             : [];
 
         $requiredDirectories = [];
-
-        if (\file_exists($this->vanillaSrcDir.'/addon.json')) {
-            $requiredDirectories[] = $this->vanillaSrcDir;
-        } else {
-            CliUtil::warn("WARNING: No core javascript base was found. Special module resolution like @core, @vanilla, and @dashboard will not work.");
-        }
-
         foreach($requirements as $requirement) {
             $requiredDirectories[] = $this->resolveAddonLocationInVanilla($requirement);
         }
