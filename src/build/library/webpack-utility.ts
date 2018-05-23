@@ -223,20 +223,12 @@ function mergeTypescriptConfig(options: ICliOptions, config: Configuration, incl
  *
  * @param exports - The exports to transform.
  */
-<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
-function preprocessWebpackExports(exports, addonDirectory) {
-=======
-export function preprocessWebpackExports(exports: IBuildExports) {
-    if (!("*" in exports)) {
-        return exports;
-    }
-
->>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
+export function preprocessWebpackExports(exports: IBuildExports, addonDirectory: string) {
     const star = exports["*"];
     const output: any = {};
 
-    const expandGlobs = (items) => {
-        const newItems = [];
+    const expandGlobs = (items: string[]) => {
+        const newItems: string[] = [];
 
         items.forEach(item => {
             if (!item.includes("*")) {
@@ -255,18 +247,10 @@ export function preprocessWebpackExports(exports: IBuildExports) {
             continue;
         }
 
-<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
-        output[key] = [
-            ...expandGlobs(star),
-            ...expandGlobs(value),
-        ];
-=======
-        output[key] = [...star, ...value];
->>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
+        output[key] = [...expandGlobs(star), ...expandGlobs(value)];
     }
 
     exports = output;
-
 
     return exports;
 }
@@ -291,15 +275,8 @@ export function getAliasesForRequirements(options: ICliOptions, forceAll = false
 
     allowedKeys.push("vanilla", "dashboard");
 
-<<<<<<< HEAD:src/NodeTools/library/webpack-utility.js
-    const result = {};
-    ['applications', 'addons', 'plugins', 'themes'].forEach(topDirectory => {
-=======
-    const result: { [key: string]: string } = {
-        "@core": path.resolve(vanillaDirectory, "src/scripts"),
-    };
+    const result: any = {};
     ["applications", "addons", "plugins", "themes"].forEach(topDirectory => {
->>>>>>> Convert to typescript:src/Build/library/webpack-utility.ts
         const fullTopDirectory = path.join(vanillaDirectory, topDirectory);
 
         if (fs.existsSync(fullTopDirectory)) {

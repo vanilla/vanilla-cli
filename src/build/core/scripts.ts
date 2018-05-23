@@ -211,29 +211,16 @@ function addonUsesCoreBuildProcess(directory: string) {
  *
  * @param options
  */
-<<<<<<< HEAD:src/NodeTools/BuildProcess/core/build-scripts.js
-function getChunkPublicPath(options) {
-=======
 function getChunkPublicPath(options: ICliOptions) {
-    const { addonKey } = options;
-    const basePath = addonKey === "core" ? "" : `themes/${addonKey}/`;
-
->>>>>>> Convert to typescript:src/Build/process/core/scripts.ts
     return getPathFromVanillaRoot(options) + `js/`;
 }
 
 /**
  * Get the base path for the requiring dynamic chunks.
  */
-<<<<<<< HEAD:src/NodeTools/BuildProcess/core/build-scripts.js
-function getPathFromVanillaRoot(options) {
-    const { rootDirectories, vanillaDirectory } = options;
-    const root = rootDirectories[0].replace(vanillaDirectory, '/').replace("//", "/");
-=======
 function getPathFromVanillaRoot(options: ICliOptions) {
-    const { addonKey, rootDirectories, vanillaDirectory } = options;
+    const { rootDirectories, vanillaDirectory } = options;
     const root = rootDirectories[0].replace(vanillaDirectory, "/").replace("//", "/");
->>>>>>> Convert to typescript:src/Build/process/core/scripts.ts
     if (root.endsWith("/")) {
         return root;
     } else {
