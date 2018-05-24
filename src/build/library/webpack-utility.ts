@@ -228,7 +228,7 @@ export function preprocessWebpackExports(exports: IBuildExports, addonDirectory:
     const output: any = {};
 
     const expandGlobs = (items: string[]) => {
-        const newItems: string[] = [];
+        let newItems: string[] = [];
 
         items.forEach(item => {
             if (!item.includes("*")) {
@@ -236,7 +236,7 @@ export function preprocessWebpackExports(exports: IBuildExports, addonDirectory:
             }
 
             const resolvedPath = path.join(addonDirectory, item);
-            newItems.concat(glob.sync(resolvedPath));
+            newItems = newItems.concat(glob.sync(resolvedPath));
         });
 
         return newItems;
@@ -250,9 +250,7 @@ export function preprocessWebpackExports(exports: IBuildExports, addonDirectory:
         output[key] = [...expandGlobs(star), ...expandGlobs(value)];
     }
 
-    exports = output;
-
-    return exports;
+    return output;
 }
 
 /**
