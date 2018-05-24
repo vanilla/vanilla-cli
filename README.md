@@ -63,7 +63,6 @@ Some of the node.js build processes have unit and integration tests. Be sure tha
 The NodeTools tests are run using [jest](https://facebook.github.io/jest/).
 
 ```bash
-$ cd src/NodeTools
 $ yarn install
 
 $ yarn test
@@ -72,7 +71,7 @@ $ yarn test --watch
 ```
 
 ## Debugging
-During local development you main want to run a debugger. This is supported for the primary PHP process.
+During local development you may want to run a debugger. This is supported for the primary PHP process.
 
 ### PHP
 
