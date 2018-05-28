@@ -14,8 +14,7 @@ import StylesheetBuilder from "../library/StylesheetBuilder";
  * @param options - The Options passed from PHP
  * @param callback - A callback to be called when the event is build is finished.
  */
-export default function buildStyles(options: ICliOptions, callback?: () => void) {
+export default function buildStyles(options: ICliOptions, callback: () => void = () => {}) {
     gulp.task("build", new StylesheetBuilder(options).compiler);
-
     gulp.start("build", callback);
 }
