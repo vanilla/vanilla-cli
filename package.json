@@ -1,6 +1,6 @@
 {
     "name": "vanilla-cli",
-    "version": "2.7a-1",
+    "version": "2.7a-2",
     "private": true,
     "description": "Node.js tooling for the Vanilla Cli.",
     "repository": "https://github.com/vanilla/vanilla-cli",
@@ -35,7 +35,7 @@
         "gulp-size": "2.1.0",
         "gulp-sourcemaps": "2.6.4",
         "happypack": "5.0.0",
-        "hard-source-webpack-plugin": "0.7.2",
+        "hard-source-webpack-plugin": "0.7.4",
         "html-loader": "0.5.5",
         "imagemin-pngquant": "5.1.0",
         "node-sass": "4.9.0",
