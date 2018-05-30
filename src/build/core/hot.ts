@@ -57,7 +57,7 @@ function buildConfigForSection(entries: IBuildEntries | IBuildExports, sectionKe
             new HardSourceWebpackPlugin({
                 // Either an absolute path or relative to webpack's options.context.
                 cacheDirectory: path.normalize(
-                    path.join(__dirname, "../../node_modules/.cache/hard-source/[confighash]"),
+                    path.join(__dirname, "../../../node_modules/.cache/hard-source/[confighash]"),
                 ),
             }),
             new webpack.HotModuleReplacementPlugin(),
