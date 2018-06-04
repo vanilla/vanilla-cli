@@ -11,6 +11,7 @@ interface ICliOptions {
     watch: boolean;
     verbose: boolean;
     hot: boolean;
+    hotReloadIP: string;
     section: string;
     enabledAddonKeys: string[];
     skipPrettify: boolean;
