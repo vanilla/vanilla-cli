@@ -48,7 +48,7 @@ function buildConfigForSection(entries: IBuildEntries | IBuildExports, sectionKe
         output: {
             filename: `${sectionKey}-hot-bundle.js`,
             chunkFilename: `[name]-${sectionKey}-hot-chunk.js`,
-            publicPath: "http://127.0.0.1:3030/",
+            publicPath: `http://${options.hotReloadIP}:3030/`,
         },
         resolve: {
             alias: getAliasesForRequirements(options, true),
@@ -106,7 +106,7 @@ export default function run(options: ICliOptions) {
 
         app.use(
             devMiddleware(compiler, {
-                publicPath: "http://127.0.0.1:3030/",
+                publicPath: `http://${options.hotReloadIP}:3030/`,
                 stats: {
                     chunks: false, // Makes the build much quieter
                     modules: false,
@@ -118,7 +118,7 @@ export default function run(options: ICliOptions) {
         app.use(hotMiddleware(compiler));
 
         app.listen(3030, () => {
-            print("Dev server listening on port 3030.");
+            print(`Dev server listening on port ${options.hotReloadIP}:3030.`);
 
             print(
                 "Complete hot reload setup by adding the following to your vanilla config file.\n" +

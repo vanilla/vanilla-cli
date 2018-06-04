@@ -51,6 +51,9 @@ class BuildCmd extends NodeCommandBase {
     /** @var boolean Whether or not to run in hot mode. */
     private $hot = false;
 
+    /** @var string The IP to run the hot reload server on. */
+    private $hotReloadIP;
+
     /** @var string|null A section of entries to filter the hot process by. */
     private $section = null;
 
@@ -59,6 +62,8 @@ class BuildCmd extends NodeCommandBase {
 
     /** @var array An array of realpaths to roots of addons being built. */
     private $addonRootDirectories = [];
+
+    private $enabledAddonKeys = [];
 
     /**
      * BuildCmd constructor.
@@ -89,6 +94,7 @@ class BuildCmd extends NodeCommandBase {
         parent::run($args);
 
         $this->setBuildOptionsFromArgs($args);
+        $this->getVanillaConfigValues();
         $this->setAddonJsonBuildOptions();
         $this->setDefaultBuildOptions();
         $this->validateBuildOptions();
@@ -99,10 +105,11 @@ class BuildCmd extends NodeCommandBase {
             'requiredDirectories' => $this->getRequiredAddonDirectories(),
             'watch' => $this->watch,
             'hot' => $this->hot,
+            'hotReloadIP' => $this->hotReloadIP,
             'section' => $this->section,
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => $this->hot ? "dashboard" : CliUtil::getAddonJsonForDirectory(getcwd())["key"],
-            'enabledAddonKeys' => $this->getEnabledAddonKeys(),
+            'enabledAddonKeys' => $this->enabledAddonKeys,
             'skipPrettify' => $args->getOpt('skip-prettify') ?: false,
         ];
 
@@ -220,7 +227,7 @@ class BuildCmd extends NodeCommandBase {
      *
      * @return array
      */
-    protected function getEnabledAddonKeys() {
+    protected function getVanillaConfigValues() {
         $configPath = $this->vanillaSrcDir.'/conf/'.$this->configName;
         $configDefaultsPath = $this->vanillaSrcDir.'/conf/config-defaults.php';
         if (!file_exists($configPath)) {
@@ -251,7 +258,8 @@ class BuildCmd extends NodeCommandBase {
             $result[] = $Configuration["Garden"]["Theme"];
         }
 
-        return $result;
+        $this->enabledAddonKeys = $result;
+        $this->hotReloadIP = valr("HotReload.IP", $Configuration, "127.0.0.1");
     }
 
     /**
