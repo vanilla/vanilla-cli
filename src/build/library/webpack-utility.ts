@@ -236,7 +236,7 @@ export function preprocessWebpackExports(exports: IBuildExports, addonDirectory:
             }
 
             const resolvedPath = path.join(addonDirectory, item);
-            newItems = newItems.concat(glob.sync(resolvedPath));
+            newItems = newItems.concat(glob.sync(resolvedPath).filter(globItem => !globItem.match(/\.test\./)));
         });
 
         return newItems;
