@@ -262,12 +262,10 @@ export function preprocessWebpackExports(exports: IBuildExports, addonDirectory:
  * @param forceAll - Force the function to make aliases for every single addon.
  */
 export function getAliasesForRequirements(options: ICliOptions, forceAll = false) {
-    const { vanillaDirectory, requiredDirectories } = options;
-    if (!requiredDirectories) {
-        return {};
-    }
+    const { vanillaDirectory, requiredDirectories, rootDirectories } = options;
+    const allDirectories = [...requiredDirectories, ...rootDirectories];
 
-    const allowedKeys = requiredDirectories.map(dir => {
+    const allowedKeys = allDirectories.map(dir => {
         return path.basename(dir);
     });
 
