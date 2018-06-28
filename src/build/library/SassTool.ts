@@ -9,7 +9,7 @@ import chalk from "chalk";
 import { print, printVerbose, printError } from "./utility";
 
 export default class SassTool {
-    constructor(private sourceDirectories: string[]) {}
+    constructor(private sourceDirectories: string[], private vanillaDirectory: string) {}
 
     /**
      * Create a custom Sass importer to search node modules folder with ~ prefix.
@@ -19,7 +19,7 @@ export default class SassTool {
      * @param prev - The previous filepath.
      * @param {function} done - Completion callback.
      */
-    public importer(
+    public importer = (
         url: string,
         prev: string,
         done: (
@@ -27,13 +27,17 @@ export default class SassTool {
                 file: string;
             },
         ) => void,
-    ) {
+    ) => {
         const nodeModuleRegex = /^~/;
         const cssHttpImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
+        const scssRegex = /^@dashboard/;
 
         let trueFilePath = "";
 
-        if (url.match(cssHttpImportRegex)) {
+        if (url.match(scssRegex)) {
+            trueFilePath = url.replace(scssRegex, path.join(this.vanillaDirectory, "applications/dashboard"));
+            printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
+        } else if (url.match(cssHttpImportRegex)) {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
             trueFilePath = `'${url}'`;
         } else if (url.match(nodeModuleRegex)) {
@@ -44,7 +48,7 @@ export default class SassTool {
         }
 
         return done({ file: trueFilePath });
-    }
+    };
 
     /**
      * Swap any placeholders comments in an SCSS file imports.
