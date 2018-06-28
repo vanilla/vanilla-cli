@@ -30,12 +30,12 @@ export default class SassTool {
     ) => {
         const nodeModuleRegex = /^~/;
         const cssHttpImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
-        const scssRegex = /^@vanilla-root/;
+        const scssRegex = /^@dashboard/;
 
         let trueFilePath = "";
 
         if (url.match(scssRegex)) {
-            trueFilePath = url.replace(scssRegex, this.vanillaDirectory);
+            trueFilePath = url.replace(scssRegex, path.join(this.vanillaDirectory, "applications/dashboard"));
             printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else if (url.match(cssHttpImportRegex)) {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
