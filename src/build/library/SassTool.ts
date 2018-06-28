@@ -35,7 +35,7 @@ export default class SassTool {
         let trueFilePath = "";
 
         if (url.match(scssRegex)) {
-            trueFilePath = url.replace(scssRegex, path.join(this.vanillaDirectory, "applications/dashboard"));
+            trueFilePath = url.replace(scssRegex, path.join(this.vanillaDirectory, "applications/dashboard/scss"));
             printVerbose(`Mapping request SCSS import ${chalk.yellow(url)} to ${trueFilePath}`);
         } else if (url.match(cssHttpImportRegex)) {
             // Ensure the file name is wrapped in quotes or we'll break the native css @import
