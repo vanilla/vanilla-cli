@@ -21,7 +21,7 @@ export default class StylesheetBuilder {
     private sassTool: SassTool;
     constructor(private cliOptions: ICliOptions) {
         const { rootDirectories } = this.cliOptions;
-        this.sassTool = new SassTool(rootDirectories);
+        this.sassTool = new SassTool(rootDirectories, cliOptions.vanillaDirectory);
     }
 
     public compiler = () => {
