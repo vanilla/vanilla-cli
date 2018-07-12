@@ -87,19 +87,17 @@ async function installNodeModules() {
 /**
  * Start the livereload server to listen for changes.
  *
- * @param directory - The directory to listen for file changes in.
+ * @param addonDir - The directory of the addon that the files build into
+ * @param srcDir - The directory that src files come from.
  */
-function startLiveReload(directory: string) {
+function startLiveReload(addonDir: string, srcDirectories: string[]) {
     gulp.task("watch", () => {
         livereload.listen();
-
         const onReload = (file: any) => livereload.changed(file.path);
+        const styleGlobs = srcDirectories.map(dir => path.resolve(dir, "**/*.scss"));
 
-        gulp.watch([path.resolve(directory, "design/*.css"), path.resolve(directory, "js/*.js")], onReload);
-
-        gulp.watch(path.resolve(directory, "src/**/*.scss"), () => {
-            return buildStyles(options);
-        });
+        gulp.watch([path.resolve(addonDir, "design/*.css"), path.resolve(addonDir, "js/*.js")], onReload);
+        gulp.watch(styleGlobs, () => buildStyles(options));
     });
 
     gulp.start("watch");
@@ -125,7 +123,7 @@ async function run() {
 
     if (options.watch) {
         await checkLiveReloadPort();
-        promises.push(startLiveReload(primaryDirectory));
+        promises.push(startLiveReload(primaryDirectory, [primaryDirectory, ...options.requiredDirectories]));
     }
 
     return Promise.all(promises).then();
