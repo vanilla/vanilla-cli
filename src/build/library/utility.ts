@@ -184,7 +184,7 @@ export function getAllCoreBuildAddons(options: ICliOptions) {
         return cachedCoreBuildAddons;
     }
 
-    cachedCoreBuildAddons =  glob
+    cachedCoreBuildAddons = glob
         .sync(path.join(vanillaDirectory, "**/addon.json"))
         .filter(addonJsonPath => {
             const directory = path.dirname(addonJsonPath);
@@ -215,6 +215,8 @@ export function getAllCoreBuildAddons(options: ICliOptions) {
 
 /**
  * Get all of paths of all the entry files in addons identififed by `getAllCoreBuildAddons`.
+ *
+ * The bootstrap files will always be last.
  *
  * @param options - The root of the vanilla installation.
  *
@@ -248,6 +250,17 @@ export function getAllCoreBuildEntries(options: ICliOptions): IBuildExports {
             coreBuildEntries[entryKey].push(path.join(coreAddonPath, entryPath));
         }
     });
+
+    // Sort the bootstrap files to the end of the entries.
+    for (const [entryKey, entryArray] of Object.entries(coreBuildEntries)) {
+        coreBuildEntries[entryKey] = entryArray.sort(a => {
+            if (a.includes("bootstrap")) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    }
 
     return coreBuildEntries;
 }
