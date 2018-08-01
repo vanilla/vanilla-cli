@@ -43,7 +43,7 @@ export default class StylesheetBuilder {
             .pipe(this.getStyleSheetBuilder())
             .pipe(
                 autoprefixer({
-                    browsers: ["ie > 9", "last 6 iOS versions", "last 4 versions"],
+                    browsers: ["ie > 9", "last 6 iOS major versions", "last 4 versions"],
                 }),
             )
             .pipe(minifier())
