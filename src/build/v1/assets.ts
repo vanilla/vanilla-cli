@@ -6,7 +6,6 @@
 import gulp from "gulp";
 import fs from "fs";
 import path from "path";
-import sourcemaps from "gulp-sourcemaps";
 import size from "gulp-size";
 import cache from "gulp-cache";
 import imagemin from "gulp-imagemin";

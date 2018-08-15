@@ -10,8 +10,9 @@ import glob from "globby";
 import chalk from "chalk";
 import plumber from "gulp-plumber";
 import sourcemaps from "gulp-sourcemaps";
-import cssnano from "gulp-cssnano";
-import autoprefixer from "gulp-autoprefixer";
+import postcss from "gulp-postcss";
+import autoprefixer from "autoprefixer";
+import cssnano from "cssnano";
 import size from "gulp-size";
 import modifyFile from "gulp-modify-file";
 import { print, printVerbose, printError } from "./utility";
@@ -28,25 +29,22 @@ export default class StylesheetBuilder {
         const { rootDirectories } = this.cliOptions;
         const destination = path.resolve(rootDirectories[0], "design");
 
-        const minifier = process.env.NODE_ENV !== "test" ? cssnano : util.noop;
         const sourceGlobs = this.getSourceGlobs();
         glob.sync(sourceGlobs).forEach(srcFile => {
             const prettyPath = srcFile.replace(this.cliOptions.vanillaDirectory, "");
             print(chalk.yellow(`Using Entrypoint: ${prettyPath}`));
         });
 
+        const autoPrefixerConfig = {
+            browsers: ["ie > 9", "last 6 iOS versions", "last 4 versions"],
+        };
         const compiler = gulp
             .src(sourceGlobs)
             .pipe(plumber())
             .pipe(sourcemaps.init())
             .pipe(modifyFile(this.sassTool.swapPlaceholders))
             .pipe(this.getStyleSheetBuilder())
-            .pipe(
-                autoprefixer({
-                    browsers: ["ie > 9", "last 6 iOS versions", "last 4 versions"],
-                }),
-            )
-            .pipe(minifier())
+            .pipe(postcss([autoprefixer(autoPrefixerConfig), cssnano({ autoprefixer: autoPrefixerConfig } as any)]))
             .pipe(sourcemaps.write("."))
             .pipe(gulp.dest(destination));
 

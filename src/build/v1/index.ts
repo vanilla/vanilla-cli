@@ -30,7 +30,7 @@ const options: ICliOptions = JSON.parse(argv.options);
 global.verbose = options.verbose;
 
 const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
-const parentDirectories = options.rootDirectories.slice(1, options.rootDirectories.length);
+const parentDirectories: string[] = options.rootDirectories.slice(1, options.rootDirectories.length);
 
 print(`Starting build process ${chalk.green("v1")} for addon at ${chalk.yellow(primaryDirectory)}.`);
 parentDirectories.forEach(parent => {
