@@ -7,14 +7,8 @@ interface ICliOptions {
     addonKey: string;
     vanillaDirectory: string;
     rootDirectories: string[];
-    requiredDirectories: string[];
     watch: boolean;
     verbose: boolean;
-    hot: boolean;
-    hotReloadIP: string;
-    section: string;
-    enabledAddonKeys: string[];
-    skipPrettify: boolean;
 }
 
 interface IBuildEntries {

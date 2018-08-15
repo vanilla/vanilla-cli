@@ -25,7 +25,7 @@ export default class StylesheetBuilder {
     }
 
     public compiler = () => {
-        const { rootDirectories, buildOptions } = this.cliOptions;
+        const { rootDirectories } = this.cliOptions;
         const destination = path.resolve(rootDirectories[0], "design");
 
         const minifier = process.env.NODE_ENV !== "test" ? cssnano : util.noop;

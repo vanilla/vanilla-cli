@@ -9,7 +9,6 @@ import fs from "fs";
 import chalk from "chalk";
 import detectPort from "detect-port";
 import { spawn, SpawnOptions } from "child_process";
-import glob from "glob";
 
 const defaultSpawnOptions: SpawnOptions = {
     stdio: "inherit",
@@ -165,102 +164,4 @@ export async function checkLiveReloadPort() {
     } catch (err) {
         fail(err);
     }
-}
-
-let cachedCoreBuildAddons: string[];
-
-/**
- * Get the path to all currently enabled addons that use the "core" build process.
- *
- * This export function caches the result the first time because there are a lot of file lookups involved.
- * I you enable another addon, you will need to restart the build tool.
- *
- * @returns {string[]} - An array of filepaths.
- */
-export function getAllCoreBuildAddons(options: ICliOptions) {
-    const { vanillaDirectory } = options;
-
-    if (cachedCoreBuildAddons) {
-        return cachedCoreBuildAddons;
-    }
-
-    cachedCoreBuildAddons = glob
-        .sync(path.join(vanillaDirectory, "**/addon.json"))
-        .filter(addonJsonPath => {
-            const directory = path.dirname(addonJsonPath);
-            const addonJson = getJsonFileForDirectory(directory, "addon");
-
-            if (addonJson && addonJson.build && addonJson.build.process === "core") {
-                return true;
-            } else {
-                return false;
-            }
-        })
-        .map(path.dirname)
-        .filter((item, index, self) => self.indexOf(item) === index)
-        .filter(addonPath => {
-            const addonKey = path.basename(addonPath);
-
-            if (options.enabledAddonKeys.includes(addonKey)) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-    cachedCoreBuildAddons.unshift(options.vanillaDirectory);
-
-    return cachedCoreBuildAddons;
-}
-
-/**
- * Get all of paths of all the entry files in addons identififed by `getAllCoreBuildAddons`.
- *
- * The bootstrap files will always be last.
- *
- * @param options - The root of the vanilla installation.
- *
- * @returns An Object of keyed "sections" and entries for that section.
- */
-export function getAllCoreBuildEntries(options: ICliOptions): IBuildExports {
-    const coreAddonPaths = getAllCoreBuildAddons(options);
-    const coreBuildEntries: IBuildExports = {};
-
-    coreAddonPaths.forEach(coreAddonPath => {
-        if (!fs.existsSync(path.join(coreAddonPath, "addon.json"))) {
-            return;
-        }
-        const addonJson = getJsonFileForDirectory(coreAddonPath, "addon");
-        const { entries } = addonJson.build as IBuildProperties;
-
-        if (!entries) {
-            return;
-        }
-
-        for (let [entryKey, entryPath] of Object.entries(entries)) {
-            // Special handling for bootstrap files.
-            if (entryKey.includes("bootstrap")) {
-                entryKey = entryKey.replace("bootstrap-", "");
-            }
-
-            if (!coreBuildEntries[entryKey]) {
-                coreBuildEntries[entryKey] = [];
-            }
-
-            coreBuildEntries[entryKey].push(path.join(coreAddonPath, entryPath));
-        }
-    });
-
-    // Sort the bootstrap files to the end of the entries.
-    for (const [entryKey, entryArray] of Object.entries(coreBuildEntries)) {
-        coreBuildEntries[entryKey] = entryArray.sort(a => {
-            if (a.includes("bootstrap")) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-    }
-
-    return coreBuildEntries;
 }
