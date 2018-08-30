@@ -3,3 +3,5 @@ cache: yarn
 node_js:
     - "8"
     - "lts/*"
+script:
+    - echo "This repository does not currently contain any tests"
