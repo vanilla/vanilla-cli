@@ -14,6 +14,7 @@ import { print, sleep, checkLiveReloadPort } from "../library/utility";
 import buildJs from "./scripts";
 import StylesheetBuilder from "../library/StylesheetBuilder";
 import buildAssets from "./assets";
+import { log } from "util";
 
 /**
  * @var Object The options passed from the PHP process.
@@ -31,6 +32,7 @@ global.verbose = options.verbose;
 
 const primaryDirectory = options.rootDirectories.slice(0, 1)[0];
 const parentDirectories: string[] = options.rootDirectories.slice(1, options.rootDirectories.length);
+const { cssTool } = options.buildOptions;
 
 print(`Starting build process ${chalk.green("v1")} for addon at ${chalk.yellow(primaryDirectory)}.`);
 parentDirectories.forEach(parent => {
@@ -57,21 +59,26 @@ gulp.task("watch", ["build"], () => {
 
         const onReload = (file: any) => livereload.changed(file.path);
 
-        gulp.watch(
-            [
-                path.resolve(primaryDirectory, "design/*.css"),
-                path.resolve(primaryDirectory, "design/images/**/*"),
-                path.resolve(primaryDirectory, "js/*.js"),
-                path.resolve(primaryDirectory, "views/**/*"),
-            ],
-            onReload,
-        );
+        const watchPaths = (root: string) => {
+            gulp.watch(
+                [
+                    path.resolve(root, "design/*.css"),
+                    path.resolve(root, "design/images/**/*"),
+                    path.resolve(root, "js/*.js"),
+                    path.resolve(root, "views/**/*"),
+                ],
+                onReload,
+            );
+            gulp.watch(path.resolve(root, `src/**/*.${cssTool}`), ["build:styles"]);
+            gulp.watch(path.resolve(root, "src/**/*.js"), ["build:js"]);
+            gulp.watch(path.resolve(root, "design/images/**/*"), ["build:assets"]);
+        };
 
-        const { cssTool } = options.buildOptions;
-
-        gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
-        gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
-        gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
+        watchPaths(primaryDirectory);
+        if (options.watchExtra) {
+            log("Watching additional directory " + options.watchExtra);
+            watchPaths(options.watchExtra);
+        }
 
         print("\n" + chalk.green("Watching for changes in src files..."));
     });

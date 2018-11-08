@@ -47,6 +47,8 @@ class BuildCmd extends NodeCommandBase {
     /** Whether or not to run in hot mode. */
     private $watch = false;
 
+    private $watchExtra = "";
+
     /** @var string|null A section of entries to filter the hot process by. */
     private $section = null;
 
@@ -67,6 +69,7 @@ class BuildCmd extends NodeCommandBase {
             ->opt('watch:w', 'Run the build process in watch mode. Best used with the livereload browser extension.', false, 'bool')
             ->opt('process:p', 'Which version of the build process to use. This will override the one specified in the addon.json')
             ->opt('csstool:ct', 'Which CSS Preprocessor to use: Either `scss` or `less`. Defaults to `scss`', false, 'string')
+            ->opt('watch-extra', 'Watch an extra directory', false, 'string')
         ;
 
         $this->buildToolBaseDirectory = $this->toolRealPath.'/src/build';
@@ -90,6 +93,7 @@ class BuildCmd extends NodeCommandBase {
             'buildOptions' => $this->addonBuildConfigs[0],
             'rootDirectories' => $this->addonRootDirectories,
             'watch' => $this->watch,
+            'watchExtra' => $this->watchExtra,
             'vanillaDirectory' => $this->vanillaSrcDir,
             'addonKey' => CliUtil::getAddonJsonForDirectory(getcwd())["key"],
         ];
@@ -160,6 +164,7 @@ class BuildCmd extends NodeCommandBase {
         $processArg = $args->getOpt('process') ?: false;
         $watchArg = $args->getOpt('watch') ?: false;
         $cssToolArg = $args->getOpt('csstool');
+        $this->watchExtra = $args->getOpt('watch-extra') ?: '';
 
         if ($processArg) {
             $this->defaultConfigurationOptions['process'] = $processArg;

@@ -8,6 +8,7 @@ interface ICliOptions {
     vanillaDirectory: string;
     rootDirectories: string[];
     watch: boolean;
+    watchExtra: string;
     verbose: boolean;
 }
 
