@@ -48,6 +48,7 @@ export function createBaseConfig(buildRoot: string, options: ICliOptions, should
                         ...Array.from(includes),
                         // We need to transpile quill's ES6 because we are building form source.
                         /\/node_modules\/quill/,
+                        /\/node_modules\/\@vanillaforums/,
                     ],
                     use: [
                         {
