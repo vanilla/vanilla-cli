@@ -51,7 +51,11 @@ export function createBaseConfig(buildRoot: string, options: ICliOptions, should
             ],
         },
         resolve: {
-            modules: [path.join(buildRoot, "node_modules"), "node_modules"],
+            modules: [
+                path.join(buildRoot, "node_modules"),
+                "node_modules",
+                path.resolve(__dirname, "../../../node_modules"),
+            ],
             extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"],
         },
         plugins: [
