@@ -7,7 +7,6 @@ import path from "path";
 import fs from "fs";
 import webpack, { Configuration } from "webpack";
 import merge from "webpack-merge";
-import babelPreset from "@vanillaforums/babel-preset";
 import UglifyJsPlugin from "uglifyjs-webpack-plugin";
 import HappyPack from "happypack";
 
@@ -24,18 +23,6 @@ const happyThreadPool = HappyPack.ThreadPool({ size: 4, id: "scripts" });
 export function createBaseConfig(buildRoot: string, options: ICliOptions, shouldUglifyProd = true) {
     const oldScriptsPath = path.join(buildRoot, "./src/js");
 
-    const includes = new Set([oldScriptsPath]);
-
-    // Add the realpaths as well because filesystems are complicated and the user could run the tool
-    // from the realpath or the symlink depending on the OS and shell.
-    includes.forEach(include => {
-        if (fs.existsSync(include)) {
-            includes.add(fs.realpathSync(include));
-        } else {
-            includes.delete(include);
-        }
-    });
-
     const commonConfig: Configuration = {
         cache: true,
         context: buildRoot,
@@ -43,13 +30,7 @@ export function createBaseConfig(buildRoot: string, options: ICliOptions, should
             rules: [
                 {
                     test: /\.jsx?$/,
-                    exclude: ["node_modules"],
-                    include: [
-                        ...Array.from(includes),
-                        // We need to transpile quill's ES6 because we are building form source.
-                        /\/node_modules\/quill/,
-                        /\/node_modules\/\@vanillaforums/,
-                    ],
+                    exclude: () => false,
                     use: [
                         {
                             loader: "happypack/loader?id=babel",
@@ -71,9 +52,6 @@ export function createBaseConfig(buildRoot: string, options: ICliOptions, should
         },
         resolve: {
             modules: [path.join(buildRoot, "node_modules"), "node_modules"],
-            alias: {
-                quill$: path.join(buildRoot, "node_modules/quill/quill.js"),
-            },
             extensions: [".ts", ".tsx", ".js", ".jsx", ".svg"],
         },
         plugins: [
@@ -85,7 +63,7 @@ export function createBaseConfig(buildRoot: string, options: ICliOptions, should
                     {
                         path: "babel-loader",
                         query: {
-                            ...babelPreset,
+                            presets: [require.resolve("@vanilla/babel-preset")],
                             cacheDirectory: true,
                         },
                     },
