@@ -7,10 +7,11 @@
     "author": "Adam Charron <adam@charrondev.com>",
     "license": "MIT",
     "dependencies": {
-        "@vanillaforums/babel-preset": "1.0.5",
+        "@babel/core": "7.6.2",
+        "@vanilla/babel-preset": "3.0.1",
         "autoprefixer": "9.1.1",
         "babel-core": "6.26.3",
-        "babel-loader": "7.1.5",
+        "babel-loader": "8.0.6",
         "chalk": "2.4.1",
         "chokidar": "2.0.4",
         "cross-env": "5.2.0",

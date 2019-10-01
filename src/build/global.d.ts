@@ -48,7 +48,7 @@ declare module "gulp-livereload" {
 }
 
 declare module "happypack";
-declare module "@vanillaforums/babel-preset";
+declare module "@vanilla/babel-preset";
 declare module "prettier-webpack-plugin";
 declare module "hard-source-webpack-plugin";
 declare module "gulp*";
