@@ -6,6 +6,7 @@
 import path from "path";
 import fs from "fs";
 import chalk from "chalk";
+import resolve from "resolve";
 import { print, printVerbose, printError } from "./utility";
 
 export default class SassTool {
@@ -19,15 +20,7 @@ export default class SassTool {
      * @param prev - The previous filepath.
      * @param {function} done - Completion callback.
      */
-    public importer = (
-        url: string,
-        prev: string,
-        done: (
-            results: {
-                file: string;
-            },
-        ) => void,
-    ) => {
+    public importer = (url: string, prev: string, done: (results: { file: string }) => void) => {
         const nodeModuleRegex = /^~/;
         const cssHttpImportRegex = /^((\/\/)|(http:\/\/)|(https:\/\/))/;
         const scssRegex = /^@dashboard/;
@@ -139,12 +132,21 @@ export default class SassTool {
      * @throws If no file can be located.
      */
     private resolveFilePathInNodeModules(requestPath: string): string {
+        for (const sourceDir of this.sourceDirectories) {
+            try {
+                const resolved = resolve.sync(requestPath, { basedir: sourceDir });
+                if (resolved) {
+                    return resolved;
+                }
+            } catch (e) {}
+        }
+
         const moduleBasePath = path.join("node_modules", requestPath);
         const packageJsonPath = path.join(moduleBasePath, "package.json");
         const resolvedPath = this.resolveOneFilePathFromMutlipleAddons(moduleBasePath);
 
         if (!resolvedPath) {
-            throw new Error(`Failed css node_module lookup. Package ${moduleBasePath}} not found.`);
+            throw new Error(`Failed css node_module lookup. Package ${moduleBasePath} not found.`);
         }
 
         const json = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
