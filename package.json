@@ -1,6 +1,6 @@
 {
     "name": "vanilla-cli",
-    "version": "2.7.3",
+    "version": "2.7.4",
     "private": true,
     "description": "Node.js tooling for the Vanilla Cli.",
     "repository": "https://github.com/vanilla/vanilla-cli",
