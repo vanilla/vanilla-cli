@@ -28,9 +28,10 @@ export default class StylesheetBuilder {
     public compiler = () => {
         const { rootDirectories } = this.cliOptions;
         const destination = path.resolve(rootDirectories[0], "design");
+        print(chalk.yellow(`Destination: ${destination}`));
 
         const sourceGlobs = this.getSourceGlobs();
-        glob.sync(sourceGlobs).forEach(srcFile => {
+        glob.sync(sourceGlobs, { cwd: __dirname }).forEach((srcFile) => {
             const prettyPath = srcFile.replace(this.cliOptions.vanillaDirectory, "");
             print(chalk.yellow(`Using Entrypoint: ${prettyPath}`));
         });
@@ -52,7 +53,7 @@ export default class StylesheetBuilder {
             compiler.pipe(size({ showFiles: true }));
         }
 
-        return () => compiler;
+        return compiler;
     };
 
     /**
@@ -80,9 +81,10 @@ export default class StylesheetBuilder {
             const less = require("gulp-less");
             return less();
         } else {
+            const Fiber = require("fibers");
             const sass = require("gulp-sass");
-            // @ts-ignore
-            return sass({ importer: this.sassTool.importer });
+            sass.compiler = require("sass");
+            return sass({ fiber: Fiber, importer: this.sassTool.importer });
         }
     }
 }

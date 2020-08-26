@@ -9,6 +9,8 @@ import path from "path";
 import size from "gulp-size";
 import cache from "gulp-cache";
 import imagemin from "gulp-imagemin";
+import chalk from "chalk";
+import { print } from "../library/utility";
 
 /**
  * Gulp build process for images.
@@ -18,8 +20,10 @@ import imagemin from "gulp-imagemin";
  *
  * @return A gulp execution function.
  */
-const buildAssets = (addonDirectory: string, options: ICliOptions) => () => {
+const buildAssets = (addonDirectory: string, options: ICliOptions) => (cb: any) => {
     if (!fs.existsSync(path.join(addonDirectory, "src/images"))) {
+        print(chalk.yellowBright("No images found. Skipping assets build."));
+        cb();
         return;
     }
 
