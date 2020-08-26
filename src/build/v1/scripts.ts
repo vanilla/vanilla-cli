@@ -24,7 +24,7 @@ import { createBaseConfig } from "../library/webpack-utility";
  *
  * @return A gulp execution function.
  */
-const buildScripts = (addonDirectory: string, options: ICliOptions) => () => {
+const buildScripts = (addonDirectory: string, options: ICliOptions) => (cb: any) => {
     const jsEntries = options.buildOptions.entries;
 
     const expectedEntryPoint = "./index.js";
@@ -38,6 +38,7 @@ const buildScripts = (addonDirectory: string, options: ICliOptions) => () => {
 
     if (!fs.existsSync(path.join(addonDirectory, "src/js", expectedEntryPoint))) {
         print(chalk.yellowBright("Javascript entrypoint src/js/index.js not found. Skipping JS build."));
+        cb();
         return;
     }
 
@@ -50,11 +51,11 @@ const buildScripts = (addonDirectory: string, options: ICliOptions) => () => {
         },
     };
 
-    const baseConfig = createBaseConfig(addonDirectory, options);
+    const baseConfig = createBaseConfig(path.resolve(addonDirectory), options);
     const finalConfig = merge(baseConfig, v1Config);
 
     return gulp
-        .src("")
+        .src(".")
         .pipe(
             stream(finalConfig, webpack, (err: Error, stats: Stats) => {
                 print(
