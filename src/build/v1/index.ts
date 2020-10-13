@@ -6,10 +6,10 @@
 import path from "path";
 import gulp from "gulp";
 import livereload from "gulp-livereload";
-import { argv } from "yargs";
+import {argv} from "yargs";
 import chalk from "chalk";
 
-import { print, sleep, checkLiveReloadPort } from "../library/utility";
+import {print, sleep, checkLiveReloadPort} from "../library/utility";
 
 import buildJs from "./scripts";
 import StylesheetBuilder from "../library/StylesheetBuilder";
@@ -44,6 +44,8 @@ WARNING The process is starting in watch/dev mode. Be sure to run a production b
 
 print(options.watch ? devModeWarning : "");
 
+print(`changed code`);
+
 gulp.task("build:js", buildJs(primaryDirectory, options));
 
 gulp.task("build:styles", new StylesheetBuilder(options).compiler);
@@ -70,11 +72,11 @@ gulp.task(
                 onReload,
             );
 
-            const { cssTool } = options.buildOptions;
+            const {cssTool} = options.buildOptions;
 
-            gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
-            gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
-            gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
+            gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), gulp.series("build:styles"));
+            gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), gulp.series("build:js"));
+            gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), gulp.series("build:assets"));
 
             print("\n" + chalk.green("Watching for changes in src files..."));
         });
