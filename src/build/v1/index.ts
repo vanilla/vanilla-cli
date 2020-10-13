@@ -70,7 +70,7 @@ gulp.task(
                 onReload,
             );
 
-            const {cssTool} = options.buildOptions;
+            const { cssTool } = options.buildOptions;
 
             gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), gulp.series("build:styles"));
             gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), gulp.series("build:js"));
