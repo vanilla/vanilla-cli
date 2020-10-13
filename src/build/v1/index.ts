@@ -4,12 +4,12 @@
  */
 
 import path from "path";
-import gulp from "gulp";
+import { series, task, watch } from "gulp";
 import livereload from "gulp-livereload";
 import { argv } from "yargs";
 import chalk from "chalk";
 
-import { print, sleep, checkLiveReloadPort } from "../library/utility";
+import { checkLiveReloadPort, print } from "../library/utility";
 
 import buildJs from "./scripts";
 import StylesheetBuilder from "../library/StylesheetBuilder";
@@ -44,23 +44,23 @@ WARNING The process is starting in watch/dev mode. Be sure to run a production b
 
 print(options.watch ? devModeWarning : "");
 
-gulp.task("build:js", buildJs(primaryDirectory, options));
+task("build:js", buildJs(primaryDirectory, options));
 
-gulp.task("build:styles", new StylesheetBuilder(options).compiler);
+task("build:styles", new StylesheetBuilder(options).compiler);
 
-gulp.task("build:assets", buildAssets(primaryDirectory, options));
+task("build:assets", buildAssets(primaryDirectory, options));
 
-gulp.task("build", gulp.series("build:assets", "build:styles", "build:js"));
+task("build", series("build:assets", "build:styles", "build:js"));
 
-gulp.task(
+task(
     "watch",
-    gulp.series("build", () => {
+    series("build", () => {
         checkLiveReloadPort().then(() => {
             livereload.listen();
 
             const onReload = (file: any) => livereload.changed(file.path);
 
-            gulp.watch(
+            watch(
                 [
                     path.resolve(primaryDirectory, "design/*.css"),
                     path.resolve(primaryDirectory, "design/images/**/*"),
@@ -72,9 +72,9 @@ gulp.task(
 
             const { cssTool } = options.buildOptions;
 
-            gulp.watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), ["build:styles"]);
-            gulp.watch(path.resolve(primaryDirectory, "src/**/*.js"), ["build:js"]);
-            gulp.watch(path.resolve(primaryDirectory, "design/images/**/*"), ["build:assets"]);
+            watch(path.resolve(primaryDirectory, `src/**/*.${cssTool}`), series("build:styles"));
+            watch(path.resolve(primaryDirectory, "src/**/*.js"), series("build:js"));
+            watch(path.resolve(primaryDirectory, "design/images/**/*"), series("build:assets"));
 
             print("\n" + chalk.green("Watching for changes in src files..."));
         });
@@ -83,4 +83,4 @@ gulp.task(
 
 const taskToExecute = options.watch ? "watch" : "build";
 
-gulp.task(taskToExecute)();
+task(taskToExecute)();
