@@ -6,10 +6,10 @@
 import path from "path";
 import gulp from "gulp";
 import livereload from "gulp-livereload";
-import {argv} from "yargs";
+import { argv } from "yargs";
 import chalk from "chalk";
 
-import {print, sleep, checkLiveReloadPort} from "../library/utility";
+import { print, sleep, checkLiveReloadPort } from "../library/utility";
 
 import buildJs from "./scripts";
 import StylesheetBuilder from "../library/StylesheetBuilder";
@@ -43,8 +43,6 @@ WARNING The process is starting in watch/dev mode. Be sure to run a production b
 `);
 
 print(options.watch ? devModeWarning : "");
-
-print(`changed code`);
 
 gulp.task("build:js", buildJs(primaryDirectory, options));
 
